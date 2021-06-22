@@ -67,7 +67,7 @@ export FIXwave=${FIXwave:-$HOMEgefs/fix/fix_wave}
 ##############################################
 export COMPONENT=wave
 # Have to include $COMPONENT in COM paths for downstream scripts
-export COMIN=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}/$cyc/$COMPONENT}
+export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}/$cyc/$COMPONENT}
 export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}/$cyc/$COMPONENT}
 if [[ $SENDCOM == "YES" ]]; then
     mkdir -p $COMOUT/gridded
