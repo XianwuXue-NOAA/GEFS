@@ -1,4 +1,4 @@
-#!/bin/ksh -l
+#!/bin/ksh
 
 ###################################################################
 # This parm file defines the control variables for the GEFS model
@@ -48,15 +48,8 @@ case $cyc in
 esac
 
 memberlist="c00"
-#for (( imem=1; imem<=$npert; imem++ )); do
-#	memberlist="$memberlist p$(printf %02i $imem)"
-#done
-
-imem=1
-while [[ imem -le $npert ]];
-do
-    memberlist="$memberlist p$(printf %02i $imem)"
-    (( imem++ ))
+for (( imem=1; imem<=$npert; imem++ )); do
+	memberlist="$memberlist p$(printf %02i $imem)"
 done
 export memberlist
 
@@ -139,3 +132,10 @@ export save_pgrb2_p25=${save_pgrb2_p25:-NO}
 # List of contacts to mail when there is mail sent by mail.py for product degredation
 export MAIL_LIST=${MAIL_LIST:-"Dingchen.Hou@noaa.gov,Walter.Kolczynski@noaa.gov,Xianwu.Xue@noaa.gov"}
 
+#version numbers of the models who's com data will be used in GEFS
+export ver_gfs=16 
+export ver_cfs=02 
+export ver_uk=xx    #uk
+export ver_ec=xx    #ecmwf
+export ver_na=xx    #nawips
+export ver_nam=xx   #nam

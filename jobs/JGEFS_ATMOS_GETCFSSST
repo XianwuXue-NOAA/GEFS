@@ -1,19 +1,19 @@
 #!/bin/ksh
 
-echo "$(date -u) begin ${0}"
+echo "$(date -u) begin ${.sh.file}"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
 	# Turn on strict bash error checking
 	set -eu
 fi
-export PS4='$SECONDS + ${0}[$LINENO] '
+export PS4='$SECONDS + $(basename ${.sh.file})[$LINENO] '
 
 ####################################
 # Determine Job Output Name on System
 ####################################
-export jobid=${jobid:-"$job.$PBS_JOBID"}
-export pgmout=${pgmout:-"OUTPUT.${PBS_JOBID}"}
+export jobid=${jobid:-"$job.$LSB_JOBID"}
+export pgmout=${pgmout:-"OUTPUT.${LSB_JOBID}"}
 export pgmerr=errfile
 
 ####################################
@@ -51,20 +51,19 @@ source PDY
 ####################################
 # Specify Execution Areas
 ####################################
-export HOMEgefs=${HOMEgefs:-${NWROOT}/gefs.${gefs_ver}}
+export HOMEgefs=${HOMEgefs:-${PACKAGEROOT}/gefs.${gefs_ver}}
 export EXECgefs=${EXECgefs:-$HOMEgefs/exec}
 export FIXgefs=${FIXgefs:-$HOMEgefs/fix/fix_gefs}
 
 ##############################################
 # Define COM directories
 ##############################################
+ver=${ver:-$(echo ${gefs_ver}|cut -c2-3)}
 export COMPONENT="atmos"
-export COMOUT=${COMOUT:-$COMROOT/${NET}/${envir}/${RUN}.${PDY}/$cyc/$COMPONENT}
+export COMOUT=${COMOUT:-$COMROOT/${NET}/${ver}/${RUN}.${PDY}/$cyc/$COMPONENT}
 
-export COMINgfs=${COMINgfs:-$(compath.py gfs/prod)/gfs.${PDY}/$cyc/atmos}
-export COMINcfs=${COMINcfs:-$(compath.py cfs/prod)/cfs/cfs.}
-
-export jlogfile=${jlogfile:-$DATA/jlogfile}
+export COMINgfs=${COMINgfs:-$(compath.py gfs/${ver_gfs})/gfs.${PDY}/$cyc/atmos}
+export COMINcfs=${COMINcfs:-$(compath.py cfs/${ver_cfs})/cfs/cfs.}
 
 echo "Environment before calling script"
 env | sort
@@ -76,7 +75,7 @@ export err=$?
 if [[ $err == 0 ]]; then
     echo "$job completed normally!"
 else
-    echo "FATAL ERROR in ${0}: $job failed!"
+    echo "FATAL ERROR in ${.sh.file}: $job failed!"
     exit $err
 fi
 #############################################################
@@ -87,6 +86,6 @@ fi
 cd $DATAROOT
 if [ ${KEEPDATA:-NO} = NO ] ; then rm -rf $DATA ; fi
 
-echo "$(date -u) end ${0}"
+echo "$(date -u) end ${.sh.file}"
 
 exit $err
