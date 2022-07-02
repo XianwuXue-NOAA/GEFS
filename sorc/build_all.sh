@@ -69,12 +69,29 @@ echo " .... Building wave_stat - 06 .... "
 }
 
 #------------------------------------
-# build gefs_subx
+# build gefs_subx_p1
 #------------------------------------
-$Build_gefs_subx && {
-echo " .... Building gefs_subx - 07 .... "
-./build_gefs_subx.sh > $logs_dir/build_gefs_subx.log 2>&1
+$Build_gefs_subx_p1 && {
+echo " .... Building gefs_subx_p1 - 07 .... "
+./build_gefs_subx_p1.sh > $logs_dir/build_gefs_subx_p1.log 2>&1
 }
+
+#------------------------------------
+# build gefs_subx_p2
+#------------------------------------
+$Build_gefs_subx_p2 && {
+echo " .... Building gefs_subx_p2 - 08 .... "
+./build_gefs_subx_p2.sh > $logs_dir/build_gefs_subx_p2.log 2>&1
+}
+
+#------------------------------------
+# build gefs_subx_p3
+#------------------------------------
+$Build_gefs_subx_p3 && {
+echo " .... Building gefs_subx_p3 - 09 .... "
+./build_gefs_subx_p3.sh > $logs_dir/build_gefs_subx_p3.log 2>&1
+}
+
 
 #------------------------------------
 # build global-workflow

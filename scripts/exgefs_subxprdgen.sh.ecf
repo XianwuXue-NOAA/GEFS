@@ -4,7 +4,6 @@ echo `date` $0 begin
 #   Script:    
 #
 
-
 # Set environment.
 VERBOSE=${VERBOSE:-"YES"}
 if [ $VERBOSE = "YES" ]; then
@@ -12,55 +11,67 @@ if [ $VERBOSE = "YES" ]; then
     set -x
 fi
 
-# Utilities
-NCP=${NCP:-"/bin/cp -p"}
-NLN=${NLN:-"/bin/ln -sf"}
-NMV=${NMV:-"/bin/mv -uv"}
+export SUBXDAILY_P1=$EXECgefs/gefsv12_daily_ave_1mem_p1.exe
+export SUBXDAILY_P2=$EXECgefs/gefsv12_daily_ave_1mem_p2.exe
+export SUBXDAILY_P3=$EXECgefs/gefsv12_daily_ave_1mem_p3.exe
 
 export mem=$1
+export fhmax=$fhmax
+export nfile=$((${fhmax}/6+1))
 export file_dir=$COMOUT/pgrbsubx1p0 #pgrbsubx1p0 location
 
 #Input directories (directories that need to be extracted from)
-export pgrb2ap5_dir=/gpfs/dell6/emc/modeling/noscrub/emc.enspara/Xianwu.Xue/GEFS_v12_test_Data/test_1_Hou_20200415/gefs.20200415/00/atmos/pgrb2ap5 
-export pgrb2bp5_dir=/gpfs/dell6/emc/modeling/noscrub/emc.enspara/Xianwu.Xue/GEFS_v12_test_Data/test_1_Hou_20200415/gefs.20200415/00/atmos/pgrb2bp5
+
+if [[ -d /gpfs/dell4/nco/ops/com/gefs/prod/gefs.${PDY}/00/atmos/pgrb2ap5 ]];
+then
+ export pgrb2ap5_dir=/gpfs/dell4/nco/ops/com/gefs/prod/gefs.${PDY}/00/atmos/pgrb2ap5 
+else
+ export pgrb2ap5_dir=/gpfs/dell6/emc/modeling/noscrub/Eric.Sinsky/gefsv12_ops_data/gefs.${PDY}/00/atmos/pgrb2ap5 
+fi
+
+if [[ -d /gpfs/dell4/nco/ops/com/gefs/prod/gefs.${PDY}/00/atmos/pgrb2bp5 ]];
+then
+ export pgrb2bp5_dir=/gpfs/dell4/nco/ops/com/gefs/prod/gefs.${PDY}/00/atmos/pgrb2bp5
+else
+ export pgrb2bp5_dir=/gpfs/dell6/emc/modeling/noscrub/Eric.Sinsky/gefsv12_ops_data/gefs.${PDY}/00/atmos/pgrb2bp5
+fi
 
 
 #extract and interpolate the subx variables
-CDATE=$PDY$cyc
-export E_YEAR=$(echo  $CDATE | cut -c1-4)
-export E_MONTH=$(echo $CDATE | cut -c5-6)
-export E_DAY=$(echo   $CDATE | cut -c7-8)
-
-#extraction and interpolation
 $USHgefs/gefs_subxextract.sh
 
 fcst_file=$COMOUT/pgrbsubx1p0/ #input data 
+filecnt=$(ls -l ${file_dir}/${mem}*.f??? 2> /dev/null | wc -l)
+echo "$filecnt files created for ${mem}"
 
-ls ${fcst_file}/${mem}* 2> /dev/null
-rc=$?
-echo "rc=$rc"
-if [ $rc == "0" ]; then
-  echo "pgrbsubx1p0 forecast is available"
-  export date=${E_YEAR}${E_MONTH}${E_DAY}
+if [ $filecnt -ge "${nfile}" ]; then
+
+  echo "Have ${nfile} forecast files for ${mem} in pgrbsubx1p0"
   export out_dir_pre=$COMOUT/subx_daily
   export ens_mem=${mem}
   echo ${out_dir_pre}*m${mem:3:2}*.grb2
 
-  export out_dir=$out_dir_pre/output_p1/
-  $EXECgefs/gefsv12_daily_ave_1mem_p1.exe $date
-  export out_dir=$out_dir_pre/output_p2/
-  $EXECgefs/gefsv12_daily_ave_1mem_p2.exe $date
-  export out_dir=$out_dir_pre/output_p3/
-  $EXECgefs/gefsv12_daily_ave_1mem_p3.exe $date
+  ln -s ${file_dir}/${mem}*.f??? .
+
+  export out_dir1=$out_dir_pre/output_p1/
+  $SUBXDAILY_P1 $ens_mem $fhmax
+  mv -v *m${mem:3:2}*.grb2 $out_dir1
+
+  export out_dir2=$out_dir_pre/output_p2/
+  $SUBXDAILY_P2 $ens_mem $fhmax
+  mv -v *m${mem:3:2}*.grb2 $out_dir2 
+
+  export out_dir3=$out_dir_pre/output_p3/
+  $SUBXDAILY_P3 $ens_mem $fhmax
+  mv -v *m${mem:3:2}*.grb2 $out_dir3 
+
 else
-   msg="FAILED to extract SubX variables from pgrb2ap5 and/or pgrb2bp5 for ${mem}."
+
+   msg="FATAL ERROR: Forecast files missing for ${mem} therefore cannot perform daily avg/accu calculation."
    echo "$(date)    $msg"
    postmsg "$jlogfile" "$msg"
    export err=1
    err_chk
    exit $err
+
 fi
-
-
-
-

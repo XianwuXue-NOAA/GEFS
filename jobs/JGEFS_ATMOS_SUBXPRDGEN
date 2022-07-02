@@ -53,7 +53,6 @@ export SENDCOM=${SENDCOM:-YES}
 export SENDDBN=${SENDDBN:-YES}
 export SENDECF=${SENDECF:-YES}
 export VERBOSE=${VERBOSE:-YES}
-
 ####################################
 # Specify Execution Areas
 ####################################
@@ -77,7 +76,6 @@ setpdy.sh
 echo set parameters using gefs.parm
 ##############################################
 . $PARMgefs/gefs.parm
-. $PARMgefs/gefs_ensstat.parm
 
 ##############################################
 # Define COM directories
@@ -106,14 +104,8 @@ rm -f $COMOUT/subx_daily/output_p3/*
 # Execute ecflow scripts
 ##############################################
 rm -f subxprdgen.cmdfile
-for mem in $MEMLIST;do
-
-	subdata=${DATA}/$mem
-	if [ ! -d ${subdata} ]; then
-		mkdir -p ${subdata};
-	fi
-	outfile=${subdata}/${mem}.out
-
+for mem in $memberlist;do
+	outfile=${mem}.out
 	echo "$HOMEgefs/scripts/exgefs_subxprdgen.sh.ecf ge${mem} 2>&1 >${outfile}" >> subxprdgen.cmdfile
 done
 
@@ -139,6 +131,13 @@ fi
 
 msg="JOB COMPLETED NORMALLY"
 postmsg "$jlogfile" "$msg"
+
+
+localtime=$(TZ="America/New_York" date)
+
+rm -f /gpfs/dell6/emc/modeling/noscrub/emc.enspara/GEFSv12_SubX/rocoto/logs/message_body1b.txt
+echo "SubX postprocessing has finished on $localtime" >> /gpfs/dell6/emc/modeling/noscrub/emc.enspara/GEFSv12_SubX/rocoto/logs/message_body1b.txt
+
 
 ##############################
 # Remove the Temporary working directory

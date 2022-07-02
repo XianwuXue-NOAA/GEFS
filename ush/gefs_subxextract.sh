@@ -1,11 +1,6 @@
 #!/bin/ksh
 #Created by Wei Li: Collect 52 SubX variables from pgrb2ap5 and pgrb2bp5 and interpolate to 1 degree  ---- Apr.14 2020
 
-
-E_YEAR=${E_YEAR}
-E_MONTH=${E_MONTH}
-E_DAY=${E_DAY}
-
 mem=${mem}
 output_dir=${COMOUT}/pgrbsubx1p0
 echo ${output_dir}
