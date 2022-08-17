@@ -301,8 +301,6 @@ def create_metatask_task(dicBase, taskname="atmos_prep", sPre="\t", GenTaskEnt=F
     cycledef = "gefs"
     if taskname in ["forecast_lr", "post_lr", "prdgen_lr", "ensstat_lr", "enspost_lr", "cqpf", "atmos_awips_lr"]:
         cycledef = "gefs_00z"
-    elif taskname == "avg_gempak_vgf":
-        cycledef = "gefs_00z,gefs_12z"
 
     maxtries = 1
 
@@ -1192,7 +1190,7 @@ def get_param_of_task(dicBase, taskname):
 
                 # For 00z
                 sDep_2 = ""
-                for s in ["prdgen_lr", "ensstat_lr", "enspost_lr", "cqpf", "avg_gempak_vgf"]:
+                for s in ["prdgen_lr", "ensstat_lr", "enspost_lr", "cqpf"]:
                     if DoesTaskExist(dicBase, s):
                         if s in get_metatask_names():
                             sDep_2 += '\n\t\t\t<metataskdep metatask="{0}"/>'.format(s)
@@ -1340,13 +1338,6 @@ def get_param_of_task(dicBase, taskname):
                     sDep = ""
                 else:
                     sDep += '\n</and>'
-
-            # For avg_gempak_vgf
-            if taskname.lower() == "avg_gempak_vgf":
-                if DoesTaskExist(dicBase, "gempak"):
-                    sDep = '<taskdep task="gempak"/>'
-                else:
-                    sDep = ''
 
             # For gempak_meta
             if taskname.lower() == "gempak_meta":
