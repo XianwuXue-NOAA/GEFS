@@ -33,5 +33,4 @@ export COMIN=${COMIN:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}/$cyc}
 export COMOUT=${COMOUT:-${COMROOT}/${NET}/${envir}/${RUN}.${PDY}/$cyc}
 
 # CALL executable job script here
-#$GEFS_ROCOTO/bin/py/archive_wave.py
-$GEFS_ROCOTO/bin/py/archive_chem.py
+$GEFS_ROCOTO/bin/py/archive_wave.py

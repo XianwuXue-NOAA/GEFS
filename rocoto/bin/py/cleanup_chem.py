@@ -105,7 +105,7 @@ for output_dir in output_dirs:
 
 # Other init directories
 #dirs_to_remove.append(time.strftime("{work_dir}/nwges/dev/gefs.%Y%m%d/*.t%Hz.*".format(work_dir=work_dir)))
-#dirs_to_remove.append(time.strftime("{work_dir}/nwges/dev/gefs.%Y%m%d/%H/aer".format(work_dir=work_dir)))
+#dirs_to_remove.append(time.strftime("{work_dir}/nwges/dev/gefs.%Y%m%d/%H/init/aer".format(work_dir=work_dir)))
 dirs_to_remove.append(time.strftime(f"{work_dir}/dev/com/gefs/v12.2/gefs.%Y%m%d/%H/nwges/init/aer"))
 
 # Log directory (probably want to keep these)

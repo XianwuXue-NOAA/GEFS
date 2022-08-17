@@ -14,12 +14,6 @@ if [ ! -d "../exec" ]; then
   mkdir ../exec
 fi
 
-# Check final exec folder exists in util folder
-if [ ! -d "../util/exec" ]; then
-  echo "Creating ../util/exec folder"
-  mkdir ../util/exec
-fi
-
 #------------------------------------
 # INCLUDE PARTIAL BUILD 
 #------------------------------------
