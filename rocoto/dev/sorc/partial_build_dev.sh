@@ -4,7 +4,7 @@
  declare -a Build_prg=("Build_global_enspqpf" "Build_global_enscvprcp" \
                        "Build_global_enspvrfy" "Build_global_enssrbias" \
                        "Build_global_enscqpf" "Build_global_enscvt24h" \
-                       "Build_global_ensrfmat" "Build_overenstr_grib")
+                       "Build_global_ensrfmat")
 
 #
 # function parse_cfg: read config file and retrieve the values

@@ -84,14 +84,6 @@ echo " .... Building global_ensrfmat - 07 .... "
 }
 
 #------------------------------------
-# build overenstr_grib
-#------------------------------------
-$Build_overenstr_grib && {
-echo " .... Building overenstr_grib - 08 .... "
-./build_overenstr_grib.sh > $logs_dir/build_overenstr_grib.log 2>&1
-}
-
-#------------------------------------
 # build global-workflow
 #------------------------------------
 #if [[ -d global-workflow.fd ]] ; then
