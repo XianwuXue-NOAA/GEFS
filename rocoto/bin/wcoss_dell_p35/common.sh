@@ -56,7 +56,7 @@ elif [[ $RocotoGen == 1 ]]; then
     export SENDDBN=NO       # ecflow YES
     export SENDDBN_NTC=NO   # ecflow YES
 
-    export npert=2
+    export npert=30
     export navg_min=1 
     #export fhmax="840"
     #export fhrestart="48"

@@ -151,6 +151,11 @@ def config_tasknames(dicBase):
             sTaskName = "taskname_{0}".format(iTaskName_Num)
             dicBase[sTaskName.upper()] = "enspost_lr"
 
+            # ---subxprdgen
+            iTaskName_Num += 1
+            sTaskName = "taskname_{0}".format(iTaskName_Num)
+            dicBase[sTaskName.upper()] = "subxprdgen"
+
         # #    <!-- gempak jobs -->
         if dicBase['RUN_GEMPAK'].upper()[0] == "Y":
             # ---gempak
