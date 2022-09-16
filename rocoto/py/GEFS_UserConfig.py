@@ -152,7 +152,7 @@ def create_folders(dicBase):
     if not os.path.exists(WORKDIR):
         os.makedirs(WORKDIR)
 
-    if WHERE_AM_I.lower() == "wcoss2":
+    if WHERE_AM_I.lower() in ["hera", "wcoss2"]:
         sPath = WORKDIR + sSep + 'tmp'
     else:
         sPath = WORKDIR + sSep + 'tmpnwprd'
