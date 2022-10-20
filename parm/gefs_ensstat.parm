@@ -19,7 +19,7 @@ export nensposthr=0
 export nenspostlr=20
 export nenspostp5=0
 export statskiplist="gfs c00"
-export statoutfhlist="0 6 384"
+export statoutfhlist="6 6 384"
 
 enspostnamlr[1]=z500
 enspostvarlr[1]=7

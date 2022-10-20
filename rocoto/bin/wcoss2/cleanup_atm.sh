@@ -8,8 +8,8 @@ ulimit -a
 . $SOURCEDIR/versions/run.ver
 
 # Load modules
-. /usrx/local/prod/lmod/lmod/init/ksh
-module list
+#. /usrx/local/prod/lmod/lmod/init/ksh
+#module list
 module purge
 
 #module load EnvVars/$EnvVars_ver

@@ -302,9 +302,9 @@
 :TCDC:boundary layer cloud layer:
 :TCDC:convective cloud layer:
 :TCDC:entire atmosphere:
-:TCDC:high cloud layer:
-:TCDC:low cloud layer:
-:TCDC:middle cloud layer:
+:HCDC:high cloud layer:
+:LCDC:low cloud layer:
+:MCDC:middle cloud layer:
 :TMAX:2 m above ground:
 :TMIN:2 m above ground:
 :TMP:0.995 sigma level:

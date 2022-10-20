@@ -84,4 +84,27 @@
 :VGRD:925 mb:
 :VVEL:850 mb:
 :WEASD:surface:
+:TMP:2 mb:
+:TMP:surface:
+:TMP:1 hybrid level:
+:SPFH:2 m above ground:
+:SPFH:200 mb:
+:SPFH:700 mb:
+:SPFH:500 mb:
+:SPFH:925 mb:
+:SOILW:0.1-0.4 m below ground:
+:SOILW:0.4-1 m below ground:
+:SOILW:1-2 m below ground:
+:SNOHF:surface:
+:WATR:surface:
+:USWRF:top of atmosphere:
+:CPRAT:surface:
+:PRATE:surface:
+:PVORT:450 K isentropic level:
+:PVORT:550 K isentropic level:
+:PVORT:650 K isentropic level:
+:ICEC:surface:
+:GFLUX:surface:
+:UFLX:surface:
+:VFLX:surface:
 ;############################ do not leave a blank line at the end

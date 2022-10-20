@@ -20,10 +20,10 @@ echo "PRDGEN_STREAMS = $PRDGEN_STREAMS"
 export overwrite=yes
 
 if [[ $SENDCOM == "YES" && $save_pgrb2_p5 == YES ]]; then
-	mkdir -m 775 -p $COMOUT/$COMPONENT/pgrb2p5
+	mkdir -m 775 -p $COMOUT/pgrb2p5
 fi
 if [[ $SENDCOM == "YES" && $save_pgrb2_p25 == YES ]]; then
-	mkdir -m 775 -p $COMOUT/$COMPONENT/pgrb2p25
+	mkdir -m 775 -p $COMOUT/pgrb2p25
 fi
 
 case ${FORECAST_SEGMENT:-none} in
@@ -102,9 +102,9 @@ export HDMAX=00
 rm -f prdgen.cmdfile
 for stream in ${PRDGEN_STREAMS[@]}; do
 	if [[ $SENDCOM == "YES" ]]; then
-		mkdir -m 775 -p $COMOUT/$COMPONENT/${PRDGEN_A_DIR[${stream}]}
+		mkdir -m 775 -p $COMOUT/${PRDGEN_A_DIR[${stream}]}
 		if [[ ! -z ${PRDGEN_B_DIR[$stream]} ]]; then
-			mkdir -m 775 -p $COMOUT/$COMPONENT/${PRDGEN_B_DIR[${stream}]}
+			mkdir -m 775 -p $COMOUT/${PRDGEN_B_DIR[${stream}]}
 		fi
 	fi
 

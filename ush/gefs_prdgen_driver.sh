@@ -78,15 +78,15 @@ export GRID=$jobgrid   # GRID is part of the DBN message
 # clean up missing markers from previous run
 ############################################################
 if [[ $SENDCOM == "YES" ]]; then
-	mkdir -m 775 -p $COMOUT/$COMPONENT/misc/$submc
-	cd $COMOUT/$COMPONENT/misc/$submc
+	mkdir -m 775 -p $COMOUT/misc/$submc
+	cd $COMOUT/misc/$submc
 
 	rc=$?
 	if (( rc == 0 )); then
 		for file in $RUNMEM.*.missing; do
 			if [[ -f $file ]]; then
-				echo "Removing $COMOUT/$COMPONENT/misc/$submc/$file"
-				rm -f $COMOUT/$COMPONENT/misc/$submc/$file
+				echo "Removing $COMOUT/misc/$submc/$file"
+				rm -f $COMOUT/misc/$submc/$file
 			fi
 		done # for file in $RUNMEM.*.missing
 	fi # (( rc == 0 ))
@@ -141,19 +141,19 @@ for hour in $hours; do
 			else
 				# Check if control file has been created, to make sure file is complete before using
 				testfhr=-1
-				if [[ -f $mcfile ]]; then
-					teststring=$(cat $mcfile|head -1)
-					if [[ $teststring != '' ]]; then
-						if [[ -f $mifile ]]; then
-							testfhr=$(echo $teststring | cut -c11-13)
-						fi
-					fi # [[ $teststring != '' ]]
-				fi # [[ -f $mcfile ]]
+		#		if [[ -f $mcfile ]]; then
+	#				teststring=$(cat $mcfile|head -1)
+#					if [[ $teststring != '' ]]; then
+#						if [[ -f $mifile ]]; then
+#							testfhr=$(echo $mcfile | cut -c11-13)
+#						fi
+#					fi # [[ $teststring != '' ]]
+#				fi # [[ -f $mcfile ]]
 				echo "testfhr=$testfhr fhr=$fhr"
 
-				if (( testfhr >= fhr )); then
+#				if (( testfhr >= fhr )); then
 					break
-				fi # (( testfhr >= fhr ))
+#				fi # (( testfhr >= fhr ))
 			fi
 
 			ic=$(expr $ic + 1)
@@ -250,9 +250,9 @@ for hour in $hours; do
 		export mcfile=""
 		export makepgrb2b="no"
 	else 
-		export mafile=$COMIN/$COMPONENT/master/$RUNMEM.$cycle.master.grb2f$fhr
-		export mifile=$COMIN/$COMPONENT/master/$RUNMEM.$cycle.master.grb2if$fhr
-		export mcfile=$COMIN/$COMPONENT/misc/post/$RUNMEM.$cycle.master.control.f$fhr
+		export mafile=$COMIN/$mem/gfs.$PDY/00/atmos/gfs.$cycle.master.grb2f$fhr
+		export mifile=$COMIN/$mem/gfs.$PDY/00/atmos/gfs.$cycle.master.grb2if$fhr
+		export mcfile=$mafile
 		if [[ -z "$pgbd" ]]; then
 			export makepgrb2b="no"
 		else
@@ -261,15 +261,15 @@ for hour in $hours; do
 	fi # [[ $RUNMEM = "gegfs" ]]
 
 	if [[ $SENDCOM == "YES" ]]; then
-		export pcfile=$COMOUT/$COMPONENT/misc/$submc/${RUNMEM}.t${cyc}z.prdgen.control.f$fhr
-		export fileaout=$COMOUT/$COMPONENT/$pgad/$RUNMEM.$cycle.${pgapre}f${fhr}
-		export fileaouti=$COMOUT/$COMPONENT/$pgad/$RUNMEM.$cycle.${pgapre}f${fhr}.idx
+		export pcfile=$COMOUT/misc/$submc/${RUNMEM}.t${cyc}z.prdgen.control.f$fhr
+		export fileaout=$COMOUT/$pgad/$RUNMEM.$cycle.${pgapre}f${fhr}
+		export fileaouti=$COMOUT/$pgad/$RUNMEM.$cycle.${pgapre}f${fhr}.idx
 		if [[ $RUNMEM = "geaer" ]]; then
 			export fileaout=$COMOUT/$COMPONENT/$pgad/${NET}.${COMPONENT}.$cycle.${pgapre}f${fhr}.grib2
 			export fileaouti=${fileaout}.idx
 		fi
-		export filebout=$COMOUT/$COMPONENT/$pgbd/$RUNMEM.$cycle.${pgbpre}f${fhr}
-		export filebouti=$COMOUT/$COMPONENT/$pgbd/$RUNMEM.$cycle.${pgbpre}f${fhr}.idx
+		export filebout=$COMOUT/$pgbd/$RUNMEM.$cycle.${pgbpre}f${fhr}
+		export filebouti=$COMOUT/$pgbd/$RUNMEM.$cycle.${pgbpre}f${fhr}.idx
 	else
 		export pcfile=$DATA/$submc/${RUNMEM}.t${cyc}z.prdgen.control.f$fhr
 		export fileaout=$DATA/$RUNMEM.$cycle.${pgapre}f${fhr}
@@ -279,12 +279,12 @@ for hour in $hours; do
 	fi
 
 	if [[ $SENDCOM == "YES" && $save_pgrb2_p5 = YES ]] && (( FHOUR > FHMAXHF )); then
-		export mafile_p5=$COMOUT/$COMPONENT/pgrb2p5/$RUNMEM.$cycle.pgrb2.0p50.f${fhr}
-		export mifile_p5=$COMOUT/$COMPONENT/pgrb2p5/$RUNMEM.$cycle.pgrb2.0p50.f${fhr}.idx
+		export mafile_p5=$COMOUT/pgrb2p5/$RUNMEM.$cycle.pgrb2.0p50.f${fhr}
+		export mifile_p5=$COMOUT/pgrb2p5/$RUNMEM.$cycle.pgrb2.0p50.f${fhr}.idx
 	fi
 	if [[ $SENDCOM == "YES" && $save_pgrb2_p25 = YES ]] && (( FHOUR <= FHMAXHF )); then
-		export mafile_p25=$COMOUT/$COMPONENT/pgrb2p25/$RUNMEM.$cycle.pgrb2.0p25.f${fhr}
-		export mifile_p25=$COMOUT/$COMPONENT/pgrb2p25/$RUNMEM.$cycle.pgrb2.0p25.f${fhr}.idx
+		export mafile_p25=$COMOUT/pgrb2p25/$RUNMEM.$cycle.pgrb2.0p25.f${fhr}
+		export mifile_p25=$COMOUT/pgrb2p25/$RUNMEM.$cycle.pgrb2.0p25.f${fhr}.idx
 	fi
 
 	ic=1
@@ -292,27 +292,27 @@ for hour in $hours; do
 	while [ $ic -le $SLEEP_LOOP_MAX ]; do
 		if [[ $RUNMEM = "gegfs" ]]; then
 			# Check if index file has been created, to make sure file is complete before using
-			if [[ -f $mifile ]]; then
+			if [[ -f $mcfile ]]; then
 				found="yes"
 				break
 			fi # [[ -f $mafile ]]
 		else # [[ $RUNMEM = "gegfs" ]]
 			# Check if control file has been created, to make sure file is complete before using
 			testfhr=-1
-			if [[ -f $mcfile ]]; then
-				teststring=$(cat $mcfile|head -1)
-				if [[ $teststring != '' ]]; then
-					if [[ -f $mifile ]]; then
-						testfhr=$(echo $teststring | cut -c11-13)
-					fi
-				fi # [[ $teststring != '' ]]
-			fi # [[ -f $mcfile ]]
+#			if [[ -f $mcfile ]]; then
+#				teststring=$(cat $mcfile|head -1)
+#				if [[ $teststring != '' ]]; then
+#					if [[ -f $mcfile ]]; then
+#						testfhr=$(echo $teststring | cut -c11-13)
+#					fi
+#				fi # [[ $teststring != '' ]]
+#			fi # [[ -f $mcfile ]]
 			echo "testfhr=$testfhr fhr=$fhr"
 
-			if (( testfhr >= fhr )); then
+#			if (( testfhr >= fhr )); then
 				found="yes"
 				break
-			fi # (( testfhr >= fhr ))
+#			fi # (( testfhr >= fhr ))
 		fi # [[ $RUNMEM = "gegfs" ]]
 
 		ic=$((ic + 1))

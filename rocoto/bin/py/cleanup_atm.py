@@ -53,11 +53,10 @@ from functools import partial
 print = partial(print, flush=True)
 
 # Output directories that need to be removed
-output_dirs = ["f2d", "f3d", "cfssst", "ensstat", "init", "misc", "sflux", "genesis", "master",
-				"pgrb2sp25", "pgrb2p25", "pgrb2ap5", "pgrb2bp5", "pgrb22p5", "sfcsig", 
-                "tctrack", "bufr", "wmo"]
+output_dirs = ["pgrb2sp25", "pgrb2p25", "pgrb2ap5", "pgrb2bp5", "pgrb22p5", "pgrb2a1p0", "pgrb2b1p0",  
+                "master06", "ic", "c00", "misc"]
 output_dirs_last_cyc = ["restart", "sfcsig_enkf", "track_enkf", "gempak"]
-output_dir_pattern = "{work_dir}/com/gefs/dev/gefs.%Y%m%d/%H/atmos/{output_dir}"
+output_dir_pattern = "{work_dir}/dev/com/gefs.%Y%m%d/%H/{output_dir}"
 
 # Read in environment variables and make sure they exist
 work_dir = os.environ.get("WORKDIR")

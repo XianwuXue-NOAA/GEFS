@@ -29,9 +29,9 @@ import os
 import shutil
 from functools import partial
 
-destination_pattern = "{keep_dir}/gefs.{pdy}/{cycle}/atmos"
+destination_pattern = "{keep_dir}/{pdy}"
 #output_pattern = "{work_dir}/com/gefs/dev/gefs.{pdy}/{cycle}/atmos"
-output_pattern = "{work_dir}/dev/com/gefs/v12.2/gefs.{pdy}/{cycle}/atmos"
+output_pattern = "{work_dir}/dev/com/gefs.{pdy}/{cycle}"
 
 clobber = True
 
@@ -74,7 +74,7 @@ print("Directories to Keep   : {dirs_to_keep}".format(dirs_to_keep=str(dirs_to_k
 print("Date/Cycle            : {pdy}_{cycle}".format(pdy=pdy, cycle=cycle))
 
 
-destination_path = destination_pattern.format(keep_dir=keep_dir, pdy=pdy, cycle=cycle)
+destination_path = destination_pattern.format(keep_dir=keep_dir, pdy=pdy)
 output_path = output_pattern.format(work_dir=work_dir, pdy=pdy, cycle=cycle)
 
 os.makedirs(destination_path, exist_ok=True)
@@ -94,3 +94,60 @@ for directory in dirs_to_keep:
 		print("Copying files for {directory}".format(directory=directory))
 		print("    From {output_dir} to {destination_dir}".format(output_dir=output_dir, destination_dir=destination_dir))
 		shutil.copytree(output_dir, destination_dir)
+
+directory="output"
+output_dir = work_dir + "/dev/output/" + pdy
+destination_dir = "{destination_path}/{directory}".format(destination_path=destination_path, directory=directory) #keep_dir + "/gefs." + date_string + "/" + cycle + "/output"
+if os.path.exists(output_dir):
+    if os.path.exists(destination_dir):
+        if(clobber):
+            shutil.rmtree(destination_dir + "/")
+
+        else:
+            print("FATAL: Destination diretory " + destination_dir + " already exists and clobber is False")
+            quit(-103)
+    #else:
+    #    os.makedirs(destination_dir)
+
+    print("Copying files for " + directory)
+    print("    From " + output_dir + " to " + destination_dir)
+    shutil.copytree(output_dir, destination_dir)
+
+
+directory="ocean"
+output_dir = work_dir + "/dev/com/gefs." + pdy + "/00/c00/gfs." + pdy + "/00/" + directory
+destination_dir = "{destination_path}/{directory}".format(destination_path=destination_path, directory=directory) #keep_dir + "/gefs." + date_string + "/" + cycle + "/output"
+if os.path.exists(output_dir):
+    if os.path.exists(destination_dir):
+        if(clobber):
+            shutil.rmtree(destination_dir + "/")
+
+        else:
+            print("FATAL: Destination diretory " + destination_dir + " already exists and clobber is False")
+            quit(-103)
+    #else:
+    #    os.makedirs(destination_dir)
+
+    print("Copying files for " + directory)
+    print("    From " + output_dir + " to " + destination_dir)
+    shutil.copytree(output_dir, destination_dir)
+
+
+directory="ice"
+output_dir = work_dir + "/dev/com/gefs." + pdy + "/00/c00/gfs." + pdy + "/00/" + directory
+destination_dir = "{destination_path}/{directory}".format(destination_path=destination_path, directory=directory) #keep_dir + "/gefs." + date_string + "/" + cycle + "/output"
+if os.path.exists(output_dir):
+    if os.path.exists(destination_dir):
+        if(clobber):
+            shutil.rmtree(destination_dir + "/")
+
+        else:
+            print("FATAL: Destination diretory " + destination_dir + " already exists and clobber is False")
+            quit(-103)
+    #else:
+    #    os.makedirs(destination_dir)
+
+    print("Copying files for " + directory)
+    print("    From " + output_dir + " to " + destination_dir)
+    shutil.copytree(output_dir, destination_dir)
+

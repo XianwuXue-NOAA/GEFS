@@ -1,6 +1,11 @@
 ############################# sorted pgrb2a 201408
+:APCP:surface:
 :CAPE:180-0 mb above ground:
+:CFRZR:surface:
+:CICEP:surface:
 :CIN:180-0 mb above ground:
+:CRAIN:surface:
+:CSNOW:surface:
 :DLWRF:surface:
 :DSWRF:surface:
 :HGT:10 mb:
@@ -14,9 +19,8 @@
 :HGT:700 mb:
 :HGT:850 mb:
 :HGT:925 mb:
-:HGT:surface:
-:ICETK:surface:
 :LHTFL:surface:
+:ICETK:surface:
 :PRES:surface:
 :PRMSL:mean sea level:
 :PWAT:entire atmosphere (considered as a single layer):
@@ -34,6 +38,9 @@
 :SHTFL:surface:
 :SNOD:surface:
 :SOILW:0-0.1 m below ground:
+:TCDC:entire atmosphere:
+:TMAX:2 m above ground:
+:TMIN:2 m above ground:
 :TMP:10 mb:
 :TMP:100 mb:
 :TMP:1000 mb:
@@ -100,4 +107,10 @@
 :GFLUX:surface:
 :UFLX:surface:
 :VFLX:surface:
+:O3MR:10 mb:
+:O3MR:50 mb:
+:O3MR:100 mb:
+:UGRD:0.995 sigma level:
+:VGRD:0.995 sigma level:
+:HLCY:3000-0 m above ground:
 ;############################ do not leave a blank line at the end
