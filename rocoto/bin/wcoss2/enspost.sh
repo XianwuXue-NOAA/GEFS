@@ -35,5 +35,7 @@ module list
 export OMP_NUM_THREADS=1
 export envir=prod
 
+export COMIN=/lfs/h1/ops/prod/com/gefs/v12.3/${RUN}.${PDY}/$cyc
+#export COMIN=/lfs/h2/emc/ptmp/xianwu.xue/o/testd/com/gefs/v12.2/${RUN}.${PDY}/$cyc
 # CALL executable job script here
 $SOURCEDIR/jobs/JGEFS_ATMOS_ENSPOST
