@@ -17,7 +17,6 @@ export FIXam=${FIXam:-$FIXgfs/fix_am}
 export VCOORD_FILE=${VCOORD_FILE:-$FIXam/global_hyblev.l${LEVS}.txt}
 
 mem=$(echo $RUNMEM|cut -c3-5)
-sfc_mem=${sfc_mem:-"c00"}
 
 cd $DATA
 
