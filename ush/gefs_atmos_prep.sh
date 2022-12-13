@@ -13,6 +13,47 @@ export mem=$1
 export nmem=$(echo $mem|cut -c 2-)
 nmem=${nmem#0}
 
+if [[ $USE_EARLY_ENKF == YES ]]; then
+  if [[ $mem = c00 ]]; then
+    echo "Working on c00"
+  else
+    echo "Working on ${mem}"
+    mkdir -p $COMOUT/RESTART
+
+    gmemdir=${COMINenkfgfs}
+    memdir=${COMINenkf}
+
+    CDATE=${PDY}${cyc}
+    sCDATE=$($NDATE -3 $CDATE)
+    sPDY=$(echo $sCDATE | cut -c1-8)
+    scyc=$(echo $sCDATE | cut -c9-10)
+
+    # Link all (except sfc_data) restart files from $gmemdir
+    for file in $(ls $gmemdir/RESTART/${sPDY}.${scyc}0000.*.nc); do
+      file2=$(echo $(basename $file))
+      file2=$(echo $file2 | cut -d. -f3-) # remove the date from file
+      fsuf=$(echo $file2 | cut -d. -f1)
+      if [ $fsuf != "sfc_data" ]; then
+        $NLN $file $COMOUT/RESTART/ #$file2
+      fi
+    done
+
+    # Link sfcanl_data restart files from $memdir
+    for file in $(ls $memdir/RESTART/${sPDY}.${scyc}0000.*.nc); do
+      file2=$(echo $(basename $file))
+      file2=$(echo $file2 | cut -d. -f3-) # remove the date from file
+      fsufanl=$(echo $file2 | cut -d. -f1)
+      if [ $fsufanl = "sfcanl_data" ]; then
+        file2=$(echo $file2 | sed -e "s/sfcanl_data/sfc_data/g")
+        $NLN $file $COMOUT/RESTART/ #$file2
+      fi
+    done
+
+  fi
+  echo "$(date -u) end $(basename $BASH_SOURCE)"
+  exit 0
+fi
+
 export INIDIR=$DATA
 export OUTDIR=$GESOUT/enkf/$mem
 INITDIR=$GESOUT/init/$mem
