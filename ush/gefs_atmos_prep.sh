@@ -40,7 +40,7 @@ if [[ $USE_EARLY_ENKF == YES ]]; then
       file2=$(echo $file2 | cut -d. -f3-) # remove the date from file
       fsuf=$(echo $file2 | cut -d. -f1)
       if [ $fsuf != "sfc_data" ]; then
-        $NLN $file $COMOUT/RESTART/ #$file2
+        $NLN $file $COMOUT/RESTART/
       fi
     done
 
@@ -51,9 +51,45 @@ if [[ $USE_EARLY_ENKF == YES ]]; then
       fsufanl=$(echo $file2 | cut -d. -f1)
       if [ $fsufanl = "sfcanl_data" ]; then
         file2=$(echo $file2 | sed -e "s/sfcanl_data/sfc_data/g")
-        $NLN $file $COMOUT/RESTART/ #$file2
+        $NLN $file $COMOUT/RESTART/
       fi
     done
+
+    # Need a coupler.res when doing IAU
+    if [ $DOIAU = "YES" ]; then
+      rm -f $COMOUT/RESTART/coupler.res
+      cat >> $COMOUT/RESTART/coupler.res << EOF
+      2        (Calendar: no_calendar=0, thirty_day_months=1, julian=2, gregorian=3, noleap=4)
+      ${gPDY:0:4}  ${gPDY:4:2}  ${gPDY:6:2}  ${gcyc}     0     0        Model start time:   year, month, day, hour, minute, second
+      ${sPDY:0:4}  ${sPDY:4:2}  ${sPDY:6:2}  ${scyc}     0     0        Current model time: year, month, day, hour, minute, second
+EOF
+    fi
+
+    # Link increments
+    if [ $DOIAU = "YES" ]; then
+      for i in $(echo $IAUFHRS | sed "s/,/ /g" | rev); do
+        incfhr=$(printf %03i $i)
+        if [ $incfhr = "006" ]; then
+          increment_file=$memdir/gfs.t${cyc}z.${PREFIX_ATMINC}atminc.nc
+        else
+          increment_file=$memdir/gfs.t${cyc}z.${PREFIX_ATMINC}atmi${incfhr}.nc
+        fi
+        if [ ! -f $increment_file ]; then
+          echo "ERROR: DOIAU = $DOIAU, but missing increment file for fhr $incfhr at $increment_file"
+          echo "Abort!"
+          exit 1
+        fi
+        $NLN $increment_file $COMOUT/RESTART/
+      done
+    else
+      increment_file=$memdir/gfs.t${cyc}z.${PREFIX_ATMINC}atminc.nc
+      if [ -f $increment_file ]; then
+        $NLN $increment_file $COMOUT/RESTART/
+        read_increment=".true."
+        res_latlon_dynamics="fv3_increment.nc"
+      fi
+    fi
+
 
   fi
   echo "$(date -u) end $(basename $BASH_SOURCE)"

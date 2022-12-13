@@ -73,6 +73,11 @@ if [[ $USE_EARLY_ENKF == YES ]]; then
     mem=$(echo $RUNMEM|cut -c3-5)
     export COMOUT=${COMOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDY}/$cyc/${mem}/$COMPONENT}
     export GESOUT=${GESOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDY}/$cyc/${mem}/$COMPONENT}
+
+    export DOIAU=${DOIAU:-"YES"}
+    export IAUFHRS=${IAUFHRS:-"3,6,9"}
+    export PREFIX_ATMINC=${PREFIX_ATMINC:-""}
+
 else
     export COMOUT=${COMOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDY}/$cyc/$COMPONENT}
     export GESOUT=${GESOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDY}/$cyc/nwges}
