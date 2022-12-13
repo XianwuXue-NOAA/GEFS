@@ -20,8 +20,14 @@ if [[ $USE_EARLY_ENKF == YES ]]; then
     echo "Working on ${mem}"
     mkdir -p $COMOUT/RESTART
 
-    gmemdir=${COMINenkfgfs}
-    memdir=${COMINenkf}
+    (( cmem = nmem + memshift ))
+    if (( cmem > 80 )); then
+      (( cmem = cmem - 80 ))
+    fi
+    memchar="mem"$(printf %03i $cmem)
+
+    gmemdir=${COMINenkfgfs}/${memchar}
+    memdir=${COMINenkf}/${memchar}
 
     CDATE=${PDY}${cyc}
     sCDATE=$($NDATE -3 $CDATE)
