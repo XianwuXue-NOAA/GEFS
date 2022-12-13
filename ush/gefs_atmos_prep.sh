@@ -16,9 +16,10 @@ nmem=${nmem#0}
 if [[ $USE_EARLY_ENKF == YES ]]; then
   if [[ $mem = c00 ]]; then
     echo "Working on c00"
+    gmemdir=${COMINgdas}
+    memdir=${COMINgfs}
   else
     echo "Working on ${mem}"
-    mkdir -p $COMOUT/RESTART
 
     (( cmem = nmem + memshift ))
     if (( cmem > 80 )); then
@@ -28,6 +29,9 @@ if [[ $USE_EARLY_ENKF == YES ]]; then
 
     gmemdir=${COMINenkf}/${memchar}
     memdir=${COMINenkfgfs}/${memchar}
+  fi
+
+    mkdir -p $COMOUT/RESTART
 
     CDATE=${PDY}${cyc}
     sCDATE=$($NDATE -3 $CDATE)
@@ -82,17 +86,17 @@ EOF
           echo "Abort!"
           exit 1
         fi
-        $NLN $memdir/gfs.$increment_file $COMOUT/${CDUMP}.$increment_file
+        $NLN $memdir/gfs.$increment_file $COMOUT/gefs.$increment_file
       done
     else
       increment_file=t${cyc}z.${PREFIX_ATMINC}atminc.nc
       if [ -f $memdir/gfs.$increment_file ]; then
-        $NLN $memdir/gfs.$increment_file $COMOUT/${CDUMP}.$increment_file
+        $NLN $memdir/gfs.$increment_file $COMOUT/gefs.$increment_file
       fi
     fi
 
 
-  fi
+  #fi
   echo "$(date -u) end $(basename $BASH_SOURCE)"
   exit 0
 fi

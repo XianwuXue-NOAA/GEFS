@@ -99,6 +99,7 @@ done
 export COMINgfs=${COMINgfs:-$(compath.py ${envir}/com/gfs/${gfs_ver})/gfs.${PDY}/${cyc}/atmos}
 export COMINenkf=${COMINenkf:-$(compath.py ${envir}/com/gfs/${gfs_ver})/enkfgdas.${pdyp}/${cycp}/atmos}
 if [[ $USE_EARLY_ENKF == YES ]]; then
+    export COMINgdas=${COMINgdas:-$(compath.py ${envir}/com/gfs/${gfs_ver})/gdas.${pdyp}/${cycp}/atmos}
     export COMINenkfgfs=${COMINenkfgfs:-$(compath.py ${envir}/com/gfs/${gfs_ver})/enkfgfs.${PDY}/${cyc}/atmos}
     export NLN=${NLN:-"/bin/ln -sf"}
 fi
