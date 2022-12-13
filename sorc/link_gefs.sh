@@ -56,7 +56,7 @@ cd ${pwd}
 if [[ -d global-workflow.fd ]] ; then
     cd ${pwd}/../fix
 
-    for gw_dir in fix_am fix_fv3_gmted2010/C384 fix_chem; do
+    for gw_dir in fix_am fix_fv3_gmted2010/C768 fix_fv3_gmted2010/C384 fix_fv3_gmted2010/C192 fix_fv3_gmted2010/C96 fix_fv3_gmted2010/C48 fix_chem; do
         if [[ -d $gw_dir ]]; then rm -Rf $gw_dir; fi
         mkdir -p $(dirname $gw_dir)
         $LINK $FIX_DIR_FV3/$gw_dir $gw_dir
