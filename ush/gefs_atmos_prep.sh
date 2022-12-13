@@ -26,13 +26,16 @@ if [[ $USE_EARLY_ENKF == YES ]]; then
     fi
     memchar="mem"$(printf %03i $cmem)
 
-    gmemdir=${COMINenkfgfs}/${memchar}
-    memdir=${COMINenkf}/${memchar}
+    gmemdir=${COMINenkf}/${memchar}
+    memdir=${COMINenkfgfs}/${memchar}
 
     CDATE=${PDY}${cyc}
     sCDATE=$($NDATE -3 $CDATE)
     sPDY=$(echo $sCDATE | cut -c1-8)
     scyc=$(echo $sCDATE | cut -c9-10)
+
+    gPDY=${pdyp}
+    gcyc=${cycp}
 
     # Link all (except sfc_data) restart files from $gmemdir
     for file in $(ls $gmemdir/RESTART/${sPDY}.${scyc}0000.*.nc); do
@@ -57,8 +60,8 @@ if [[ $USE_EARLY_ENKF == YES ]]; then
 
     # Need a coupler.res when doing IAU
     if [ $DOIAU = "YES" ]; then
-      rm -f $COMOUT/RESTART/coupler.res
-      cat >> $COMOUT/RESTART/coupler.res << EOF
+      rm -f $COMOUT/RESTART/${sPDY}.${scyc}0000.coupler.res
+      cat >> $COMOUT/RESTART/${sPDY}.${scyc}0000.coupler.res << EOF
       2        (Calendar: no_calendar=0, thirty_day_months=1, julian=2, gregorian=3, noleap=4)
       ${gPDY:0:4}  ${gPDY:4:2}  ${gPDY:6:2}  ${gcyc}     0     0        Model start time:   year, month, day, hour, minute, second
       ${sPDY:0:4}  ${sPDY:4:2}  ${sPDY:6:2}  ${scyc}     0     0        Current model time: year, month, day, hour, minute, second
@@ -70,23 +73,21 @@ EOF
       for i in $(echo $IAUFHRS | sed "s/,/ /g" | rev); do
         incfhr=$(printf %03i $i)
         if [ $incfhr = "006" ]; then
-          increment_file=$memdir/gfs.t${cyc}z.${PREFIX_ATMINC}atminc.nc
+          increment_file=t${cyc}z.${PREFIX_ATMINC}atminc.nc
         else
-          increment_file=$memdir/gfs.t${cyc}z.${PREFIX_ATMINC}atmi${incfhr}.nc
+          increment_file=t${cyc}z.${PREFIX_ATMINC}atmi${incfhr}.nc
         fi
-        if [ ! -f $increment_file ]; then
-          echo "ERROR: DOIAU = $DOIAU, but missing increment file for fhr $incfhr at $increment_file"
+        if [ ! -f $memdir/gfs.$increment_file ]; then
+          echo "ERROR: DOIAU = $DOIAU, but missing increment file for fhr $incfhr at $memdir/gfs.$increment_file"
           echo "Abort!"
           exit 1
         fi
-        $NLN $increment_file $COMOUT/RESTART/
+        $NLN $memdir/gfs.$increment_file $COMOUT/${CDUMP}.$increment_file
       done
     else
-      increment_file=$memdir/gfs.t${cyc}z.${PREFIX_ATMINC}atminc.nc
-      if [ -f $increment_file ]; then
-        $NLN $increment_file $COMOUT/RESTART/
-        read_increment=".true."
-        res_latlon_dynamics="fv3_increment.nc"
+      increment_file=t${cyc}z.${PREFIX_ATMINC}atminc.nc
+      if [ -f $memdir/gfs.$increment_file ]; then
+        $NLN $memdir/gfs.$increment_file $COMOUT/${CDUMP}.$increment_file
       fi
     fi
 

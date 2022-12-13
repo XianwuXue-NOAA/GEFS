@@ -16,6 +16,7 @@ export FIXfv3=${FIXfv3:-$FIXgfs/fix_fv3_gmted2010}
 export FIXam=${FIXam:-$FIXgfs/fix_am}
 export VCOORD_FILE=${VCOORD_FILE:-$FIXam/global_hyblev.l${LEVS}.txt}
 
+export CDUMP=$RUNMEM
 mem=$(echo $RUNMEM|cut -c3-5)
 
 cd $DATA
