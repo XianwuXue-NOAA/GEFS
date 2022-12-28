@@ -104,7 +104,7 @@ if [[ $USE_EARLY_ENKF == YES ]]; then
     export NLN=${NLN:-"/bin/ln -sf"}
 fi
 
-NCP=${NCP:-"/bin/cp -p"}
+NCP=${NCP:-"/bin/cp -rfp"}
 
 echo "Environment before calling script"
 env | sort

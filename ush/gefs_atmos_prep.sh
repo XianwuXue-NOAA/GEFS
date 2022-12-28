@@ -42,7 +42,15 @@ if [[ $USE_EARLY_ENKF == YES ]]; then
 		memdir=${COMINenkfgfs}/${memchar}
 	fi
 
-	mkdir -p $COMOUT/RESTART
+	#mkdir -p $COMOUT/RESTART
+	export INIDIR=$DATA
+	export OUTDIR=$COMOUT
+
+	mkdir -p $INIDIR/RESTART
+	if [[ -e $OUTDIR ]]; then
+		rm -rf $OUTDIR
+	fi
+	mkdir -p $OUTDIR
 
 	CDATE=${PDY}${cyc}
 	sCDATE=$($NDATE -3 $CDATE)
@@ -58,7 +66,7 @@ if [[ $USE_EARLY_ENKF == YES ]]; then
 		file2=$(echo $file2 | cut -d. -f3-) # remove the date from file
 		fsuf=$(echo $file2 | cut -d. -f1)
 		if [ $fsuf != "sfc_data" ]; then
-			$NLN $file $COMOUT/RESTART/
+			$NLN $file $INIDIR/RESTART/
 		fi
 	done
 
@@ -69,14 +77,14 @@ if [[ $USE_EARLY_ENKF == YES ]]; then
 		fsufanl=$(echo $file2 | cut -d. -f1)
 		if [ $fsufanl = "sfcanl_data" ]; then
 			file2=$(echo $file2 | sed -e "s/sfcanl_data/sfc_data/g")
-			$NLN $file $COMOUT/RESTART/
+			$NLN $file $INIDIR/RESTART/
 		fi
 	done
 
 	# Need a coupler.res when doing IAU
 	if [ $DOIAU = "YES" ]; then
-		rm -f $COMOUT/RESTART/${sPDY}.${scyc}0000.coupler.res
-		cat >> $COMOUT/RESTART/${sPDY}.${scyc}0000.coupler.res <<- EOF
+		rm -f $INIDIR/RESTART/${sPDY}.${scyc}0000.coupler.res
+		cat >> $INIDIR/RESTART/${sPDY}.${scyc}0000.coupler.res <<- EOF
 			2        (Calendar: no_calendar=0, thirty_day_months=1, julian=2, gregorian=3, noleap=4)
 			${gPDY:0:4}  ${gPDY:4:2}  ${gPDY:6:2}  ${gcyc}     0     0        Model start time:   year, month, day, hour, minute, second
 			${sPDY:0:4}  ${sPDY:4:2}  ${sPDY:6:2}  ${scyc}     0     0        Current model time: year, month, day, hour, minute, second
@@ -97,12 +105,24 @@ if [[ $USE_EARLY_ENKF == YES ]]; then
 				echo "Abort!"
 				exit 1
 			fi
-			$NLN $memdir/gfs.$increment_file $COMOUT/gefs.$increment_file
+			$NLN $memdir/gfs.$increment_file $INIDIR/gefs.$increment_file
 		done
 	else
 		increment_file=t${cyc}z.${PREFIX_ATMINC}atminc.nc
 		if [ -f $memdir/gfs.$increment_file ]; then
-			$NLN $memdir/gfs.$increment_file $COMOUT/gefs.$increment_file
+			$NLN $memdir/gfs.$increment_file $INIDIR/gefs.$increment_file
+		fi
+	fi
+
+	if [[ $SENDCOM == "YES" ]]; then
+		if [[ $mem = c00 ]]; then
+			echo "Copying $mem to COM Directory!"
+			$NCP $INIDIR/*.nc $COMOUT/
+			$NCP $INIDIR/RESTART $COMOUT/
+		else
+			echo "Copying $mem to COM Directory!"
+			$NCP $INIDIR/*.nc $COMOUT/
+			$NCP $INIDIR/RESTART $COMOUT/
 		fi
 	fi
 
