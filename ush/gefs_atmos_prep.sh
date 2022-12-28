@@ -18,7 +18,9 @@ export INPUT_TYPE="gaussian_netcdf"
 export FIXgfs=${FIXgfs:-$HOMEgfs/fix}
 
 export CRES=$(echo $CASE |cut -c2-5)
+CRES_H=$((CRES+CRES))
 export FIXfv3=$FIXgfs/orog/C$CRES
+export FIXfv3_H=$FIXgfs/orog/C$CRES_H
 export FIXsfc=$FIXfv3/fix_sfc
 export FIXam=${FIXam:-$FIXgfs/am}
 export VCOORD_FILE=${VCOORD_FILE:-$FIXam/global_hyblev.l${LEVS}.txt}
@@ -42,15 +44,14 @@ if [[ $USE_EARLY_ENKF == YES ]]; then
 		memdir=${COMINenkfgfs}/${memchar}
 	fi
 
-	#mkdir -p $COMOUT/RESTART
 	export INIDIR=$DATA
-	export OUTDIR=$COMOUT
+	cd $INIDIR
 
 	mkdir -p $INIDIR/RESTART
-	if [[ -e $OUTDIR ]]; then
-		rm -rf $OUTDIR
+	if [[ -e $COMOUT ]]; then
+		rm -rf $COMOUT
 	fi
-	mkdir -p $OUTDIR
+	mkdir -p $COMOUT
 
 	CDATE=${PDY}${cyc}
 	sCDATE=$($NDATE -3 $CDATE)
@@ -114,11 +115,65 @@ if [[ $USE_EARLY_ENKF == YES ]]; then
 		fi
 	fi
 
+	if [[ $mem = c00 ]]; then
+        export CONVERT_NST=".false."
+		export INPUT_TYPE='restart'
+		export MOSAIC_FILE_INPUT_GRID="${FIXfv3_H}/C${CRES_H}_mosaic.nc"
+        export MOSAIC_FILE_TARGET_GRID="${FIXfv3}/C${CRES}_mosaic.nc"
+		export OROG_DIR_INPUT_GRID="${FIXfv3_H}"
+
+		OROG_FILES_INPUT_GRID=""
+		ATM_CORE_FILES_INPUT=""
+		ATM_TRACER_FILES_INPUT=""
+		SFC_FILES_INPUT=""
+		for tile in {1..6}
+		do
+			OROG_FILES_INPUT_GRID=${OROG_FILES_INPUT_GRID}"C${CRES_H}_oro_data.tile${tile}.nc"
+			ATM_CORE_FILES_INPUT=${ATM_CORE_FILES_INPUT}"${sPDY}.${scyc}0000.fv_core.res.tile${tile}.nc"
+			ATM_TRACER_FILES_INPUT=${ATM_TRACER_FILES_INPUT}"${sPDY}.${scyc}0000.fv_tracer.res.tile${tile}.nc"
+			SFC_FILES_INPUT=${SFC_FILES_INPUT}"${sPDY}.${scyc}0000.sfcanl_data.tile${tile}.nc"
+			if [[ $tile != 6 ]]; then
+				OROG_FILES_INPUT_GRID=${OROG_FILES_INPUT_GRID}'","'
+				ATM_CORE_FILES_INPUT=${ATM_CORE_FILES_INPUT}'","'
+				ATM_TRACER_FILES_INPUT=${ATM_TRACER_FILES_INPUT}'","'
+				SFC_FILES_INPUT=${SFC_FILES_INPUT}'","'
+			fi
+		done
+
+		export OROG_FILES_INPUT_GRID
+		ATM_CORE_FILES_INPUT=${ATM_CORE_FILES_INPUT}'","'
+		export ATM_CORE_FILES_INPUT=${ATM_CORE_FILES_INPUT}"${sPDY}.${scyc}0000.fv_core.res.nc"
+		export ATM_TRACER_FILES_INPUT
+		export SFC_FILES_INPUT
+
+		export TRACERS_TARGET='"sphum","liq_wat","o3mr","ice_wat","rainwat","snowwat","graupel"'
+		export TRACERS_INPUT='"sphum","liq_wat","o3mr","ice_wat","rainwat","snowwat","graupel"'
+
+		export COMIN=$INIDIR/RESTART
+
+		# Execute the script
+		$USHgfs/chgres_cube.sh
+		export err=$?
+		if [[ $err != 0 ]]; then
+			echo "FATAL ERROR in $(basename $BASH_SOURCE): chgres_cube failed!"
+			exit $err
+		fi
+	fi
+
 	if [[ $SENDCOM == "YES" ]]; then
 		if [[ $mem = c00 ]]; then
 			echo "Copying $mem to COM Directory!"
-			$NCP $INIDIR/*.nc $COMOUT/
-			$NCP $INIDIR/RESTART $COMOUT/
+			if [[ -e $COMOUT/INPUT ]]; then
+				rm -rf $COMOUT/INPUT
+			fi
+			mkdir -p $COMOUT/INPUT
+
+			for tile in {1..6}
+			do
+				mv $INIDIR/out.sfc.tile${tile}.nc $COMOUT/INPUT/sfc_data.tile${tile}.nc
+				mv $INIDIR/out.atm.tile${tile}.nc $COMOUT/INPUT/gfs_data.tile${tile}.nc
+			done
+			mv $INIDIR/gfs_ctrl.nc $COMOUT/INPUT/
 		else
 			echo "Copying $mem to COM Directory!"
 			$NCP $INIDIR/*.nc $COMOUT/

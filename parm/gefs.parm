@@ -96,7 +96,7 @@ export FHOUT_HF_WAV=${FHOUTHF:-3}
 #######################################
 #For the half-month range part of FV3 based forecast
 export CASEHR=${CASEHR:-C384}
-export LEVSHR=${LEVSHR:-64}
+export LEVSHR=${LEVSHR:-127}
 export DELTIM=${DELTIM:-450}
 export JCAPFV=${JCAPFV:-766}
 export LATBFV=${LATBFV:-768}
@@ -105,7 +105,7 @@ export MTNRSLFV=${MTNRSLFV:-766.1536.768}
 
 #For the longer range part of FV3 based forecast
 export CASELR=${CASELR:-C384}
-export LEVSLR=${LEVSLR:-64}
+export LEVSLR=${LEVSLR:-127}
 export DELTIMLR=${DELTIMLR:-450}
 export JCAPLR=${JCAPLR:-766}
 export LATBLR=${LATBLR:-768}
