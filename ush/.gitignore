@@ -5,4 +5,11 @@ chgres_cube.sh
 merge_fv3_aerosol_tile.py
 wave_*.sh
 
-forecast*.sh
+cplvalidate.sh
+forecast_predet.sh
+forecast_det.sh
+forecast_postdet.sh
+nems_configure.sh
+parsing_model_configure_FV3.sh
+parsing_model_configure_DATM.sh
+
