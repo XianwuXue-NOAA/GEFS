@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/bash
 set -ex
 
 #--make symbolic links for EMC installation and hardcopies for NCO delivery
@@ -39,7 +39,7 @@ elif [ $machine = "hera" ]; then
     FIX_DIR_FV3="/scratch1/NCEPDEV/global/glopara/fix"
 elif [ $machine == "wcoss2" ]; then
     FIX_DIR="/lfs/h2/emc/ens/save/emc.ens/FIX/gefs/fix_nco_gefsv12.3"
-    FIX_DIR_FV3="/lfs/h2/emc/global/save/emc.global/FIX/fix_nco_gfsv15"
+    FIX_DIR_FV3="/lfs/h2/emc/global/noscrub/emc.global/FIX/fix"
 fi
 
 # Delete Fix folder and relink/recopy it
@@ -54,12 +54,19 @@ done
 cd ${pwd}
 
 if [[ -d global-workflow.fd ]] ; then
+
+    # Source fix version file
+    source "${pwd}/../versions/fix.ver"
+
     cd ${pwd}/../fix
 
-    for gw_dir in fix_am fix_fv3_gmted2010/C768 fix_fv3_gmted2010/C384 fix_fv3_gmted2010/C192 fix_fv3_gmted2010/C96 fix_fv3_gmted2010/C48 fix_chem; do
-        if [[ -d $gw_dir ]]; then rm -Rf $gw_dir; fi
-        mkdir -p $(dirname $gw_dir)
-        $LINK $FIX_DIR_FV3/$gw_dir $gw_dir
+    for gw_dir in am orog chem; do
+        if [[ -d $gw_dir ]]; then
+            rm -rf $gw_dir
+        fi
+        #mkdir -p $(dirname $gw_dir)
+        fix_ver="${gw_dir}_ver"
+        ${LINK} "${FIX_DIR_FV3}/${gw_dir}/${!fix_ver}" "${gw_dir}"
     done
 
     # product
@@ -77,30 +84,31 @@ fi
 cd $pwd
 if [[ -d global-workflow.fd ]] ; then
 
-    sPath=../sorc/global-workflow.fd/sorc/fv3gfs.fd/WW3/model/exe
+    
+    sPath=../sorc/global-workflow.fd/exec
     for sFile in ${sPath}/ww3_*
     do
         echo $sFile
     done
     $LINK ${sPath}/ww3_* ../exec/
 
-    sPath=../sorc/global-workflow.fd/sorc/fv3gfs.fd/NEMS/exe
-    $LINK ${sPath}/global_fv3gfs.* ../exec/
+    sPath=../sorc/global-workflow.fd/sorc/ufs_model.fd/tests
+    $LINK ${sPath}/ufs_model.x ../exec/
 
-    sPath=../sorc/global-workflow.fd/sorc/gfs_post.fd/exec
-    $LINK ${sPath}/ncep_post ../exec/gfs_ncep_post
+    sPath=../sorc/global-workflow.fd/sorc/ufs_model.fd/FV3/upp/exec
+    $LINK ${sPath}/upp.x ../exec/
 
-    sPath=../sorc/global-workflow.fd/sorc/gsi.fd/exec
+    sPath=../sorc/global-workflow.fd/sorc/gsi_utils.fd/install/bin
     $LINK ${sPath}/getsigensmeanp_smooth.x ../exec/
     $LINK ${sPath}/getsfcensmeanp.x ../exec/
 
-    sPath=../sorc/global-workflow.fd/exec
-    $LINK ${sPath}/gfs_bufr ../exec/
-    $LINK ${sPath}/tocsbufr ../exec/
+    sPath=../sorc/global-workflow.fd/sorc/gfs_utils.fd/install/bin
+    $LINK ${sPath}/gfs_bufr.x ../exec/
+    $LINK ${sPath}/tocsbufr.x ../exec/
 
     # chem_prep_emissions
-    sPath=../sorc/global-workflow.fd/sorc/gsd_prep_chem.fd/workflow/emc-global/exec
-    $LINK ${sPath}/prep_chem_sources_RADM_FV3_SIMPLE.exe ../exec/
+    #sPath=../sorc/global-workflow.fd/sorc/gsd_prep_chem.fd/workflow/emc-global/exec
+    #$LINK ${sPath}/prep_chem_sources_RADM_FV3_SIMPLE.exe ../exec/
 
 fi
 
@@ -115,7 +123,7 @@ if [[ -d global-workflow.fd ]] ; then
     if [[ -d ../parm/post ]]; then
         rm -rf ../parm/post
     fi
-    $LINK ../sorc/global-workflow.fd/sorc/gfs_post.fd/parm ../parm/post
+    $LINK ../sorc/global-workflow.fd/sorc/ufs_model.fd/FV3/upp/parm ../parm/post
 
     if [[ -d ../parm/product ]]; then
         rm -rf ../parm/product
@@ -123,30 +131,33 @@ if [[ -d global-workflow.fd ]] ; then
     $LINK ../sorc/global-workflow.fd/parm/product ../parm/
 fi
 
+
 # Copy/Link ush files
 cd $pwd
 if [[ -d global-workflow.fd ]] ; then
     $LINK ../sorc/global-workflow.fd/sorc/ufs_utils.fd/ush/chgres_cube.sh ../ush/
 
-    $LINK ../sorc/global-workflow.fd/sorc/gfs_post.fd/ush/gfs_nceppost.sh ../ush/
-
+    #$LINK ../sorc/global-workflow.fd/sorc/gfs_post.fd/ush/gfs_nceppost.sh ../ush/
 fi
 
 # For Forecast
 cd $pwd
 if [[ -d global-workflow.fd ]] ; then
-    sFile=exglobal_fcst_nemsfv3gfs.sh
-    if [[ -e ../scripts/$sFile ]]; then
-        if [[ -L ../scripts/$sFile ]]; then
-            rm ../scripts/$sFile
-            $LINK ../sorc/global-workflow.fd/scripts/$sFile ../scripts/
+    for sFile in scripts/exglobal_forecast.sh ush/forecast_det.sh ush/forecast_postdet.sh ush/forecast_predet.sh
+    do
+        if [[ -e ../$sFile ]]; then
+            if [[ -L ../$sFile ]]; then
+                rm ../$sFile
+                $LINK ../sorc/global-workflow.fd/$sFile ../$sFile 
+            fi
+        else
+            $LINK ../sorc/global-workflow.fd/$sFile ../$sFile
         fi
-    else
-        $LINK ../sorc/global-workflow.fd/scripts/$sFile ../scripts/
-    fi
+    done
 fi
 
 # For wave
+if [[ 1 == 0 ]]; then
 echo $pwd
 cd $pwd
 if [[ -d global-workflow.fd ]]; then
@@ -169,23 +180,24 @@ if [[ -d global-workflow.fd ]]; then
         $LINK ${pwd}/global-workflow.fd/env ../
     fi
 fi
+fi
 
 # for CHEM
 if [[ -d global-workflow.fd ]]; then
     # for chem_prep_emissions
-    $LINK ../sorc/global-workflow.fd/sorc/gsd_prep_chem.fd/workflow/emc-global/scripts/exglobal_prep_chem.sh ../scripts/
-    $LINK ../sorc/global-workflow.fd/sorc/gsd_prep_chem.fd/workflow/emc-global/parm/prep_chem_sources.inp.IN ../parm/
+    #$LINK ../sorc/global-workflow.fd/sorc/gsd_prep_chem.fd/workflow/emc-global/scripts/exglobal_prep_chem.sh ../scripts/
+    #$LINK ../sorc/global-workflow.fd/sorc/gsd_prep_chem.fd/workflow/emc-global/parm/prep_chem_sources.inp.IN ../parm/
 
     # for init_aerosol
-    $LINK ../sorc/global-workflow.fd/ush/merge_fv3_chem_tile.py ../ush/
+    $LINK ../sorc/global-workflow.fd/ush/merge_fv3_aerosol_tile.py ../ush/
 fi
 
-# for atmos_prep for GFSv16
+# for atmos_prep for GFSv17
 if [[ -d global-workflow.fd ]]; then
     $LINK ../sorc/global-workflow.fd/sorc/ufs_utils.fd/exec/chgres_cube ../exec/
-    $LINK ../sorc/global-workflow.fd/exec/chgres_recenter_ncio.exe ../exec/
-    $LINK ../sorc/global-workflow.fd/sorc/gsi.fd/exec/calc_increment_ens_ncio.x ../exec/
-fi
 
+    #$LINK ../sorc/global-workflow.fd/exec/chgres_recenter_ncio.exe ../exec/
+    #$LINK ../sorc/global-workflow.fd/sorc/gsi.fd/exec/calc_increment_ens_ncio.x ../exec/
+fi
 
 exit 0
