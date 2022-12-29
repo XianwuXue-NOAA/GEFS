@@ -59,7 +59,7 @@ if [[ -d global-workflow.fd ]] ; then
 
   cd ${pwd}/../fix
 
-  for gw_dir in am orog chem; do
+  for gw_dir in am aer lut orog chem; do
     if [[ -d $gw_dir ]]; then
       rm -rf $gw_dir
     fi
