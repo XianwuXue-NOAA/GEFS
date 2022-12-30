@@ -9,7 +9,6 @@
 ##############################################
 export npert=${npert:-30}
 export navg_min=${navg_min:-20}
-export nstinit=${nstinit:-yes}
 #################################################
 # Forecast Hour: fhmax and fhmaxh and fhmax_ext
 #################################################
@@ -31,20 +30,20 @@ export fhrp=${fhrp:-06}
 export gefs_cych=${gefs_cych:-6}
 
 case $cyc in
-	(00)
-		fhmax=$fhmax00 ;;
-	(06)
-		fhmax=$fhmax06 ;;
-	(12)
-		fhmax=$fhmax12 ;;
-	(18)
-		fhmax=$fhmax18 ;;
-	(*)
-		echo
-		echo UNDEFINED CYCLE cyc=$cyc
-		echo
-		echo unmodified fhmax=$fhmax
-		;;
+  (00)
+    fhmax=$fhmax00 ;;
+  (06)
+    fhmax=$fhmax06 ;;
+  (12)
+    fhmax=$fhmax12 ;;
+  (18)
+    fhmax=$fhmax18 ;;
+  (*)
+    echo
+    echo UNDEFINED CYCLE cyc=$cyc
+    echo
+    echo unmodified fhmax=$fhmax
+    ;;
 esac
 
 memberlist="c00"
@@ -62,13 +61,13 @@ if [[ ${RUNMEM:-none} = "geaer" ]]; then cplchm=".true."; fi
 export cplchm=${cplchm:-.false.}
 
 if [[ $cplchm = ".true." ]]; then
-	# Override forecast length
-	export fhmaxh=$fhmax_aer
-	export fhmax=$fhmax_aer
+  # Override forecast length
+  export fhmaxh=$fhmax_aer
+  export fhmax=$fhmax_aer
 
-	export AEROSOL_INIT_TYPE=${AEROSOL_INIT_TYPE:-"warm"}
+  export AEROSOL_INIT_TYPE=${AEROSOL_INIT_TYPE:-"warm"}
 
-	export cplwav=".false." # Running both chem and waves is not yet supported
+  export cplwav=".false." # Running both chem and waves is not yet supported
 fi
 
 export fhmax
@@ -80,8 +79,8 @@ export restart_interval_aer=${restart_interval_aer:-12}
 export other_restart_time=${other_restart_time:-6}
 
 if [[ $cplchm = ".true." ]]; then
-	export restart_interval=$restart_interval_aer
-	export other_restart_time=${other_restart_time:-$gefs_cych}
+  export restart_interval=$restart_interval_aer
+  export other_restart_time=${other_restart_time:-$gefs_cych}
 fi
 
 #pass these variables to gefs_wave.parm
