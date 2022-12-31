@@ -1,4 +1,4 @@
-#! /bin/ksh
+#! /usr/bin/env bash
 
 echo "$(date -u) begin ${.sh.file}"
 
@@ -20,11 +20,11 @@ export FIXgfs=$HOMEgfs/fix
 export FIX_DIR=$FIXgfs
 export FIX_AM=$FIX_DIR/am
 export FIXfv3=$FIX_DIR/orog
-export FIXemi=${FIXemi:-$HOMEgefs/fix/fix_emission/emi_}
-export SSTDIR=${SSTDIR:-$COMIN/atmos/cfssst}
+#export FIXemi=${FIXemi:-$HOMEgefs/fix/fix_emission/emi_}
+#export SSTDIR=${SSTDIR:-$COMIN/atmos/cfssst}
 
-export COMINWW3=${COMINWW3:-${COMIN}/wave}
-export COMOUTWW3=${COMOUTWW3:-${COMIN}/wave}
+export COMINwave=${COMINwave:-${COMIN}/wave}
+export COMOUTwave=${COMOUTwave:-${COMIN}/wave}
 export COMPONENTwave=${COMPONENTwave:-${RUN}.wave}
 
 export ERRSCRIPT=err_chk
