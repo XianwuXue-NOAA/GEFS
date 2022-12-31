@@ -140,6 +140,7 @@ fi
 cd $pwd
 if [[ -d global-workflow.fd ]] ; then
   for sFile in scripts/exglobal_forecast.sh \
+                ush/preamble.sh \
                 ush/cplvalidate.sh \
                 ush/forecast_predet.sh \
                 ush/forecast_det.sh \

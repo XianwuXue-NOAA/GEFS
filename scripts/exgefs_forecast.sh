@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-echo "$(date -u) begin ${.sh.file}"
+echo "$(date -u) begin ${BASH_SOURCE}"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
@@ -74,7 +74,7 @@ case $FORECAST_SEGMENT in
         export CDATE_RST=$($NDATE +$FHINI $PDY$cyc)
       fi
     else
-      echo "FATAL ERROR in ${.sh.file}: There is no $fRestart"
+      echo "FATAL ERROR in ${BASH_SOURCE}: There is no $fRestart"
       export err=101
       exit $err
     fi
@@ -87,7 +87,7 @@ case $FORECAST_SEGMENT in
     (( LEVS = LEVSLR + 1 ))
     ;;
   *)
-    echo "FATAL ERROR in ${.sh.file}: Incorrect value of FORECAST_SEGMENT=$FORECAST_SEGMENT"
+    echo "FATAL ERROR in ${BASH_SOURCE}: Incorrect value of FORECAST_SEGMENT=$FORECAST_SEGMENT"
     export err=100
     exit $err
     ;;
@@ -210,7 +210,7 @@ export NLN="/bin/ln -sf"
 
 export VERBOSE=YES
 
-#echo "-----end of CONFIG in ${.sh.file} --------"
+#echo "-----end of CONFIG in ${BASH_SOURCE} --------"
 
 ################################################################################
 export CDATE=$PDY$cyc
@@ -254,7 +254,7 @@ if [[ $cplchm = ".true." ]]; then
     echo "$msg" | mail.py -c $MAIL_LIST
     export EMITYPE=1
   else
-    echo "FATAL ERROR in ${.sh.file}: cplchm is .true. but smoke emissions are not available!"
+    echo "FATAL ERROR in ${BASH_SOURCE}: cplchm is .true. but smoke emissions are not available!"
     echo "  Check input directory $CHEMIN"
     export err=10
     exit $err
@@ -304,10 +304,10 @@ fi
 $FORECASTSH
 export err=$?
 if [[ $err != 0 ]]; then
-  echo "FATAL ERROR in ${.sh.file}: received a non-zero return code from $FORECASTSH"
+  echo "FATAL ERROR in ${BASH_SOURCE}: received a non-zero return code from $FORECASTSH"
   exit $err
 fi
 
-echo "$(date -u) end ${.sh.file}"
+echo "$(date -u) end ${BASH_SOURCE}"
 
 exit $err
