@@ -4,8 +4,8 @@ echo "$(date -u) begin ${BASH_SOURCE}"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
-	# Turn on strict bash error checking
-	set -eu
+  # Turn on strict bash error checking
+  set -eu
 fi
 export PS4='$SECONDS + $(basename ${BASH_SOURCE})[$LINENO] '
 
@@ -55,8 +55,8 @@ setpdy.sh
 source PDY
 
 if [ ${FORECAST_SEGMENT} = lr ]; then
-    export cyc=00
-    export cycle=t${cyc}z
+  export cyc=00
+  export cycle=t${cyc}z
 fi
 
 ####################################
@@ -83,23 +83,23 @@ export COMOUT=${COMOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDY}/$cyc}
 configs="gefs gefs_wave gefs_fcst"
 config_path=$PARMgefs
 for config in $configs; do
-    . $config_path/$config.parm
-    export err=$?
-    if [[ $err != 0 ]]; then
-    	echo "FATAL ERROR in ${BASH_SOURCE}: Error while loading parm file $config_path/$config.parm"
-    	exit $err
-    fi
+  . $config_path/$config.parm
+  export err=$?
+  if [[ $err != 0 ]]; then
+    echo "FATAL ERROR in ${BASH_SOURCE}: Error while loading parm file $config_path/$config.parm"
+    exit $err
+  fi
 done
 
 if [[ $cplchm = ".true." ]]; then
-    COMPONENT="chem"
+  COMPONENT="chem"
 fi
 if [[ $cplwav = ".true." ]]; then
-    # Set location of wave restart from last cycle
-    last_date=$($NDATE -$WAVHCYC $CDATE)
-    last_PDY=$(echo $last_date | cut -c1-8)
-    last_cyc=$(echo $last_date | cut -c9-10)
-    export WRDIR=${WRDIR:-$(compath.py $envir/com/$NET/${ver})}/${RUN}.${last_PDY}/$last_cyc/wave/restart
+  # Set location of wave restart from last cycle
+  last_date=$($NDATE -$WAVHCYC $CDATE)
+  last_PDY=$(echo $last_date | cut -c1-8)
+  last_cyc=$(echo $last_date | cut -c9-10)
+  export WRDIR=${WRDIR:-$(compath.py $envir/com/$NET/${ver})}/${RUN}.${last_PDY}/$last_cyc/wave/restart
 fi
 
 export COMPONENT=${COMPONENT:-atmos}
@@ -112,10 +112,10 @@ env | sort
 $HOMEgefs/scripts/exgefs_forecast.sh
 export err=$?
 if [[ $err == 0 ]]; then
-    echo "$job completed normally!"
+  echo "$job completed normally!"
 else
-    echo "FATAL ERROR in ${BASH_SOURCE}: $job failed!"
-    exit $err
+  echo "FATAL ERROR in ${BASH_SOURCE}: $job failed!"
+  exit $err
 fi
 #############################################################
 
