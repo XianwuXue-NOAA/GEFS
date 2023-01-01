@@ -9,6 +9,199 @@ export HOMEgfs=${HOMEgfs:-$HOMEgefs}
 export RERUN=${RERUN:-"NO"}
 export CDATE_RST=${CDATE_RST:-""}
 
+# ---config.fv3
+echo "BEGIN: config.fv3"
+
+case_in=$CASEHR
+if [[ $FORECAST_SEGMENT == "lr" ]]; then
+  case_in=$CASELR
+fi
+
+if [[ "${machine}" = "WCOSS2" ]]; then
+   export npe_node_max=128
+elif [[ "${machine}" = "JET" ]]; then
+   if [[ "${PARTITION_BATCH}" = "xjet" ]]; then
+     export npe_node_max=24
+   elif [[ "${PARTITION_BATCH}" = "vjet" || "${PARTITION_BATCH}" = "sjet" ]]; then
+     export npe_node_max=16
+   elif [[ "${PARTITION_BATCH}" = "kjet" ]]; then
+     export npe_node_max=40
+   fi
+elif [[ "${machine}" = "HERA" ]]; then
+   export npe_node_max=40
+elif [[ "${machine}" = "S4" ]]; then
+   if [[ "${PARTITION_BATCH}" = "s4" ]]; then
+      export npe_node_max=32
+   elif [[ "${PARTITION_BATCH}" = "ivy" ]]; then
+      export npe_node_max=20
+   fi
+elif [[ "${machine}" = "ORION" ]]; then
+   export npe_node_max=40
+fi
+
+# (Standard) Model resolution dependent variables
+case ${case_in} in
+    "C48")
+        export DELTIM=${DELTIM:-450}
+        export layout_x=${layout_x:-3}
+        export layout_y=${layout_y:-2}
+        # export layout_x_gfs=3
+        # export layout_y_gfs=2
+        export nth_fv3=${nth_fv3:-1}
+        # export nth_fv3_gfs=1
+        export cdmbgwd=${cdmbgwd:-"0.071,2.1,1.0,1.0"}  # mountain blocking, ogwd, cgwd, cgwd src scaling
+        export WRITE_GROUP=${WRITE_GROUP:-1}
+        export WRTTASK_PER_GROUP=${WRTTASK_PER_GROUP:-64}
+        #export WRITE_GROUP_GFS=${WRITE_GROUP_GFS:-1}
+        #export WRTTASK_PER_GROUP_GFS=64
+        export WRTIOBUF=${WRTIOBUF:-"1M"}
+        ;;
+    "C96")
+        export DELTIM=${DELTIM:-450}
+        export layout_x=${layout_x:-6}
+        export layout_y=${layout_y:-4}
+        #export layout_x_gfs=6
+        #export layout_y_gfs=4
+        export nth_fv3=${nth_fv3:-1}
+        #export nth_fv3_gfs=1
+        export cdmbgwd=${cdmbgwd:-"0.14,1.8,1.0,1.0"}  # mountain blocking, ogwd, cgwd, cgwd src scaling
+        export WRITE_GROUP=${WRITE_GROUP:-1}
+        export WRTTASK_PER_GROUP=${WRTTASK_PER_GROUP:-64}
+        #export WRITE_GROUP_GFS=1
+        #export WRTTASK_PER_GROUP_GFS=64
+        export WRTIOBUF=${WRTIOBUF:-"4M"}
+        export n_split=${n_split:-6}
+        ;;
+    "C192")
+        export DELTIM=${DELTIM:-450}
+        export layout_x=${layout_x:-4}
+        export layout_y=${layout_y:-6}
+        #export layout_x_gfs=4
+        #export layout_y_gfs=6
+        export nth_fv3=${nth_fv3:-1}
+        #export nth_fv3_gfs=2
+        export cdmbgwd=${cdmbgwd:-"0.23,1.5,1.0,1.0"}  # mountain blocking, ogwd, cgwd, cgwd src scaling
+        export WRITE_GROUP=${WRITE_GROUP:-1}
+        export WRTTASK_PER_GROUP=64
+        #export WRITE_GROUP_GFS=2
+        #export WRTTASK_PER_GROUP_GFS=64
+        export WRTIOBUF=${WRTIOBUF:-"8M"}
+        ;;
+    "C384")
+        export DELTIM=${DELTIM:-200}
+        export layout_x=${layout_x:-6}
+        export layout_y=${layout_y:-8}
+        #export layout_x_gfs=${layout_x_gfs:-8}
+        #export layout_y_gfs=${layout_y_gfs:-12}
+        export nth_fv3=${nth_fv3:-1}
+        #export nth_fv3_gfs=${nth_fv3_gfs:-2}
+        export cdmbgwd=${cdmbgwd:-"1.1,0.72,1.0,1.0"}  # mountain blocking, ogwd, cgwd, cgwd src scaling
+        export WRITE_GROUP=${WRITE_GROUP:-2}
+        export WRTTASK_PER_GROUP=${WRTTASK_PER_GROUP:-64}
+        #export WRITE_GROUP_GFS=${WRITE_GROUP_GFS:-2}
+        #export WRTTASK_PER_GROUP_GFS=${WRTTASK_PER_GROUP_GFS:-64}
+        export WRTIOBUF=${WRTIOBUF:-"16M"}
+        ;;
+    "C768")
+        export DELTIM=${DELTIM:-150}
+        export layout_x=${layout_x:-8}
+        export layout_y=${layout_y:-12}
+        #export layout_x_gfs=16
+        #export layout_y_gfs=12
+        export nth_fv3=${nth_fv3:-4}
+        #export nth_fv3_gfs=4
+        export cdmbgwd=${cdmbgwd:-"4.0,0.15,1.0,1.0"}  # mountain blocking, ogwd, cgwd, cgwd src scaling
+        export WRITE_GROUP=${WRITE_GROUP:-2}
+        export WRTTASK_PER_GROUP=${WRTTASK_PER_GROUP:-64}
+        #export WRITE_GROUP_GFS=4
+        #export WRTTASK_PER_GROUP_GFS=64
+        export WRTIOBUF=${WRTIOBUF:-"32M"}
+        ;;
+    *)
+        echo "grid ${case_in} not supported, ABORT!"
+        exit 1
+        ;;
+esac
+
+if [[ "${WRTTASK_PER_GROUP}" -gt "${npe_node_max}" ]]; then export WRTTASK_PER_GROUP=${npe_node_max} ; fi
+#if [[ "${WRTTASK_PER_GROUP_GFS}" -gt "${npe_node_max}" ]]; then export WRTTASK_PER_GROUP_GFS=${npe_node_max} ; fi
+
+# Calculate chunksize based on resolution
+export RESTILE=$(echo ${case_in} |cut -c2-)
+export ichunk2d=$((4*RESTILE))
+export jchunk2d=$((2*RESTILE))
+export ichunk3d=$((4*RESTILE))
+export jchunk3d=$((2*RESTILE))
+export kchunk3d=1
+
+# Determine whether to use parallel NetCDF based on resolution
+case ${case_in} in
+  "C48" | "C96" | "C192" | "C384")
+    export OUTPUT_FILETYPE_ATM="netcdf"
+    export OUTPUT_FILETYPE_SFC="netcdf"
+    ;;
+  "C768" | "C1152" | "C3072")
+    export OUTPUT_FILETYPE_ATM="netcdf_parallel"
+    export OUTPUT_FILETYPE_SFC="netcdf_parallel"
+    ;;
+esac
+
+echo "END: config.fv3"
+
+case "$case_in" in
+    "C48") export OCNRES=500;;
+    "C96") export OCNRES=100;;
+    "C192") export OCNRES=050;;
+    "C384") export OCNRES=025;;
+    "C768") export OCNRES=025;;
+    *) export OCNRES=025;;
+esac
+export ICERES=$OCNRES
+
+echo "BEGIN: config.fcst"
+# Turn off waves if not used for this CDUMP
+case $WAVE_CDUMP in
+  both | $CDUMP ) ;; # Don't change
+  *) DO_WAVE="NO" ;; # Turn waves off
+esac
+
+# Source component configs if necessary
+#for component in WAVE OCN ICE AERO; do
+#  control="DO_${component}"
+#  if [[ $(eval echo \$$control) == "YES" ]]; then
+#    . $EXPDIR/config.$(echo "$component" | awk '{ print tolower($1) }')
+#  fi
+#done
+
+# Get task specific resources
+#. $EXPDIR/config.resources fcst
+
+if [[ "${machine}" = "WCOSS2" ]]; then
+   export npe_node_max=128
+elif [[ "${machine}" = "JET" ]]; then
+   if [[ ${PARTITION_BATCH} = "xjet" ]]; then
+     export npe_node_max=24
+   elif [[ ${PARTITION_BATCH} = "vjet" || ${PARTITION_BATCH} = "sjet" ]]; then
+     export npe_node_max=16
+   elif [[ ${PARTITION_BATCH} = "kjet" ]]; then
+     export npe_node_max=40
+   fi
+elif [[ ${machine} = "HERA" ]]; then
+   export npe_node_max=40
+elif [[ ${machine} = "S4" ]]; then
+   if [[ ${PARTITION_BATCH} = "s4" ]]; then
+      export npe_node_max=32
+   elif [[ ${PARTITION_BATCH} = "ivy" ]]; then
+      export npe_node_max=20
+   fi
+elif [[ ${machine} = "ORION" ]]; then
+   export npe_node_max=40
+fi
+export domains_stack_size="16000000"
+
+export is_exclusive=True
+
+# org GEFS
 export DELTIM=$DELTIM
 if [[ $FORECAST_SEGMENT = lr ]]; then
   export DELTIM=$DELTIMLR
@@ -27,12 +220,12 @@ else
     layout_y=${layout_y:-6}
   fi
 fi
-export LEVS=${LEVS:-65}
+export LEVS=${LEVS:-128}
 
 export n_sponge=${n_sponge:-23}
 
-#Writing out 
-export QUILTING=.true.
+#Writing out
+#export QUILTING=.true.
 
 if [[ $FORECAST_SEGMENT = lr ]]; then
   export WRITE_GROUP=${WRITE_GROUP_lr:-1}
@@ -47,18 +240,46 @@ else
   fi
 fi
 export NUM_FILES=2
-export OUTPUT_GRID=${FV3OUT_GRID:-"gaussian_grid"}
+
 export WRITE_NEMSIOFILE=.true.
 export WRITE_NEMSIOFLIP=.true.
 # export LONB=$LONB
 # export LATB=$LATB
 export NSOUT=0
 
+#-----
+# I/O QUILTING, true--use Write Component; false--use GFDL FMS
+# if quilting=true, choose OUTPUT_GRID as cubed_sphere_grid in netcdf or gaussian_grid
+# if gaussian_grid, set OUTPUT_FILE for nemsio or netcdf
+# WRITE_DOPOST=true, use inline POST
+export QUILTING=".true."
+export OUTPUT_GRID=${FV3OUT_GRID:-"gaussian_grid"}
+export OUTPUT_FILE="netcdf"
+export WRITE_DOPOST=".true."
+export WRITE_NSFLIP=".true."
+
+if [ $OUTPUT_FILE = "nemsio" ]; then
+  export DO_CALC_INCREMENT="YES"
+  export DO_CALC_ANALYSIS="NO"
+fi
+
+# suffix options depending on file format
+if [ $OUTPUT_FILE = "netcdf" ]; then
+  export SUFFIX=".nc"
+  export NEMSIO_IN=".false."
+  export NETCDF_IN=".true."
+else
+  export SUFFIX=".nemsio"
+  export NEMSIO_IN=".true."
+  export NETCDF_IN=".false."
+fi
+#-----
+
 # CPU geopmetry
 export ntiles=${ntiles:-6}
-export NTASKS_FV3=$(( ${layout_x} * ${layout_y} * 6 + ${WRITE_GROUP} * ${WRTTASK_PER_GROUP} ))
-export npe_fv3=$NTASKS_FV3
-export npe_node_max
+#export NTASKS_FV3=$(( ${layout_x} * ${layout_y} * 6 + ${WRITE_GROUP} * ${WRTTASK_PER_GROUP} ))
+#export npe_fv3=$NTASKS_FV3
+#export npe_node_max
 
 #PE geometry
 export hyperthread=${hyperthread:-".false."}
@@ -73,6 +294,135 @@ else
 fi
 COREPERNODE=${COREPERNODE:-128}
 export cores_per_node=$COREPERNODE
+
+# ---resources - fcst --\/\/
+(( ATMPETS = layout_x * layout_y * 6 ))
+
+# Mediator only uses the atm model PETS or less
+export MEDPETS=${MEDPETS:-ATMPETS}
+
+if [[ ${DO_AERO} == "YES" ]]; then
+  # Aerosol model only uses the atm model PETS
+  export CHMPETS=${ATMPETS}
+  # Aerosol model runs on same PETs as ATM, so don't add to $NTASKS_TOT
+
+  if [[ ${machine} == "HERA" ]]; then
+    # Need more memory on Hera for aerosols, so increase threads to spread it out
+    nth_fv3_gfs=${nth_fv3_gfs:-4}
+  fi
+fi
+
+# If using in-line post, add the write tasks to the ATMPETS
+if [[ ${QUILTING} == ".true." ]]; then
+    (( ATMPETS = ATMPETS + WRITE_GROUP * WRTTASK_PER_GROUP ))
+fi
+export ATMPETS
+NTASKS_TOT=${ATMPETS}
+
+export nth_fcst=${nth_fv3:-2}
+#export nth_fcst_gfs=${nth_fv3_gfs:-2}
+
+export npe_node_fcst=$(echo "${npe_node_max} / ${nth_fcst}" | bc)
+#export npe_node_fcst_gfs=$(echo "${npe_node_max} / ${nth_fcst_gfs}" | bc)
+
+if [[ ${DO_WAVE} == "YES" ]]; then
+  case ${waveGRD} in
+    'gnh_10m aoc_9km gsh_15m') export WAVPETS=140 ;;
+    'gwes_30m') export WAVPETS=100 ;;
+    'mx050') export WAVPETS=240 ;;
+    'mx025') export WAVPETS=80 ;;
+    *)
+      echo "FATAL: Number of PEs not defined for wave grid '${waveGRD}'"
+      echo "  Please add an entry to config.resources within fcst for this grid"
+      exit 3
+  esac
+  (( NTASKS_TOT = NTASKS_TOT + WAVPETS ))
+fi
+
+if [[ ${DO_OCN} == "YES" ]]; then
+  case ${OCNRES} in
+    # Except for 025, these are guesses for now
+    100) export OCNPETS=20 ;;
+    050) export OCNPETS=60 ;;
+    025) export OCNPETS=220 ;;
+    *)
+      echo "FATAL: Number of PEs not defined for ocean resolution ${OCNRES}"
+      echo "  Please add an entry to config.resources within fcst for this resolution"
+      exit 3
+  esac
+  (( NTASKS_TOT = NTASKS_TOT + OCNPETS ))
+fi
+
+if [[ ${DO_ICE} == "YES" ]]; then
+  case ${ICERES} in
+    # Except for 025, these are guesses for now
+    100) export ICEPETS=10 ;;
+    050) export ICEPETS=30 ;;
+    025) export ICEPETS=120 ;;
+    *)
+      echo "FATAL: Number of PEs not defined for ice resolution ${ICERES}"
+      echo "  Please add an entry to config.resources within fcst for this resolution"
+      exit 3
+  esac
+  (( NTASKS_TOT = NTASKS_TOT + ICEPETS ))
+fi
+
+if [[ ${CDUMP} == "gfs" ]]; then
+  export npe_fcst_gfs=${NTASKS_TOT}
+else
+  export npe_fcst=${NTASKS_TOT}
+fi
+
+# ---resources - fcst --/\/\
+
+# config.fcst
+
+#if [[ "$DONST" = "YES" ]]; then
+#    . $EXPDIR/config.nsst
+#fi
+
+export esmf_profile=".false."
+export esmf_logkind="ESMF_LOGKIND_MULTI_ON_ERROR" #Options: ESMF_LOGKIND_MULTI_ON_ERROR, ESMF_LOGKIND_MULTI, ESMF_LOGKIND_NONE
+
+#######################################################################
+# COUPLING COMPONENTS
+export OCN_model="mom6"
+export ICE_model="cice6"
+export WAV_model="ww3"
+export CHM_model="gocart"
+
+# cpl defaults
+
+export cpl=".false."
+export cplflx=".false."
+export cplice=".false."
+export cplchm=".false."
+export cplwav=".false."
+
+# cpl changes based on APP
+
+if [[ "$DO_COUPLED" = "YES" ]]; then
+  export cpl=".true."
+fi
+if [[ "$DO_AERO" = "YES" ]]; then
+  export cplchm=".true."
+fi
+if [[ "$DO_ICE" = "YES" ]]; then
+  export cplice=".true."
+  export cplflx=".true."
+fi
+if [[ "$DO_OCN" = "YES" ]]; then
+  export cplflx=".true."
+fi
+if [[ "$DO_WAVE" = "YES" ]]; then
+  export cplwav=".true."
+fi
+
+#######################################################################
+# COUPLING COMPONENTS
+export use_coldstart=".false."
+
+# ---
 
 #FV dynamics parameters
 export TYPE=${TYPE:-"nh"}    # choices:  nh, hydro
@@ -90,6 +440,100 @@ export warm_start=${warm_start:-".false."}
 export read_increment=${read_increment:-".false."}
 REMAP_GRID=none     # temporay setting, to void the latlon default
 export REMAP_GRID=${REMAP_GRID:-latlon}        #gaussian or latlon for using fregrid or regrid_nemsio for remapping
+
+# --- config.fcst
+# Options of stratosphere O3 physics reaction coefficients
+export new_o3forc="YES"
+
+export gwd_opt=2
+
+# --GFS.v16 uGWD.v0, used for suite FV3_GFS_v16 and UFS p6 etc
+# do_ugwp=T: use unified CGWD and OGWD, and turbulent orographic form drag (TOFD)
+# do_ugwp=F: use unified CGWD but old OGWD, TOFD is not uded.
+if [[ "$gwd_opt" -eq 1 ]]; then
+    export knob_ugwp_version=0
+    export do_ugwp=".false."
+    export do_tofd=".false."
+    export launch_level=$(echo "$LEVS/2.35" |bc)
+fi
+
+# -- uGWD.v1, for suite FV3_GFS_v17 and FV3_GFS_v17p8b etc
+if [[ "$gwd_opt" -eq 2 ]]; then
+
+    #--used for UFS p7 and p8a
+    #export  knob_ugwp_version=1
+    #export  do_ugwp=".false."
+    #export  do_tofd=".false."
+    #export  do_ugwp_v0=".false."
+    #export  do_ugwp_v1=".true."
+    #export  do_ugwp_v0_orog_only=".false."
+    #export  do_ugwp_v0_nst_only=".false."
+    #export  do_gsl_drag_ls_bl=".true."
+    #export  do_gsl_drag_ss=".true."
+    #export  do_gsl_drag_tofd=".true."
+    #export  do_ugwp_v1_orog_only=".false."
+
+    #--used for UFS p8
+    export knob_ugwp_version=0
+    export do_ugwp=".false."
+    export do_tofd=".false."
+    export do_ugwp_v0=".true."
+    export do_ugwp_v1=".false."
+    export do_ugwp_v0_orog_only=".false."
+    export do_ugwp_v0_nst_only=".false."
+    export do_gsl_drag_ls_bl=".false."
+    export do_gsl_drag_ss=".true."
+    export do_gsl_drag_tofd=".false."
+    export do_ugwp_v1_orog_only=".false."
+    export launch_level=$(echo "$LEVS/2.35" |bc)
+fi
+
+# Sponge layer settings
+export tau=10.0
+export rf_cutoff=7.5e2
+export d2_bg_k1=0.20
+export d2_bg_k2=0.04
+export dz_min=6
+export n_sponge=42
+if [[ "$LEVS" = "128" && "$CDUMP" = "gdas" ]]; then
+   export tau=5.0
+   export rf_cutoff=1.0e3
+   export d2_bg_k1=0.20
+   export d2_bg_k2=0.0
+fi
+
+# PBL/turbulance schemes
+export hybedmf=".false."
+export satmedmf=".true."
+export isatmedmf=1
+tbf=""
+if [[ "$satmedmf" = ".true." ]]; then tbf="_satmedmf" ; fi
+
+# Radiation options
+export IAER=1011    ; #spectral band mapping method for aerosol optical properties
+export iovr_lw=3    ; #de-correlation length cloud overlap method (Barker, 2008)
+export iovr_sw=3    ; #de-correlation length cloud overlap method (Barker, 2008)
+export iovr=3       ; #de-correlation length cloud overlap method (Barker, 2008)
+export icliq_sw=2   ; #cloud optical coeffs from AER's newer version v3.9-v4.0 for hu and stamnes
+export isubc_sw=2
+export isubc_lw=2
+
+# RRTMGP radiation scheme
+export  do_RRTMGP=.false.
+export  doGP_cldoptics_LUT=.false.
+export  doGP_lwscat=.false.
+
+# LSM configuration
+# NoahMP only
+export iopt_sfc="3"
+export iopt_trs="2"
+
+# Microphysics configuration
+export dnats=0
+export cal_pre=".true."
+export do_sat_adj=".false."
+export random_clds=".true."
+# --- config.fcst
 
 # set fixed k_split and n_split for dt=450s and 300s
 if [[ $DELTIM = 450 ]]; then
@@ -125,57 +569,97 @@ if [[ $cplchm = ".true." ]]; then
   export USE_COUPLER_RES="YES"
 fi
 
-#gfs_physics
-export FHZERO=${FHZER:-6}
-export idiag3d=
-export FHCYC=${FHCYC:-24}
-export USE_UFO=.true.
-export PRE_RAD=.false.
-export ncld=${NCLD:-5}
-export do_sat_adj=${DO_SAT_ADJ:-".true."}
-export zhao_mic=${ZHAO_MIC:-".false."}
-export PDFCLD=${PDFCLD:-".false."}
-export FHLWR=3600.      # LW radiation calling interval (hrs)
-export FHSWR=3600.      # SW radiation calling interval (hrs)
-export ialb=1          # 0: climatology sw albedo based on surface veg types;
-                       # 1: MODIS based land surface albedo
-export IEMS=1          # 0-blackbody ground emission; 1-climatology on one-deg map
-export IAER=111        # 111--with stratospheric aerosol, tropospheric aerosol LW, troposphere aerosol SW.
-export ICO2=2          # 0--fixed CO2 constant; 1--time varying global mean CO2; 2--changing CO2
-export ISUBC_LW=2
-export ISUBC_SW=2
-export ISOL=2          # 0--fixed solar constant; 1--changing solar constant
-export lwhtr=${lwhtr:-".true."}
-export swhtr=${swhtr:-".true."}
+##gfs_physics
+#export FHZERO=${FHZER:-6}
+#export idiag3d=
+#export FHCYC=${FHCYC:-24}
+#export USE_UFO=.true.
+#export PRE_RAD=.false.
+#export ncld=${NCLD:-5}
+#export do_sat_adj=${DO_SAT_ADJ:-".true."}
+#export zhao_mic=${ZHAO_MIC:-".false."}
+#export PDFCLD=${PDFCLD:-".false."}
+#export FHLWR=3600.      # LW radiation calling interval (hrs)
+#export FHSWR=3600.      # SW radiation calling interval (hrs)
+#export ialb=1          # 0: climatology sw albedo based on surface veg types;
+#                       # 1: MODIS based land surface albedo
+#export IEMS=1          # 0-blackbody ground emission; 1-climatology on one-deg map
+#export IAER=111        # 111--with stratospheric aerosol, tropospheric aerosol LW, troposphere aerosol SW.
+#export ICO2=2          # 0--fixed CO2 constant; 1--time varying global mean CO2; 2--changing CO2
+#export ISUBC_LW=2
+#export ISUBC_SW=2
+#export ISOL=2          # 0--fixed solar constant; 1--changing solar constant
+#export lwhtr=${lwhtr:-".true."}
+#export swhtr=${swhtr:-".true."}
+#
+#export CNVGWD=.true.
+#export shal_cnv=.true.
+#export cal_pre=.false.
+#export REDRAG=.true.
+#export DSPHEAT=.true.
+#export HYBEDMF=.true.
+#export lheatstrg=.false.
+#
+#export random_clds=.false.
+#export trans_trac=.true.
+#
+##export cnvcld=.false.
+#export NVCLD=.false.
+#export imfshalcnv=2
+#export imfdeepcnv=2
+#export cdmbgwd=1.0,1.2
+#export prslrd0=
+#export ivegsrc=
+#export isot=
+#export debug=${gfs_phys_debug:-".false."}
+#export nst_anl=${nst_anl:-".true."}
+#export nstf_name=${nstf_name:-"2,0,0,0,0"}
+#export psautco=${psautco:-"0.0008,0.0005"}
+#export prautco=${prautco:-"0.00015,0.00015"}
+#export lgfdlmprad=.true.
+#export effr_in=.true.
 
-export CNVGWD=.true.
-export shal_cnv=.true.
-export cal_pre=.false.
-export REDRAG=.true.
-export DSPHEAT=.true.
-export HYBEDMF=.true.
-export lheatstrg=.false.
+# Sponge layer settings
+export tau=10.0
+export rf_cutoff=7.5e2
+export d2_bg_k1=0.20
+export d2_bg_k2=0.04
+export dz_min=6
+export n_sponge=42
+if [[ "$LEVS" = "128" && "$CDUMP" = "gdas" ]]; then
+   export tau=5.0
+   export rf_cutoff=1.0e3
+   export d2_bg_k1=0.20
+   export d2_bg_k2=0.0
+fi
 
-export random_clds=.false.
-export trans_trac=.true.
+# PBL/turbulance schemes
+export hybedmf=".false."
+export satmedmf=".true."
+export isatmedmf=1
+tbf=""
+if [[ "$satmedmf" = ".true." ]]; then tbf="_satmedmf" ; fi
 
-export cnvcld=.false.
-export NVCLD=.false.
-export imfshalcnv=2
-export imfdeepcnv=2
-export cdmbgwd=1.0,1.2 
-export prslrd0=
-export ivegsrc=
-export isot=
-export debug=${gfs_phys_debug:-".false."}
-export nst_anl=${nst_anl:-".true."}
-export nstf_name=${nstf_name:-"2,0,0,0,0"}
-export psautco=${psautco:-"0.0008,0.0005"}
-export prautco=${prautco:-"0.00015,0.00015"}
-export lgfdlmprad=.true.
-export effr_in=.true.
+# Radiation options
+export IAER=1011    ; #spectral band mapping method for aerosol optical properties
+export iovr_lw=3    ; #de-correlation length cloud overlap method (Barker, 2008)
+export iovr_sw=3    ; #de-correlation length cloud overlap method (Barker, 2008)
+export iovr=3       ; #de-correlation length cloud overlap method (Barker, 2008)
+export icliq_sw=2   ; #cloud optical coeffs from AER's newer version v3.9-v4.0 for hu and stamnes
+export isubc_sw=2
+export isubc_lw=2
 
-#FV3 imp_microphysics
+# RRTMGP radiation scheme
+export  do_RRTMGP=.false.
+export  doGP_cldoptics_LUT=.false.
+export  doGP_lwscat=.false.
+
+# LSM configuration
+# NoahMP only
+export iopt_sfc="3"
+export iopt_trs="2"
+
+# Microphysics configuration
 export dnats=0
 export cal_pre=".true."
 export do_sat_adj=".false."
@@ -218,6 +702,62 @@ else
   echo "Unknown microphysics option, ABORT!"
 fi
 
+if [[ "$imp_physics" -eq 99 ]]; then # ZhaoCarr
+  export ncld=1
+  export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/field_table_zhaocarr${tbf}"
+  export nwat=2
+
+elif [[ "$imp_physics" -eq 6 ]]; then # WSM6
+  export ncld=2
+  export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/field_table_wsm6${tbf}"
+  export nwat=6
+
+elif [[ "$imp_physics" -eq 8 ]]; then # Thompson
+  export ncld=2
+  export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/field_table_thompson_noaero_tke"
+  export nwat=6
+
+  export cal_pre=".false."
+  export random_clds=".false."
+  export effr_in=".true."
+  export ltaerosol=".false."
+  export lradar=".false."
+  export ttendlim="-999"
+  export dt_inner=$((DELTIM/2))
+  export sedi_semi=.true.
+  if [[ "$sedi_semi" = .true. ]]; then export dt_inner=$DELTIM ; fi
+  export decfl=10
+
+  export hord_mt_nh_nonmono=5
+  export hord_xx_nh_nonmono=5
+  export vtdm4_nh_nonmono=0.02
+  export nord=2
+  export dddmp=0.1
+  export d4_bg=0.12
+elif [[ "$imp_physics" -eq 11 ]]; then # GFDL
+  export ncld=5
+  export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/field_table_gfdl${tbf}"
+  export nwat=6
+  export dnats=1
+  export cal_pre=".false."
+  export do_sat_adj=".true."
+  export random_clds=".false."
+  export lgfdlmprad=".true."
+  export effr_in=".true."
+  export reiflag=2
+
+  export hord_mt_nh_nonmono=5
+  export hord_xx_nh_nonmono=5
+  export vtdm4_nh_nonmono=0.02
+  export nord=2
+  export d4_bg=0.12
+  export dddmp=0.1
+
+else
+  echo "Unknown microphysics option, ABORT!"
+
+fi
+
 #Use STTP or SPPT
 export ENS_SPS=${ENS_SPS:-.false.}
 
@@ -251,51 +791,146 @@ if [[ $RUNMEM = "gec00" || $RUNMEM = "geaer" ]]; then
   export DO_OCN_PERT_EPBL="NO"
 fi # [[ $RUNMEM = "gec00" || $RUNMEM = "geaer" ]]
 
-# Stochastically Perturbed Physics Tendency
-if [[ $DO_SPPT = YES ]]; then
-  export SPPT_hr=${SPPT_hr:-"0.8,0.4,0.2,0.08,0.04"}                                 # Amplitude of SPPT patterns
-  export SPPT_LOGIT_hr=${SPPT_LOGIT_hr:-.TRUE.}                                      # Do a logit transform to bound values from -1.0 to 1.0
-  export SPPT_TAU_hr=${SPPT_TAU_hr:-"2.16E4,2.592E5,2.592E6,7.776E6,3.1536E7"}       # Time scale in seconds
-  export SPPT_LSCALE_hr=${SPPT_LSCALE_hr:-"500.E3,1000.E3,2000.E3,2000.E3,2000.E3"}  # Length Scale in meters
-  export sppt_sfclimit_hr=${sppt_sfclimit_hr:-.true.}                                # damp amplitude of SPPT at surface
-  export ISEED_SPPT_hr=${ISEED_SPPT_hr:-$((CDATE*1000 + MEMBER*10 + 3)),$((CDATE*1000 + MEMBER*10 + 4)),$((CDATE*1000 + MEMBER*10 + 5)),$((CDATE*1000 + MEMBER*10 + 6)),$((CDATE*1000 + MEMBER*10 + 7))} # random seed for sppt pattern
-#  export sppt_sigtop1_hr=${sppt_sigtop1_hr:-0.1}                                     # taper SPPT pattern to zero between 0.1 and 0.025 sigma
-#  export sppt_sigtop2_hr=${sppt_sigtop2_hr:-0.025}
-
-  export SPPT_hr="-999.,-999.,-999,-999,-999"
-fi
-
-# Stochastic Humidity
-
-if [[ $DO_SHUM = YES ]]; then
-  export SHUM_hr=${SHUM_hr:-"0.004,-999.,-999.,-999,-999"}                           # Amplitude of SHUM patterns
-  export SHUM_TAU_hr=${SHUM_TAU_hr:-"2.16E4,1.728E5,6.912E5,7.776E6,3.1536E7"}       # Time scale in seconds
-  export SHUM_LSCALE_hr=${SHUM_LSCALE_hr:-"500.E3,1000.E3,2000.E3,2000.E3,2000.E3"}  # Length Scale in meters
-  export ISEED_SHUM_hr=${ISEED_SHUM_hr:-$((CDATE*1000 + MEMBER*10 + 2))}             # random seed for SHUM pattern
-#  export shum_sigefold_hr=${shum_sigefold_hr:-0.2}                                   # limit SHUM to the PBL (~bottom 200 mb)
-
-else
-  export SHUM_hr="-999.,-999.,-999,-999,-999"
-fi
-
-# Stochastic Kinetic Energy Backscatter
-
-if [[ $DO_SKEB = YES ]]; then
-  export SKEB_hr=${SKEB_hr:-"0.6,-999,-999,-999,-999"}                               # Amplitude of SPPT patterns
-  export ISEED_SKEB_hr=${ISEED_SKEB_hr:-$((CDATE*1000 + MEMBER*10 + 1))}             # Seed for SKEB pattern
-  export SKEB_TAU_hr=${SKEB_TAU_hr:-"2.16E4,1.728E5,2.592E6,7.776E6,3.1536E7"}       # Time scale in seconds
-  export SKEB_LSCALE_hr=${SKEB_LSCALE_hr:-"500.E3,1000.E3,2000.E3,2000.E3,2000.E3"}  # Length Scale in meters
-  export SKEBNORM=${SKEBNORM:-1}
-
-#  export SKEB_VFILT_hr=${SKEB_VFILT_hr:-40}                                          # number of iterations of a 1-2-1 filter of the random pattern in the vertical
-#  export SKEB_DISS_SMOOTH_hr=${SKEB_DISS_SMOOTH_hr:-12}                              # number of iterations of smoothing the dissipation estimate in the horizontal
-#  export skeb_sigtop1_hr=${skeb_sigtop1_hr:-0.1}                                     # taper SKEB pattern to zero between 0.1 and 0.025 sigma
-#  export skeb_sigtop2_hr=${skeb_sigtop2_hr:-0.025}
-else
-  export SKEB_hr="-999.,-999.,-999,-999,-999"
-fi
+## Stochastically Perturbed Physics Tendency
+#if [[ $DO_SPPT = YES ]]; then
+#  export SPPT_hr=${SPPT_hr:-"0.8,0.4,0.2,0.08,0.04"}                                 # Amplitude of SPPT patterns
+#  export SPPT_LOGIT_hr=${SPPT_LOGIT_hr:-.TRUE.}                                      # Do a logit transform to bound values from -1.0 to 1.0
+#  export SPPT_TAU_hr=${SPPT_TAU_hr:-"2.16E4,2.592E5,2.592E6,7.776E6,3.1536E7"}       # Time scale in seconds
+#  export SPPT_LSCALE_hr=${SPPT_LSCALE_hr:-"500.E3,1000.E3,2000.E3,2000.E3,2000.E3"}  # Length Scale in meters
+#  export sppt_sfclimit_hr=${sppt_sfclimit_hr:-.true.}                                # damp amplitude of SPPT at surface
+#  export ISEED_SPPT_hr=${ISEED_SPPT_hr:-$((CDATE*1000 + MEMBER*10 + 3)),$((CDATE*1000 + MEMBER*10 + 4)),$((CDATE*1000 + MEMBER*10 + 5)),$((CDATE*1000 + MEMBER*10 + 6)),$((CDATE*1000 + MEMBER*10 + 7))} # random seed for sppt pattern
+##  export sppt_sigtop1_hr=${sppt_sigtop1_hr:-0.1}                                     # taper SPPT pattern to zero between 0.1 and 0.025 sigma
+##  export sppt_sigtop2_hr=${sppt_sigtop2_hr:-0.025}
+#
+#  export SPPT_hr="-999.,-999.,-999,-999,-999"
+#fi
+#
+## Stochastic Humidity
+#
+#if [[ $DO_SHUM = YES ]]; then
+#  export SHUM_hr=${SHUM_hr:-"0.004,-999.,-999.,-999,-999"}                           # Amplitude of SHUM patterns
+#  export SHUM_TAU_hr=${SHUM_TAU_hr:-"2.16E4,1.728E5,6.912E5,7.776E6,3.1536E7"}       # Time scale in seconds
+#  export SHUM_LSCALE_hr=${SHUM_LSCALE_hr:-"500.E3,1000.E3,2000.E3,2000.E3,2000.E3"}  # Length Scale in meters
+#  export ISEED_SHUM_hr=${ISEED_SHUM_hr:-$((CDATE*1000 + MEMBER*10 + 2))}             # random seed for SHUM pattern
+##  export shum_sigefold_hr=${shum_sigefold_hr:-0.2}                                   # limit SHUM to the PBL (~bottom 200 mb)
+#
+#else
+#  export SHUM_hr="-999.,-999.,-999,-999,-999"
+#fi
+#
+## Stochastic Kinetic Energy Backscatter
+#
+#if [[ $DO_SKEB = YES ]]; then
+#  export SKEB_hr=${SKEB_hr:-"0.6,-999,-999,-999,-999"}                               # Amplitude of SPPT patterns
+#  export ISEED_SKEB_hr=${ISEED_SKEB_hr:-$((CDATE*1000 + MEMBER*10 + 1))}             # Seed for SKEB pattern
+#  export SKEB_TAU_hr=${SKEB_TAU_hr:-"2.16E4,1.728E5,2.592E6,7.776E6,3.1536E7"}       # Time scale in seconds
+#  export SKEB_LSCALE_hr=${SKEB_LSCALE_hr:-"500.E3,1000.E3,2000.E3,2000.E3,2000.E3"}  # Length Scale in meters
+#  export SKEBNORM=${SKEBNORM:-1}
+#
+##  export SKEB_VFILT_hr=${SKEB_VFILT_hr:-40}                                          # number of iterations of a 1-2-1 filter of the random pattern in the vertical
+##  export SKEB_DISS_SMOOTH_hr=${SKEB_DISS_SMOOTH_hr:-12}                              # number of iterations of smoothing the dissipation estimate in the horizontal
+##  export skeb_sigtop1_hr=${skeb_sigtop1_hr:-0.1}                                     # taper SKEB pattern to zero between 0.1 and 0.025 sigma
+##  export skeb_sigtop2_hr=${skeb_sigtop2_hr:-0.025}
+#else
+#  export SKEB_hr="-999.,-999.,-999,-999,-999"
+#fi
 
 ########################################
 # End stochastic physics parameters
 ########################################
 
+
+########################################
+# Start coupling settings
+########################################
+export cplmode="nems_frac"
+if [[ "${FRAC_GRID:-".true."}" = ".false." ]]; then
+  export cplmode="nems_orig"
+fi
+export psm_bc="1"
+
+export min_lakeice="0.15"
+export min_seaice=${min_seaice:-"0.15"}
+export use_cice_alb=${use_cice_alb:-".false."}
+
+export FSICL="0"
+export FSICS="0"
+
+#---------------------------------------------------------------------
+
+# ideflate: netcdf zlib lossless compression (0-9): 0 no compression
+# nbits: netcdf lossy compression level (0-32): 0 lossless
+export ideflate=1
+export nbits=14
+export ishuffle=0
+# compression for RESTART files written by FMS
+export shuffle=1
+export deflate_level=1
+
+#---------------------------------------------------------------------
+# Disable the use of coupler.res; get model start time from model_configure
+export USE_COUPLER_RES="NO"
+
+# Write more variables to output
+if [[ "$QUILTING" = ".true." && $OUTPUT_GRID = "gaussian_grid" ]]; then
+  export DIAG_TABLE="$HOMEgfs/parm/parm_fv3diag/diag_table"
+else
+  export DIAG_TABLE="$HOMEgfs/parm/parm_fv3diag/diag_table_orig"
+fi
+
+# Write gfs restart files to rerun fcst from any break point
+export restart_interval=${restart_interval:-0}
+if [[ "$restart_interval" -le 0 ]]; then
+  export restart_interval="$FHMAX"
+else
+  rst_list=""
+  IAU_OFFSET=${IAU_OFFSET:-0}
+  [[ $DOIAU = "NO" ]] && export IAU_OFFSET=0
+  xfh=$((restart_interval+(IAU_OFFSET/2)))
+  while [ $xfh -le $FHMAX ]; do
+    rst_list="$rst_list $xfh"
+    xfh=$((xfh+restart_interval))
+  done
+  export restart_interval="$rst_list"
+fi
+
+if [[ "$DO_AERO" = "YES" ]]; then
+  # Make sure a restart file is written at the cadence time
+  if [[ ! "${restart_interval[*]}" =~ "$STEP_GFS"  ]]; then
+    export restart_interval="$STEP_GFS $restart_interval"
+  fi
+fi
+
+# Choose coupling with wave
+if [[ "$DO_WAVE" = "YES" && "$WAVE_CDUMP" != "gdas" ]]; then
+  export cplwav=".true."
+fi
+
+# Turn off dry mass adjustment in GFS
+export adjust_dry_mass=".false."
+
+# Write each restart file in 16 small files to save time
+if [[ "$CASE" = C768 ]]; then
+  export io_layout="4,4"
+else
+  export io_layout="1,1"
+fi
+
+if [[ "$DO_COUPLED" = "YES" ]] ; then # coupled model
+    export DIAG_TABLE="$HOMEgfs/parm/parm_fv3diag/diag_table_cpl"
+fi
+
+if [[ "$DO_AERO" = "YES" ]]; then # temporary settings for aerosol coupling
+  export AERO_DIAG_TABLE="${AERO_DIAG_TABLE:-$HOMEgfs/parm/parm_fv3diag/diag_table.aero}"
+  export AERO_FIELD_TABLE="${AERO_FIELD_TABLE:-$HOMEgfs/parm/parm_fv3diag/field_table.aero}"
+  export AERO_EMIS_FIRE=$( echo "${AERO_EMIS_FIRE:-none}" | awk '{ print tolower($1) }' )
+  export AERO_CONFIG_DIR="${AERO_CONFIG_DIR:-$HOMEgfs/parm/chem}"
+  export AERO_INPUTS_DIR="${AERO_INPUTS_DIR:-}"
+  export fscav_aero="${aero_conv_scav_factors:-${fscav_aero}}"
+  export dnats_aero="${aero_diag_tracers:-0}"
+fi
+
+
+########################################
+# End coupling settings
+########################################
