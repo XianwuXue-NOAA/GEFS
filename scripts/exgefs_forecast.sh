@@ -214,8 +214,8 @@ export VERBOSE=YES
 
 ################################################################################
 export CDATE=$PDY$cyc
-export rCDUMP=$RUNMEM
-export CDUMP=$RUNMEM
+export rCDUMP=gefs #$RUNMEM
+export CDUMP=gefs #$RUNMEM
 
 if [[ $cplwav = ".true." ]]; then
   # CPU partitioning

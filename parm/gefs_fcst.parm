@@ -160,10 +160,10 @@ export ICERES=$OCNRES
 
 echo "BEGIN: config.fcst"
 # Turn off waves if not used for this CDUMP
-case $WAVE_CDUMP in
-  both | $CDUMP ) ;; # Don't change
-  *) DO_WAVE="NO" ;; # Turn waves off
-esac
+#case $WAVE_CDUMP in
+#  both | $CDUMP ) ;; # Don't change
+#  *) DO_WAVE="NO" ;; # Turn waves off
+#esac
 
 # Source component configs if necessary
 #for component in WAVE OCN ICE AERO; do
@@ -197,6 +197,36 @@ elif [[ ${machine} = "S4" ]]; then
 elif [[ ${machine} = "ORION" ]]; then
    export npe_node_max=40
 fi
+
+echo "BEGIN: config.nsst" #-------------
+
+# NSST parameters contained within nstf_name
+
+# nstf_name(1) : NST_MODEL (NSST Model) : 0 = OFF, 1 = ON but uncoupled, 2 = ON and coupled
+export NST_MODEL=2
+
+# nstf_name(2) : NST_SPINUP : 0 = OFF, 1 = ON,
+export NST_SPINUP=0
+if [[ "$CDATE" -lt "2017072000" ]]; then
+    export NST_SPINUP=1
+fi
+
+# nstf_name(3) : NST_RESV (Reserved, NSST Analysis) : 0 = OFF, 1 = ON
+export NST_RESV=0
+
+# nstf_name(4,5) : ZSEA1, ZSEA2 the two depths to apply vertical average (bias correction)
+export ZSEA1=0
+export ZSEA2=0
+
+export NST_GSI=3          # default 0: No NST info at all;
+                          #         1: Input NST info but not used in GSI;
+                          #         2: Input NST info, used in CRTM simulation, no Tr analysis
+                          #         3: Input NST info, used in both CRTM simulation and Tr analysis
+export NSTINFO=0          # number of elements added in obs. data array (default = 0)
+if [ $NST_GSI -gt 0 ]; then export NSTINFO=4; fi
+
+echo "END: config.nsst" #-------------
+
 export domains_stack_size="16000000"
 
 export is_exclusive=True
@@ -367,11 +397,7 @@ if [[ ${DO_ICE} == "YES" ]]; then
   (( NTASKS_TOT = NTASKS_TOT + ICEPETS ))
 fi
 
-if [[ ${CDUMP} == "gfs" ]]; then
-  export npe_fcst_gfs=${NTASKS_TOT}
-else
-  export npe_fcst=${NTASKS_TOT}
-fi
+export npe_fcst=${NTASKS_TOT}
 
 # ---resources - fcst --/\/\
 
@@ -495,12 +521,6 @@ export d2_bg_k1=0.20
 export d2_bg_k2=0.04
 export dz_min=6
 export n_sponge=42
-if [[ "$LEVS" = "128" && "$CDUMP" = "gdas" ]]; then
-   export tau=5.0
-   export rf_cutoff=1.0e3
-   export d2_bg_k1=0.20
-   export d2_bg_k2=0.0
-fi
 
 # PBL/turbulance schemes
 export hybedmf=".false."
@@ -572,7 +592,7 @@ fi
 ##gfs_physics
 #export FHZERO=${FHZER:-6}
 #export idiag3d=
-#export FHCYC=${FHCYC:-24}
+export FHCYC=${FHCYC:-24}
 #export USE_UFO=.true.
 #export PRE_RAD=.false.
 #export ncld=${NCLD:-5}
@@ -619,51 +639,6 @@ fi
 #export lgfdlmprad=.true.
 #export effr_in=.true.
 
-# Sponge layer settings
-export tau=10.0
-export rf_cutoff=7.5e2
-export d2_bg_k1=0.20
-export d2_bg_k2=0.04
-export dz_min=6
-export n_sponge=42
-if [[ "$LEVS" = "128" && "$CDUMP" = "gdas" ]]; then
-   export tau=5.0
-   export rf_cutoff=1.0e3
-   export d2_bg_k1=0.20
-   export d2_bg_k2=0.0
-fi
-
-# PBL/turbulance schemes
-export hybedmf=".false."
-export satmedmf=".true."
-export isatmedmf=1
-tbf=""
-if [[ "$satmedmf" = ".true." ]]; then tbf="_satmedmf" ; fi
-
-# Radiation options
-export IAER=1011    ; #spectral band mapping method for aerosol optical properties
-export iovr_lw=3    ; #de-correlation length cloud overlap method (Barker, 2008)
-export iovr_sw=3    ; #de-correlation length cloud overlap method (Barker, 2008)
-export iovr=3       ; #de-correlation length cloud overlap method (Barker, 2008)
-export icliq_sw=2   ; #cloud optical coeffs from AER's newer version v3.9-v4.0 for hu and stamnes
-export isubc_sw=2
-export isubc_lw=2
-
-# RRTMGP radiation scheme
-export  do_RRTMGP=.false.
-export  doGP_cldoptics_LUT=.false.
-export  doGP_lwscat=.false.
-
-# LSM configuration
-# NoahMP only
-export iopt_sfc="3"
-export iopt_trs="2"
-
-# Microphysics configuration
-export dnats=0
-export cal_pre=".true."
-export do_sat_adj=".false."
-export random_clds=".true."
 export cnvcld=".true."
 # export imp_physics=${imp_physics:-"11"}
 # imp_physics is set in gefs.parm because it is needed in other jobs
@@ -764,6 +739,13 @@ export ENS_SPS=${ENS_SPS:-.false.}
 ########################################
 # Stochastic physics parameters
 ########################################
+
+export DO_SPPT="NO"
+  export DO_SHUM="NO"
+  export DO_SKEB="NO"
+  export DO_LAND_PERT="NO"
+  export DO_CA="NO"
+
 export DO_SPPT=${DO_SPPT:-"YES"}
 export DO_SKEB=${DO_SKEB:-"YES"}
 export DO_SHUM=${DO_SHUM:-"NO"}
@@ -887,7 +869,7 @@ else
   IAU_OFFSET=${IAU_OFFSET:-0}
   [[ $DOIAU = "NO" ]] && export IAU_OFFSET=0
   xfh=$((restart_interval+(IAU_OFFSET/2)))
-  while [ $xfh -le $FHMAX ]; do
+  while [ $xfh -le ${FHMAX:-$fhmax} ]; do
     rst_list="$rst_list $xfh"
     xfh=$((xfh+restart_interval))
   done
@@ -910,7 +892,7 @@ fi
 export adjust_dry_mass=".false."
 
 # Write each restart file in 16 small files to save time
-if [[ "$CASE" = C768 ]]; then
+if [[ "$case_in" = C768 ]]; then
   export io_layout="4,4"
 else
   export io_layout="1,1"

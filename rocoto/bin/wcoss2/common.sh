@@ -17,6 +17,9 @@ export taskspernode=${GEFS_PPN}
 
 if [[ $RocotoGen == 0 ]]; then
     export gefsmpexec="mpiexec -n $total_tasks"
+    #export APRUN_FV3="${launcher} -n ${npe_fcst} -ppn ${npe_node_fcst} --cpu-bind depth --depth ${NTHREADS_FV3}"
+    #export gefsmpexec="mpiexec -l -n 100 -ppn 128 --cpu-bind depth --depth 1" #C48 
+    #export gefsmpexec="mpiexec -l -n 416 -ppn 128 --cpu-bind depth --depth 1" #C384
     export gefsmpexec_mpmd="mpiexec -n $total_tasks cfp mpmd_cmdfile"
     export wavempexec="mpiexec -n"
     export wave_mpmd="cfp"
@@ -31,12 +34,21 @@ if [[ $RocotoGen == 0 ]]; then
     . $GEFS_ROCOTO/parm/gefs_config
     . $GEFS_ROCOTO/parm/gefs_dev.parm
 
+    #export APRUN_FV3="mpiexec -n ${npe_fcst} -ppn ${npe_node_fcst} --cpu-bind depth --depth ${NTHREADS_FV3}"
+
     # For canned data
     #export HOMEdata=/lfs/h1/ops
     #export COMPATH=$HOMEdata/canned/com/gfs:$HOMEdata/canned/com/cfs:$HOMEdata/canned/com/nawips:$HOMEdata/canned/com/ecmwf:$HOMEdata/canned/com/nam:${WORKDIR}/$envir/com/${NET}
     #export DCOMROOT=${HOMEdata}/canned/dcom
     # For prod data
-    export COMPATH=${WORKDIR}/$envir/com/${NET}
+    if [[ $CASEHR == "C48" ]]; then
+        export COMPATH=${WORKDIR}/$envir/com/${NET}:/lfs/h2/emc/ens/noscrub/xianwu.xue/GEFS_v13/z_DATA/lfs/h1/ops/prod/com/gfs
+    elif [[ $CASEHR == "C384" ]]; then
+        export COMPATH=${WORKDIR}/$envir/com/${NET}:/lfs/h2/emc/ens/noscrub/xianwu.xue/GEFS_v13/z_DATA/lfs_C768_C384/h1/ops/prod/com/gfs
+    else
+        echo "Wrong CASEHR .."
+        exit -1
+    fi
 
 elif [[ $RocotoGen == 1 ]]; then
     export HOMEtrak=/gpfs/dell2/emc/verification/noscrub/emc.enspara/common/git/ens_tracker/ens_tracker.v2.1.2

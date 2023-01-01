@@ -59,7 +59,7 @@ if [[ -d global-workflow.fd ]] ; then
 
   cd ${pwd}/../fix
 
-  for gw_dir in am aer lut orog chem; do
+  for gw_dir in am aer lut orog chem ugwd; do
     if [[ -d $gw_dir ]]; then
       rm -rf $gw_dir
     fi
@@ -147,7 +147,8 @@ if [[ -d global-workflow.fd ]] ; then
                 ush/forecast_postdet.sh \
                 ush/nems_configure.sh \
                 ush/parsing_model_configure_FV3.sh \
-                ush/parsing_model_configure_DATM.sh
+                ush/parsing_model_configure_DATM.sh \
+                sorc/ufs_model.fd
   do
     if [[ -e ../$sFile ]]; then
       if [[ -L ../$sFile ]]; then

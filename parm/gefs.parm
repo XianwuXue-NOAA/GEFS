@@ -127,7 +127,7 @@ export DO_WAVE="NO"
 export DO_OCN="NO"
 export DO_ICE="NO"
 export DO_AERO="NO"
-export CCPP_SUITE=${CCPP_SUITE:-"FV3_GFS_v17_coupled_p8"}
+export CCPP_SUITE=${CCPP_SUITE:-"FV3_GFS_v16"} #FV3_GFS_v17_coupled_p8"}
 export WAVE_CDUMP="" # When to include wave suite: gdas, gfs, or both
 export DOBNDPNT_WAVE="NO"
 export cplwav2atm=".false."
@@ -181,7 +181,7 @@ case "${APP}" in
 esac
 
 # IAU related parameters
-export DOIAU="NO"        # Enable 4DIAU for control with 3 increments
+export DOIAU="YES"        # Enable 4DIAU for control with 3 increments
 export IAUFHRS="3,6,9"
 export IAU_FHROT=$(echo $IAUFHRS | cut -c1)
 export IAU_DELTHRS=6
@@ -190,6 +190,9 @@ export IAU_OFFSET=6
 # turned on nsst in anal and/or fcst steps, and turn off rtgsst
 export DONST="YES"
 if [ $DONST = "YES" ]; then export FNTSFA="        "; fi
+
+# The switch to apply SST elevation correction or not
+export nst_anl=.true.
 #-----
 
 # Microphysics Options: 99-ZhaoCarr, 8-Thompson; 6-WSM6, 10-MG, 11-GFDL

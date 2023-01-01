@@ -26,8 +26,9 @@ cd $DATA
 ######################################
 # Set up compute resources
 ######################################
-export total_tasks=${total_tasks:-320}
-export APRUN=${gefsmpexec:-"mpiexec -n $total_tasks"}
+#export total_tasks=${total_tasks:-320}
+#export APRUN=${gefsmpexec:-"mpiexec -n $total_tasks"}
+#export APRUN_FV3="mpiexec -n ${npe_fcst} -ppn ${npe_node_fcst} --cpu-bind depth --depth ${NTHREADS_FV3}"
 
 ####################################
 # Specify NET and RUN Name and model
@@ -90,6 +91,8 @@ for config in $configs; do
     exit $err
   fi
 done
+
+export APRUN_FV3="mpiexec -n ${npe_fcst} -ppn ${npe_node_fcst} --cpu-bind depth --depth ${NTHREADS_FV3}"
 
 if [[ $cplchm = ".true." ]]; then
   COMPONENT="chem"
