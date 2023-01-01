@@ -16,6 +16,7 @@ export taskspernode=${GEFS_PPN}
 
 
 if [[ $RocotoGen == 0 ]]; then
+    export launcher="mpiexec -l"
     export gefsmpexec="mpiexec -n $total_tasks"
     #export APRUN_FV3="${launcher} -n ${npe_fcst} -ppn ${npe_node_fcst} --cpu-bind depth --depth ${NTHREADS_FV3}"
     #export gefsmpexec="mpiexec -l -n 100 -ppn 128 --cpu-bind depth --depth 1" #C48 

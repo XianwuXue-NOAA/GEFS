@@ -92,7 +92,7 @@ for config in $configs; do
   fi
 done
 
-export APRUN_FV3="mpiexec -n ${npe_fcst} -ppn ${npe_node_fcst} --cpu-bind depth --depth ${NTHREADS_FV3}"
+export APRUN_FV3=${APRUN_FV3:-"${launcher:-'mpiexec -l'} -n ${npe_fcst} -ppn ${npe_node_fcst} --cpu-bind depth --depth ${NTHREADS_FV3}"}
 
 if [[ $cplchm = ".true." ]]; then
   COMPONENT="chem"
