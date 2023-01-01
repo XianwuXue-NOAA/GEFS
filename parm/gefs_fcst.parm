@@ -287,6 +287,10 @@ export OUTPUT_GRID=${FV3OUT_GRID:-"gaussian_grid"}
 export OUTPUT_FILE="netcdf"
 export WRITE_DOPOST=".true."
 export WRITE_NSFLIP=".true."
+PARM_POST=${PARM_POST:-$HOMEgfs/parm/post}
+export FLTFILEGFS=$PARM_POST/postxconfig-NT-GEFS.txt
+export FLTFILEGFSF00=$PARM_POST/postxconfig-NT-GEFS-F00.txt
+export POSTGRB2TBL=$PARM_POST/params_grib2_tbl_new
 
 if [ $OUTPUT_FILE = "nemsio" ]; then
   export DO_CALC_INCREMENT="YES"
