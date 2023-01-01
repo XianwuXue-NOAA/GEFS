@@ -54,9 +54,16 @@ if [[ $USE_EARLY_ENKF == YES ]]; then
 	mkdir -p $COMOUT
 
 	CDATE=${PDY}${cyc}
-	sCDATE=$($NDATE -3 $CDATE)
-	sPDY=$(echo $sCDATE | cut -c1-8)
-	scyc=$(echo $sCDATE | cut -c9-10)
+
+    if [[ "$DOIAU" = "YES" ]]; then
+	  sCDATE=$($NDATE -3 $CDATE)
+	  sPDY=$(echo $sCDATE | cut -c1-8)
+	  scyc=$(echo $sCDATE | cut -c9-10)
+    else
+      sCDATE=$CDATE
+      sPDY=$PDY
+      scyc=$cyc
+    fi
 
 	gPDY=${pdyp}
 	gcyc=${cycp}
@@ -116,7 +123,7 @@ if [[ $USE_EARLY_ENKF == YES ]]; then
 	fi
 
 	if [[ $mem = c00 ]]; then
-        export CONVERT_NST=".false."
+        export CONVERT_NST=".true." #".false."
 		export INPUT_TYPE='restart'
 		export MOSAIC_FILE_INPUT_GRID="${FIXfv3_H}/C${CRES_H}_mosaic.nc"
         export MOSAIC_FILE_TARGET_GRID="${FIXfv3}/C${CRES}_mosaic.nc"
