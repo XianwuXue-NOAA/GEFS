@@ -97,6 +97,8 @@ if [[ $USE_EARLY_ENKF == YES ]]; then
 			${gPDY:0:4}  ${gPDY:4:2}  ${gPDY:6:2}  ${gcyc}     0     0        Model start time:   year, month, day, hour, minute, second
 			${sPDY:0:4}  ${sPDY:4:2}  ${sPDY:6:2}  ${scyc}     0     0        Current model time: year, month, day, hour, minute, second
 		EOF
+    else
+        $NLN $gmemdir/RESTART/${sPDY}.${scyc}0000.coupler.res $INIDIR/RESTART/
 	fi
 
 	# Link increments
@@ -104,9 +106,9 @@ if [[ $USE_EARLY_ENKF == YES ]]; then
 		for i in $(echo $IAUFHRS | sed "s/,/ /g" | rev); do
 			incfhr=$(printf %03i $i)
 			if [ $incfhr = "006" ]; then
-				increment_file=t${cyc}z.${PREFIX_ATMINC}atminc.nc
+				increment_file=t${cyc}z.${PREFIX_ATMINC:-""}atminc.nc
 			else
-				increment_file=t${cyc}z.${PREFIX_ATMINC}atmi${incfhr}.nc
+				increment_file=t${cyc}z.${PREFIX_ATMINC:-""}atmi${incfhr}.nc
 			fi
 			if [ ! -f $memdir/gfs.$increment_file ]; then
 				echo "ERROR: DOIAU = $DOIAU, but missing increment file for fhr $incfhr at $memdir/gfs.$increment_file"
@@ -116,7 +118,7 @@ if [[ $USE_EARLY_ENKF == YES ]]; then
 			$NLN $memdir/gfs.$increment_file $INIDIR/gefs.$increment_file
 		done
 	else
-		increment_file=t${cyc}z.${PREFIX_ATMINC}atminc.nc
+		increment_file=t${cyc}z.${PREFIX_ATMINC:-""}atminc.nc
 		if [ -f $memdir/gfs.$increment_file ]; then
 			$NLN $memdir/gfs.$increment_file $INIDIR/gefs.$increment_file
 		fi

@@ -181,7 +181,7 @@ case "${APP}" in
 esac
 
 # IAU related parameters
-export DOIAU="YES"        # Enable 4DIAU for control with 3 increments
+export DOIAU=${DOIAU:-"NO"}        # Enable 4DIAU for control with 3 increments
 export IAUFHRS="3,6,9"
 export IAU_FHROT=$(echo $IAUFHRS | cut -c1)
 export IAU_DELTHRS=6
