@@ -193,7 +193,6 @@ export fcstscript=${fcstscript:-$HOMEgfs/scripts/exglobal_forecast.sh}
 export FORECASTSH=$fcstscript
 export FCSTEXECDIR=${FCSTEXECDIR:-$EXECgfs}
 export PARM_FV3DIAG=${PARM_FV3DIAG:-$PARMgfs/parm_fv3diag}
-export ROTDIR=${ROTDIR:-$DATA}
 
 export APRUN=${APRUN:-""}
 
