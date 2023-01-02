@@ -82,7 +82,7 @@ export ROTDIR=${ROTDIR:-$(compath.py $envir/com/$NET/${ver})}
 #############################
 # Source relevant config files
 #############################
-configs="gefs gefs_wave gefs_fcst"
+configs="gefs gefs_fv3 gefs_wave gefs_fcst"
 config_path=$PARMgefs
 for config in $configs; do
   . $config_path/$config.parm
