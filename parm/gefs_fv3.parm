@@ -6,15 +6,6 @@
 # This config sets default variables for FV3 for a given resolution
 # User can over-ride after sourcing this config file
 
-if [ $# -ne 1 ]; then
-
-    echo "Must specify an input resolution argument to set variables!"
-    echo "argument can be any one of the following:"
-    echo "C48 C96 C192 C384 C768 C1152 C3072"
-    exit 1
-
-fi
-
 echo "BEGIN: config.fv3"
 
 case_in=$CASEHR

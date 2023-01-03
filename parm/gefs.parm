@@ -182,10 +182,16 @@ esac
 
 # IAU related parameters
 export DOIAU=${DOIAU:-"NO"}        # Enable 4DIAU for control with 3 increments
-export IAUFHRS="3,6,9"
-export IAU_FHROT=$(echo $IAUFHRS | cut -c1)
-export IAU_DELTHRS=6
-export IAU_OFFSET=6
+if [[ $DOIAU == "NO" ]]; then
+  export IAU_OFFSET=0
+  export IAU_DELTHRS=0
+  export IAU_FHROT=0
+else
+  export IAUFHRS="3,6,9"
+  export IAU_FHROT=$(echo $IAUFHRS | cut -c1)
+  export IAU_DELTHRS=6
+  export IAU_OFFSET=6
+fi
 
 # turned on nsst in anal and/or fcst steps, and turn off rtgsst
 export DONST="YES"

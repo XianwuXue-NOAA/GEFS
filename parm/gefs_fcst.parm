@@ -732,7 +732,7 @@ if [[ "$restart_interval" -le 0 ]]; then
 else
   rst_list=""
   IAU_OFFSET=${IAU_OFFSET:-0}
-  [[ $DOIAU = "NO" ]] && export IAU_OFFSET=0
+  [[ $DOIAU = "NO" ]] && export IAU_OFFSET=0; export IAU_DELTHRS=0; export IAU_FHROT=0
   xfh=$((restart_interval+(IAU_OFFSET/2)))
   while [ $xfh -le ${FHMAX:-$fhmax} ]; do
     rst_list="$rst_list $xfh"
