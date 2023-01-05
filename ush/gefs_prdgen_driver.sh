@@ -250,7 +250,7 @@ for hour in $hours; do
 		export mcfile=""
 		export makepgrb2b="no"
 	else 
-		export mafile={COMIN}/$COMPONENT/gefs.$cycle.master.grb2f$fhr
+		export mafile=${COMIN}/$COMPONENT/gefs.$cycle.master.grb2f$fhr
 		export mifile=${mafile} #{COMIN}/$COMPONENT/gefs.$cycle.master.grb2if$fhr
 		export mcfile=${mafile} #$COMIN/$COMPONENT/misc/post/gefs.$cycle.master.control.f$fhr
 		if [[ -z "$pgbd" ]]; then
