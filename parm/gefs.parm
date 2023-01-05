@@ -46,6 +46,8 @@ case $cyc in
     ;;
 esac
 
+export FHMAX_GFS=$fhmax
+
 memberlist="c00"
 
 imem=1
