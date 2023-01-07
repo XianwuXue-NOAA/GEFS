@@ -125,11 +125,17 @@ if [[ $USE_EARLY_ENKF == YES ]]; then
   fi
 
   if [[ $mem = c00 ]]; then
+    CRES_INPUT=$CRES_H
+    FIXfv3_INPUT=$FIXfv3_H
+  else
+    CRES_INPUT=$CRES
+    FIXfv3_INPUT=$FIXfv3
+  fi
     export CONVERT_NST=".true."
     export INPUT_TYPE='restart'
-    export MOSAIC_FILE_INPUT_GRID="${FIXfv3_H}/C${CRES_H}_mosaic.nc"
+    export MOSAIC_FILE_INPUT_GRID="${FIXfv3_INPUT}/C${CRES_INPUT}_mosaic.nc"
     export MOSAIC_FILE_TARGET_GRID="${FIXfv3}/C${CRES}_mosaic.nc"
-    export OROG_DIR_INPUT_GRID="${FIXfv3_H}"
+    export OROG_DIR_INPUT_GRID="${FIXfv3_INPUT}"
 
     OROG_FILES_INPUT_GRID=""
     ATM_CORE_FILES_INPUT=""
@@ -137,7 +143,7 @@ if [[ $USE_EARLY_ENKF == YES ]]; then
     SFC_FILES_INPUT=""
     for tile in {1..6}
     do
-      OROG_FILES_INPUT_GRID=${OROG_FILES_INPUT_GRID}"C${CRES_H}_oro_data.tile${tile}.nc"
+      OROG_FILES_INPUT_GRID=${OROG_FILES_INPUT_GRID}"C${CRES_INPUT}_oro_data.tile${tile}.nc"
       ATM_CORE_FILES_INPUT=${ATM_CORE_FILES_INPUT}"${sPDY}.${scyc}0000.fv_core.res.tile${tile}.nc"
       ATM_TRACER_FILES_INPUT=${ATM_TRACER_FILES_INPUT}"${sPDY}.${scyc}0000.fv_tracer.res.tile${tile}.nc"
       SFC_FILES_INPUT=${SFC_FILES_INPUT}"${sPDY}.${scyc}0000.sfcanl_data.tile${tile}.nc"
@@ -167,10 +173,10 @@ if [[ $USE_EARLY_ENKF == YES ]]; then
       echo "FATAL ERROR in $(basename $BASH_SOURCE): chgres_cube failed!"
       exit $err
     fi
-  fi
+  #fi
 
   if [[ $SENDCOM == "YES" ]]; then
-    if [[ $mem = c00 ]]; then
+    #if [[ $mem = c00 ]]; then
       echo "Copying $mem to COM Directory!"
       if [[ -e $COMOUT/INPUT ]]; then
         rm -rf $COMOUT/INPUT
@@ -183,11 +189,11 @@ if [[ $USE_EARLY_ENKF == YES ]]; then
         mv $INIDIR/out.atm.tile${tile}.nc $COMOUT/INPUT/gfs_data.tile${tile}.nc
       done
       mv $INIDIR/gfs_ctrl.nc $COMOUT/INPUT/
-    else
-      echo "Copying $mem to COM Directory!"
-      $NCP $INIDIR/*.nc $COMOUT/
-      $NCP $INIDIR/RESTART $COMOUT/
-    fi
+    #else
+    #  echo "Copying $mem to COM Directory!"
+    #  $NCP $INIDIR/*.nc $COMOUT/
+    #  $NCP $INIDIR/RESTART $COMOUT/
+    #fi
   fi
 
   echo "$(date -u) end $(basename $BASH_SOURCE)"
