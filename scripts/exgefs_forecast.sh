@@ -159,32 +159,32 @@ memchar=mem$(printf %03i $MEMBER)
 
 export SET_STP_SEED=${SET_STP_SEED:-"YES"}
 
-#if [[ $FORECAST_SEGMENT = hr || $FORECAST_SEGMENT = lr ]] ; then
-#
-#  if [[ $DO_SPPT = YES ]] ; then
-#    export SPPT=$SPPT_hr
-#    export ISEED_SPPT=$ISEED_SPPT_hr
-#    export SPPT_LOGIT=$SPPT_LOGIT_hr
-#    export SPPT_TAU=$SPPT_TAU_hr
-#    export SPPT_LSCALE=$SPPT_LSCALE_hr
-#    export sppt_sfclimit=$sppt_sfclimit_hr
-#  fi
-#
-#  if [[ $DO_SHUM = YES ]] ; then
-#    export SHUM=$SHUM_hr
-#    export ISEED_SHUM=$ISEED_SHUM_hr
-#    export SHUM_TAU=$SHUM_TAU_hr
-#    export SHUM_LSCALE=$SHUM_LSCALE_hr
-#  fi
-#
-#  if [[ $DO_SKEB = YES ]] ; then
-#    export SKEB=$SKEB_hr
-#    export ISEED_SKEB=$ISEED_SKEB_hr
-#    export SKEB_TAU=$SKEB_TAU_hr
-#    export SKEB_LSCALE=$SKEB_LSCALE_hr
-#    export SKEBNORM=${SKEBNORM:-"1"}
-#  fi
-#fi
+if [[ $FORECAST_SEGMENT = hr || $FORECAST_SEGMENT = lr ]] ; then
+
+  if [[ $DO_SPPT = YES ]] ; then
+    export SPPT=$SPPT_hr
+    export ISEED_SPPT=$ISEED_SPPT_hr
+    export SPPT_LOGIT=$SPPT_LOGIT_hr
+    export SPPT_TAU=$SPPT_TAU_hr
+    export SPPT_LSCALE=$SPPT_LSCALE_hr
+    export sppt_sfclimit=$sppt_sfclimit_hr
+  fi
+
+  if [[ $DO_SHUM = YES ]] ; then
+    export SHUM=$SHUM_hr
+    export ISEED_SHUM=$ISEED_SHUM_hr
+    export SHUM_TAU=$SHUM_TAU_hr
+    export SHUM_LSCALE=$SHUM_LSCALE_hr
+  fi
+
+  if [[ $DO_SKEB = YES ]] ; then
+    export SKEB=$SKEB_hr
+    export ISEED_SKEB=$ISEED_SKEB_hr
+    export SKEB_TAU=$SKEB_TAU_hr
+    export SKEB_LSCALE=$SKEB_LSCALE_hr
+    export SKEBNORM=${SKEBNORM:-"1"}
+  fi
+fi
 
 #
 # Forecast Input Variables

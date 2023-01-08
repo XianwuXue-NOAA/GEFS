@@ -79,6 +79,7 @@ if (( FHMAXHF > fhmaxh )); then export FHMAXHF=$fhmaxh; fi
 export restart_interval=${fhrestart:-12}
 export restart_interval_aer=${restart_interval_aer:-12}
 export other_restart_time=${other_restart_time:-6}
+export restart_interval_gfs=$restart_interval
 
 if [[ $cplchm = ".true." ]]; then
   export restart_interval=$restart_interval_aer
