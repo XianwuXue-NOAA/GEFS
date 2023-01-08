@@ -307,6 +307,43 @@ if [[ $err != 0 ]]; then
   exit $err
 fi
 
+if [[ $SENDCOM == "YES" ]]; then
+	mkdir -m 775 -p ${memdir}/misc/post
+
+  # Convert output settings into an explicit list
+  OUTPUT_FH=""
+  FHMIN_LF=$FHMIN
+  if (( FHOUT_HF > 0 && FHMAX_HF > 0 )); then
+    for (( fh = FHMIN; fh < FHMAX_HF; fh = fh + FHOUT_HF )); do
+      OUTPUT_FH="$OUTPUT_FH $fh"
+    done
+    FHMIN_LF=$FHMAX_HF
+  fi
+  for (( fh = FHMIN_LF; fh <= FHMAX; fh = fh + FHOUT )); do
+    OUTPUT_FH="$OUTPUT_FH $fh"
+  done
+
+  for fhr in $OUTPUT_FH; do
+    FH3=$(printf %03i $fhr)
+
+    mafile=${memdir}/${CDUMP}.$cycle.master.grb2f${FH3}
+    mifile=${memdir}/${CDUMP}.$cycle.master.grb2i${FH3}
+    mcfile=${memdir}/misc/post/${CDUMP}.$cycle.master.control.f${FH3}
+
+    if [[ ! -s $mcfile ]]; then
+      if [[ -s $mafile ]]; then
+        ${GRB2INDEX} "${mafile}" "${mifile}"
+        export err=$?
+        if [[ $err != 0 ]]; then
+          echo "FATAL ERROR in ${BASH_SOURCE}: received a non-zero return code from generating master index files!"
+          exit $err
+        fi
+        echo "${PDY}${cyc}${FH3}" > $mcfile
+      fi
+    fi
+  done
+fi
+
 echo "$(date -u) end ${BASH_SOURCE}"
 
 exit $err
