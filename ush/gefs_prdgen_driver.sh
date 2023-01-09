@@ -20,8 +20,8 @@ export PS4="${PS4}${1}: "
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
-	# Turn on strict bash error checking
-	set -eu
+  # Turn on strict bash error checking
+  set -eu
 fi
 
 export VERBOSE=yes
@@ -38,6 +38,7 @@ export infile="${3}"                   # ${DATA}/${stream}/${stream}.in
 # grid_spec=                # PRDGEN_GRID_SPEC[$stream]
 # hours=                    # PRDGEN_HOURS[$stream]
 # submc=                    # PRDGEN_SUBMC[$stream]
+# submc=                    # PRDGEN_SUBMC[$stream]
 # pgad=                     # PRDGEN_A_DIR[$stream]
 # pgapre=                   # PRDGEN_A_PREFIX[$stream]
 # parmlist_a00=             # PRDGEN_A_LIST_F00[$stream]
@@ -50,24 +51,24 @@ export infile="${3}"                   # ${DATA}/${stream}/${stream}.in
 
 cat <<-EOF
 	Settings for $(basename ${.sh.file}) stream $stream:
-	  RUNMEM: $RUNMEM
-	  cyc: $cyc
-	  DATA: $DATA
-  
-	  jobdir: $jobdir
-	  jobgrid: $jobgrid
-	  grid_spec: $grid_spec
-	  hours: ($hours)
-	  submc: $submc
-	  pgad: $pgad
-	  pgapre: $pgapre
-	  parmlist_a00: $parmlist_a00
-	  parmlist_ahh: $parmlist_ahh
-	  pgbd: $pgbd
-	  pgbpre: $pgbpre
-	  parmlist_b00: $parmlist_b00
-	  parmlist_bhh: $parmlist_bhh
-	  do_analysis: $do_analysis
+		RUNMEM: $RUNMEM
+		cyc: $cyc
+		DATA: $DATA
+
+		jobdir: $jobdir
+		jobgrid: $jobgrid
+		grid_spec: $grid_spec
+		hours: ($hours)
+		submc: $submc
+		pgad: $pgad
+		pgapre: $pgapre
+		parmlist_a00: $parmlist_a00
+		parmlist_ahh: $parmlist_ahh
+		pgbd: $pgbd
+		pgbpre: $pgbpre
+		parmlist_b00: $parmlist_b00
+		parmlist_bhh: $parmlist_bhh
+		do_analysis: $do_analysis
 
 EOF
 
@@ -79,18 +80,18 @@ CDUMP="gefs" #${RUNMEM}
 # clean up missing markers from previous run
 ############################################################
 if [[ $SENDCOM == "YES" ]]; then
-	mkdir -m 775 -p $COMOUT/$COMPONENT/misc/$submc
-	cd $COMOUT/$COMPONENT/misc/$submc
+  mkdir -m 775 -p $COMOUT/$COMPONENT/misc/$submc
+  cd $COMOUT/$COMPONENT/misc/$submc
 
-	rc=$?
-	if (( rc == 0 )); then
-		for file in $RUNMEM.*.missing; do
-			if [[ -f $file ]]; then
-				echo "Removing $COMOUT/$COMPONENT/misc/$submc/$file"
-				rm -f $COMOUT/$COMPONENT/misc/$submc/$file
-			fi
-		done # for file in $RUNMEM.*.missing
-	fi # (( rc == 0 ))
+  rc=$?
+  if (( rc == 0 )); then
+    for file in $RUNMEM.*.missing; do
+      if [[ -f $file ]]; then
+        echo "Removing $COMOUT/$COMPONENT/misc/$submc/$file"
+        rm -f $COMOUT/$COMPONENT/misc/$submc/$file
+      fi
+    done # for file in $RUNMEM.*.missing
+  fi # (( rc == 0 ))
 fi
 
 cd $jobdir
@@ -98,307 +99,307 @@ cd $jobdir
 SLEEP_LOOP_MAX=$(($SLEEP_TIME / $SLEEP_INT))
 
 for hour in $hours; do
-	if [[ $do_analysis = YES ]] && (( hour == 0 )); then
-		export ffhr=anl
-		export fhr=000
+  if [[ $do_analysis = YES ]] && (( hour == 0 )); then
+    export ffhr=anl
+    export fhr=000
 
-		if [[ $RUNMEM = "gegfs" ]]; then
-			export mafile=$COMINgfs/gfs.$cycle.master.grb2anl
-			export mifile=$COMINgfs/gfs.$cycle.master.grb2ianl
-			export mcfile=""
-			export makepgrb2b="no"
-		else
-			export mafile=${COMIN}/$COMPONENT/${CDUMP}.$cycle.master.grb2anl
-			export mifile=${COMIN}/$COMPONENT/${CDUMP}.$cycle.master.grb2ianl
-			export mcfile=$COMIN/misc/post/${CDUMP}.$cycle.master.control.anl
-			if [[ -z "$pgbd" ]]; then
-				export makepgrb2b="no"
-			else
-				export makepgrb2b="yes"
-			fi
-		fi # [[ $RUNMEM = "gegfs" ]]
+    if [[ $RUNMEM = "gegfs" ]]; then
+      export mafile=$COMINgfs/gfs.$cycle.master.grb2anl
+      export mifile=$COMINgfs/gfs.$cycle.master.grb2ianl
+      export mcfile=""
+      export makepgrb2b="no"
+    else
+      export mafile=${COMIN}/$COMPONENT/${CDUMP}.$cycle.master.grb2anl
+      export mifile=${COMIN}/$COMPONENT/${CDUMP}.$cycle.master.grb2ianl
+      export mcfile=$COMIN/misc/post/${CDUMP}.$cycle.master.control.anl
+      if [[ -z "$pgbd" ]]; then
+        export makepgrb2b="no"
+      else
+        export makepgrb2b="yes"
+      fi
+    fi # [[ $RUNMEM = "gegfs" ]]
 
-		if [[ $SENDCOM == "YES" ]]; then
-			export pcfile=$COMOUT/$COMPONENT/misc/$submc/${CDUMP}.$cycle.prdgen.control.anl
-			export fileaout=$COMOUT/$COMPONENT/$pgad/${CDUMP}.$cycle.${pgapre}anl
-			export fileaouti=${fileaout}.idx
-			export filebout=$COMOUT/$COMPONENT/$pgbd/${CDUMP}.$cycle.${pgbpre}anl
-			export filebouti=${filebout}.idx
-		else
-			export pcfile=$DATA/$submc/${CDUMP}.$cycle.prdgen.control.anl
-			export fileaout=$DATA/${CDUMP}.$cycle.${pgapre}anl
-			export fileaouti=${fileaout}.idx
-			export filebout=$DATA/${CDUMP}.$cycle.${pgbpre}anl
-			export filebouti=${filebout}.idx
-		fi
+    if [[ $SENDCOM == "YES" ]]; then
+      export pcfile=$COMOUT/$COMPONENT/misc/$submc/${CDUMP}.$cycle.prdgen.control.anl
+      export fileaout=$COMOUT/$COMPONENT/$pgad/${CDUMP}.$cycle.${pgapre}anl
+      export fileaouti=${fileaout}.idx
+      export filebout=$COMOUT/$COMPONENT/$pgbd/${CDUMP}.$cycle.${pgbpre}anl
+      export filebouti=${filebout}.idx
+    else
+      export pcfile=$DATA/$submc/${CDUMP}.$cycle.prdgen.control.anl
+      export fileaout=$DATA/${CDUMP}.$cycle.${pgapre}anl
+      export fileaouti=${fileaout}.idx
+      export filebout=$DATA/${CDUMP}.$cycle.${pgbpre}anl
+      export filebouti=${filebout}.idx
+    fi
 
-		ic=1
-		while [ $ic -le $SLEEP_LOOP_MAX ]; do
-			if [[ $RUNMEM = "gegfs" ]]; then
-				# Assume GFS is complete
-				if [[ -f $mifile ]]; then
-					break
-				fi
-			else
-				# Check if control file has been created, to make sure file is complete before using
-				testfhr=-1
-				if [[ -f $mcfile ]]; then
-					teststring=$(cat $mcfile|head -1)
-					if [[ $teststring != '' ]]; then
-						if [[ -f $mifile ]]; then
-							testfhr=$(echo $teststring | cut -c11-13)
-						fi
-					fi # [[ $teststring != '' ]]
-				fi # [[ -f $mcfile ]]
-				echo "testfhr=$testfhr fhr=$fhr"
+    ic=1
+    while [ $ic -le $SLEEP_LOOP_MAX ]; do
+      if [[ $RUNMEM = "gegfs" ]]; then
+        # Assume GFS is complete
+        if [[ -f $mifile ]]; then
+          break
+        fi
+      else
+        # Check if control file has been created, to make sure file is complete before using
+        testfhr=-1
+        if [[ -f $mcfile ]]; then
+          teststring=$(cat $mcfile|head -1)
+          if [[ $teststring != '' ]]; then
+            if [[ -f $mifile ]]; then
+              testfhr=$(echo $teststring | cut -c11-13)
+            fi
+          fi # [[ $teststring != '' ]]
+        fi # [[ -f $mcfile ]]
+        echo "testfhr=$testfhr fhr=$fhr"
 
-				if (( testfhr >= fhr )); then
-					break
-				fi # (( testfhr >= fhr ))
-			fi
+        if (( testfhr >= fhr )); then
+          break
+        fi # (( testfhr >= fhr ))
+      fi
 
-			ic=$(expr $ic + 1)
-			sleep $SLEEP_INT
+      ic=$(expr $ic + 1)
+      sleep $SLEEP_INT
 
-			###############################
-			# If we reach this point assume
-			# fcst job never reached restart 
-			# period and write file to
-			# indicate missing data
-			###############################
-			if [ $ic -eq $SLEEP_LOOP_MAX ]; then
-				if [[ $SENDCOM == "YES" ]]; then
-					date >$COMOUT/$COMPONENT/misc/$submc/${CDUMP}.t${cyc}z.anl.missing
-				fi
-				sDate=$(date)
-				cat <<-EOF
+      ###############################
+      # If we reach this point assume
+      # fcst job never reached restart
+      # period and write file to
+      # indicate missing data
+      ###############################
+      if [ $ic -eq $SLEEP_LOOP_MAX ]; then
+        if [[ $SENDCOM == "YES" ]]; then
+          date >$COMOUT/$COMPONENT/misc/$submc/${CDUMP}.t${cyc}z.anl.missing
+        fi
+        sDate=$(date)
+        cat <<-EOF
 					FATAL ERROR in ${.sh.file} ($stream): Post data still missing for analysis at $sDate after waiting ${SLEEP_TIME}s.
 						Looked for the following files:
 							$(set +x; if [[ $RUNMEM != "gegfs" ]]; then Control file: $mcfile $(if [[ -f $mcfile ]]; then echo "exists"; else; echo "doesn't exist"; fi); fi)
 							Grib file:    $mafile $(set +x; if [[ -f $mafile ]]; then echo "exists"; else; echo "doesn't exist"; fi)
 							Index file:   $mifile $(set +x; if [[ -f $mifile ]]; then echo "exists"; else; echo "doesn't exist"; fi)
 					EOF
-				export err=1;
-				err_chk
-				exit $err
-			fi # [ $ic -eq $SLEEP_LOOP_MAX ]
+        export err=1;
+        err_chk
+        exit $err
+      fi # [ $ic -eq $SLEEP_LOOP_MAX ]
 
-		done # [ $ic -le $SLEEP_LOOP_MAX ]
+    done # [ $ic -le $SLEEP_LOOP_MAX ]
 
-		#
-		# If control file already exists and skip if all output also present, otherwise
-		#   delete control file to rerun. 
-		#
-		if [[ -s $pcfile ]]; then
-			nmissing=0
-			check_files="$fileaout $fileaouti"
-			if [[ makepgrb2b == "yes" ]]; then
-				check_files="$check_files $filebout $filebouti"
-			fi
-			for file in $check_files ; do
-				if [[ ! -s $file ]]; then
-					echo "file=$file IS MISSING"
-					(( nmissing = nmissing + 1 ))
-				fi
-			done # for file in $fileaout $fileaouti $filebout $filebouti
-			if (( nmissing > 0 )) || [[ $RERUN == "YES" ]]; then
-				rm $pcfile
-			fi
-		else
-			nmissing=1
-		fi # [[ -s $pcfile ]]
+    #
+    # If control file already exists and skip if all output also present, otherwise
+    #   delete control file to rerun.
+    #
+    if [[ -s $pcfile ]]; then
+      nmissing=0
+      check_files="$fileaout $fileaouti"
+      if [[ makepgrb2b == "yes" ]]; then
+        check_files="$check_files $filebout $filebouti"
+      fi
+      for file in $check_files ; do
+        if [[ ! -s $file ]]; then
+          echo "file=$file IS MISSING"
+          (( nmissing = nmissing + 1 ))
+        fi
+      done # for file in $fileaout $fileaouti $filebout $filebouti
+      if (( nmissing > 0 )) || [[ $RERUN == "YES" ]]; then
+        rm $pcfile
+      fi
+    else
+      nmissing=1
+    fi # [[ -s $pcfile ]]
 
-		if [[ ! -s $pcfile ]]; then
-			export parmlist_a=$parmlist_a00
-			export parmlist_b=$parmlist_b00
+    if [[ ! -s $pcfile ]]; then
+      export parmlist_a=$parmlist_a00
+      export parmlist_b=$parmlist_b00
 
-			$USHgefs/gefs_prdgen.sh
+      $USHgefs/gefs_prdgen.sh
 
-			# Check for error
-			export err=$?
-			if [[ $err != 0 ]]; then
-				echo "FATAL ERROR in ${.sh.file} ($stream): Creation of product failed for analysis!"
-				err_chk
-				exit $err
-			fi
+      # Check for error
+      export err=$?
+      if [[ $err != 0 ]]; then
+        echo "FATAL ERROR in ${.sh.file} ($stream): Creation of product failed for analysis!"
+        err_chk
+        exit $err
+      fi
 
-			####################################
-			# send control files to misc
-			####################################
-			if [[ $SENDCOM == "YES" ]]; then
-				echo "$PDY$cyc$fhr" > $pcfile
-			fi # [[ $SENDCOM == "YES" ]]
-		fi # [[ ! -s $pcfile ]]
-	fi # [[ $do_analysis = YES ]] && (( hour == 0 ))
+      ####################################
+      # send control files to misc
+      ####################################
+      if [[ $SENDCOM == "YES" ]]; then
+        echo "$PDY$cyc$fhr" > $pcfile
+      fi # [[ $SENDCOM == "YES" ]]
+    fi # [[ ! -s $pcfile ]]
+  fi # [[ $do_analysis = YES ]] && (( hour == 0 ))
 
-	export fhr=$(printf "%03.0f" $hour)        # Zero-pad to three places
-	export ffhr="f${fhr}"
-	# GFS output is only every 12 hours after 240, skip the unwanted hours
-	if [[ $RUNMEM = "gegfs" ]] && (( fhr > gfsfhmaxh )) && (( fhr%12 == 6 )); then
-		echo "fhr=$fhr not expected for GFS"
-		continue
-	fi
+  export fhr=$(printf "%03.0f" $hour)        # Zero-pad to three places
+  export ffhr="f${fhr}"
+  # GFS output is only every 12 hours after 240, skip the unwanted hours
+  if [[ $RUNMEM = "gegfs" ]] && (( fhr > gfsfhmaxh )) && (( fhr%12 == 6 )); then
+    echo "fhr=$fhr not expected for GFS"
+    continue
+  fi
 
-	###############################
-	# Start Looping for the 
-	# existence of the restart files
-	###############################
-	export pgm="postcheck"
+  ###############################
+  # Start Looping for the
+  # existence of the restart files
+  ###############################
+  export pgm="postcheck"
 
-	if [[ $RUNMEM = "gegfs" ]]; then
-		export mafile=$COMINgfs/gfs.$cycle.master.grb2f$fhr
-		export mifile=$COMINgfs/gfs.$cycle.master.grb2if$fhr
-		export mcfile=""
-		export makepgrb2b="no"
-	else 
-		export mafile=${COMIN}/$COMPONENT/${CDUMP}.$cycle.master.grb2f$fhr
-		export mifile=${COMIN}/$COMPONENT/${CDUMP}.$cycle.master.grb2if$fhr #${mafile}
-		export mcfile=${COMIN}/$COMPONENT/misc/post/${CDUMP}.$cycle.master.control.f$fhr #${mafile}
-		if [[ -z "$pgbd" ]]; then
-			export makepgrb2b="no"
-		else
-			export makepgrb2b="yes"
-		fi
-	fi # [[ $RUNMEM = "gegfs" ]]
+  if [[ $RUNMEM = "gegfs" ]]; then
+    export mafile=$COMINgfs/gfs.$cycle.master.grb2f$fhr
+    export mifile=$COMINgfs/gfs.$cycle.master.grb2if$fhr
+    export mcfile=""
+    export makepgrb2b="no"
+  else
+    export mafile=${COMIN}/$COMPONENT/${CDUMP}.$cycle.master.grb2f$fhr
+    export mifile=${COMIN}/$COMPONENT/${CDUMP}.$cycle.master.grb2if$fhr #${mafile}
+    export mcfile=${COMIN}/$COMPONENT/misc/post/${CDUMP}.$cycle.master.control.f$fhr #${mafile}
+    if [[ -z "$pgbd" ]]; then
+      export makepgrb2b="no"
+    else
+      export makepgrb2b="yes"
+    fi
+  fi # [[ $RUNMEM = "gegfs" ]]
 
-	if [[ $SENDCOM == "YES" ]]; then
-		export pcfile=$COMOUT/$COMPONENT/misc/$submc/${CDUMP}.t${cyc}z.prdgen.control.f$fhr
-		export fileaout=$COMOUT/$COMPONENT/$pgad/${CDUMP}.$cycle.${pgapre}f${fhr}
-		export fileaouti=${fileaout}.idx
-		if [[ $RUNMEM = "geaer" ]]; then
-			export fileaout=$COMOUT/$pgad/${NET}.${COMPONENT}.$cycle.${pgapre}f${fhr}.grib2
-			export fileaouti=${fileaout}.idx
-		fi
-		export filebout=$COMOUT/$COMPONENT/$pgbd/${CDUMP}.$cycle.${pgbpre}f${fhr}
-		export filebouti=${filebout}.idx
-	else
-		export pcfile=$DATA/$submc/${CDUMP}.t${cyc}z.prdgen.control.f$fhr
-		export fileaout=$DATA/${CDUMP}.$cycle.${pgapre}f${fhr}
-		export fileaouti=${fileaout}.idx
-		export filebout=$DATA/${CDUMP}.$cycle.${pgbpre}f${fhr}
-		export filebouti=${filebout}.idx
-	fi
+  if [[ $SENDCOM == "YES" ]]; then
+    export pcfile=$COMOUT/$COMPONENT/misc/$submc/${CDUMP}.t${cyc}z.prdgen.control.f$fhr
+    export fileaout=$COMOUT/$COMPONENT/$pgad/${CDUMP}.$cycle.${pgapre}f${fhr}
+    export fileaouti=${fileaout}.idx
+    if [[ $RUNMEM = "geaer" ]]; then
+      export fileaout=$COMOUT/$pgad/${NET}.${COMPONENT}.$cycle.${pgapre}f${fhr}.grib2
+      export fileaouti=${fileaout}.idx
+    fi
+    export filebout=$COMOUT/$COMPONENT/$pgbd/${CDUMP}.$cycle.${pgbpre}f${fhr}
+    export filebouti=${filebout}.idx
+  else
+    export pcfile=$DATA/$submc/${CDUMP}.t${cyc}z.prdgen.control.f$fhr
+    export fileaout=$DATA/${CDUMP}.$cycle.${pgapre}f${fhr}
+    export fileaouti=${fileaout}.idx
+    export filebout=$DATA/${CDUMP}.$cycle.${pgbpre}f${fhr}
+    export filebouti=${filebout}.idx
+  fi
 
-	if [[ $SENDCOM == "YES" && $save_pgrb2_p5 = YES ]] && (( FHOUR > FHMAXHF )); then
-		export mafile_p5=$COMOUT/$COMPONENT/pgrb2p5/${CDUMP}.$cycle.pgrb2.0p50.f${fhr}
-		export mifile_p5=${mafile_p5}.idx
-	fi
-	if [[ $SENDCOM == "YES" && $save_pgrb2_p25 = YES ]] && (( FHOUR <= FHMAXHF )); then
-		export mafile_p25=$COMOUT/$COMPONENT/pgrb2p25/${CDUMP}.$cycle.pgrb2.0p25.f${fhr}
-		export mifile_p25=${mifile_p25}.idx
-	fi
+  if [[ $SENDCOM == "YES" && $save_pgrb2_p5 = YES ]] && (( FHOUR > FHMAXHF )); then
+    export mafile_p5=$COMOUT/$COMPONENT/pgrb2p5/${CDUMP}.$cycle.pgrb2.0p50.f${fhr}
+    export mifile_p5=${mafile_p5}.idx
+  fi
+  if [[ $SENDCOM == "YES" && $save_pgrb2_p25 = YES ]] && (( FHOUR <= FHMAXHF )); then
+    export mafile_p25=$COMOUT/$COMPONENT/pgrb2p25/${CDUMP}.$cycle.pgrb2.0p25.f${fhr}
+    export mifile_p25=${mifile_p25}.idx
+  fi
 
-	ic=1
-	found="no"
-	while [ $ic -le $SLEEP_LOOP_MAX ]; do
-		if [[ $RUNMEM = "gegfs" ]]; then
-			# Check if index file has been created, to make sure file is complete before using
-			if [[ -f $mifile ]]; then
-				found="yes"
-				break
-			fi # [[ -f $mafile ]]
-		else # [[ $RUNMEM = "gegfs" ]]
-			# Check if control file has been created, to make sure file is complete before using
-			testfhr=-1
-			if [[ -f $mcfile ]]; then
-				teststring=$(cat $mcfile|head -1)
-				if [[ $teststring != '' ]]; then
-					if [[ -f $mifile ]]; then
-						testfhr=$(echo $teststring | cut -c11-13)
-					fi
-				fi # [[ $teststring != '' ]]
-			fi # [[ -f $mcfile ]]
+  ic=1
+  found="no"
+  while [ $ic -le $SLEEP_LOOP_MAX ]; do
+    if [[ $RUNMEM = "gegfs" ]]; then
+      # Check if index file has been created, to make sure file is complete before using
+      if [[ -f $mifile ]]; then
+        found="yes"
+        break
+      fi # [[ -f $mafile ]]
+    else # [[ $RUNMEM = "gegfs" ]]
+      # Check if control file has been created, to make sure file is complete before using
+      testfhr=-1
+      if [[ -f $mcfile ]]; then
+        teststring=$(cat $mcfile|head -1)
+        if [[ $teststring != '' ]]; then
+          if [[ -f $mifile ]]; then
+            testfhr=$(echo $teststring | cut -c11-13)
+          fi
+        fi # [[ $teststring != '' ]]
+      fi # [[ -f $mcfile ]]
       #testfhr=999
-			echo "testfhr=$testfhr fhr=$fhr"
+      echo "testfhr=$testfhr fhr=$fhr"
 
-			if (( testfhr >= fhr )); then
-				found="yes"
-				break
-			fi # (( testfhr >= fhr ))
-		fi # [[ $RUNMEM = "gegfs" ]]
+      if (( testfhr >= fhr )); then
+        found="yes"
+        break
+      fi # (( testfhr >= fhr ))
+    fi # [[ $RUNMEM = "gegfs" ]]
 
-		ic=$((ic + 1))
-		sleep $SLEEP_INT
+    ic=$((ic + 1))
+    sleep $SLEEP_INT
 
-		###############################
-		# If we reach this point assume
-		# fcst job never reached restart 
-		# period and error exit
-		###############################
-		if [ $ic -eq $SLEEP_LOOP_MAX ]; then
-			if [[ $SENDCOM == "YES" ]]; then
-				date >$COMOUT/$COMPONENT/misc/$submc/${CDUMP}.t${cyc}z.f$fhr.missing
-			fi
-			sDate=$(date)
-			cat <<-EOF
+    ###############################
+    # If we reach this point assume
+    # fcst job never reached restart
+    # period and error exit
+    ###############################
+    if [ $ic -eq $SLEEP_LOOP_MAX ]; then
+      if [[ $SENDCOM == "YES" ]]; then
+        date >$COMOUT/$COMPONENT/misc/$submc/${CDUMP}.t${cyc}z.f$fhr.missing
+      fi
+      sDate=$(date)
+      cat <<-EOF
 				FATAL ERROR in ${.sh.file} ($stream): Post data still missing for f$fhr at $sDate after waiting ${SLEEP_TIME}s.
 					Looked for the following files:
 						Control file: $mcfile $(set +x; if [[ -f $mcfile ]]; then echo "exists"; else; echo "doesn't exist"; fi)
 						Grib file:    $mafile $(set +x; if [[ -f $mafile ]]; then echo "exists"; else; echo "doesn't exist"; fi)
 						Index file:   $mifile $(set +x; if [[ -f $mifile ]]; then echo "exists"; else; echo "doesn't exist"; fi)
 			EOF
-			export err=1;
-			err_chk
-			exit $err
-		fi # [ $ic -eq $SLEEP_LOOP_MAX ]
-	done # while [ $ic -le $SLEEP_LOOP_MAX ]
+      export err=1;
+      err_chk
+      exit $err
+    fi # [ $ic -eq $SLEEP_LOOP_MAX ]
+  done # while [ $ic -le $SLEEP_LOOP_MAX ]
 
-	if [[ $found = "yes" ]]; then
-		echo "Starting post for fhr=$fhr"
+  if [[ $found = "yes" ]]; then
+    echo "Starting post for fhr=$fhr"
 
-		#################################### 
-		# control the inclusion of perturbation identifiers
-		# in the GRIB1 ensemble PDS header extension
-		####################################
+    ####################################
+    # control the inclusion of perturbation identifiers
+    # in the GRIB1 ensemble PDS header extension
+    ####################################
 
-		if [[ -s $pcfile ]]; then
-			nmissing=0
-			check_files="$fileaout $fileaouti"
-			if [[ makepgrb2b == "yes" ]]; then
-				check_files="$check_files $filebout $filebouti"
-			fi
-			for file in $check_files ; do
-				if [[ ! -s $file ]]; then
-					echo "file=$file IS MISSING"
-					(( nmissing = nmissing + 1 ))
-				fi
-			done # for file in $fileaout $fileaouti $filebout $filebouti
-			if (( nmissing > 0 )) || [[ $RERUN == "YES" ]]; then
-				rm $pcfile
-			fi
-		else
-			nmissing=1
-		fi # [[ -s $pcfile ]]
+    if [[ -s $pcfile ]]; then
+      nmissing=0
+      check_files="$fileaout $fileaouti"
+      if [[ makepgrb2b == "yes" ]]; then
+        check_files="$check_files $filebout $filebouti"
+      fi
+      for file in $check_files ; do
+        if [[ ! -s $file ]]; then
+          echo "file=$file IS MISSING"
+          (( nmissing = nmissing + 1 ))
+        fi
+      done # for file in $fileaout $fileaouti $filebout $filebouti
+      if (( nmissing > 0 )) || [[ $RERUN == "YES" ]]; then
+        rm $pcfile
+      fi
+    else
+      nmissing=1
+    fi # [[ -s $pcfile ]]
 
-		if [[ ! -s $pcfile ]]; then
-			if (( hour == 0 )); then
-				parmlist_a=$parmlist_a00
-				parmlist_b=$parmlist_b00
-			else
-				parmlist_a=$parmlist_ahh
-				parmlist_b=$parmlist_bhh
-			fi
-			export parmlist_a
-			export parmlist_b
-			$USHgefs/gefs_prdgen.sh
+    if [[ ! -s $pcfile ]]; then
+      if (( hour == 0 )); then
+        parmlist_a=$parmlist_a00
+        parmlist_b=$parmlist_b00
+      else
+        parmlist_a=$parmlist_ahh
+        parmlist_b=$parmlist_bhh
+      fi
+      export parmlist_a
+      export parmlist_b
+      $USHgefs/gefs_prdgen.sh
 
-			# Check for error
-			export err=$?
-			if [[ $err -ne 0 ]]; then
-				echo "FATAL ERROR in ${.sh.file} ($stream): Creation of product failed at f${fhr}!"
-				err_chk
-				exit $err
-			fi
+      # Check for error
+      export err=$?
+      if [[ $err -ne 0 ]]; then
+        echo "FATAL ERROR in ${.sh.file} ($stream): Creation of product failed at f${fhr}!"
+        err_chk
+        exit $err
+      fi
 
-			####################################
-			# send control files to misc
-			####################################
-			if [[ $SENDCOM = "YES" ]]; then
-				echo "$PDY$cyc$fhr" > $pcfile
-			fi
-		fi # [[ ! -s $pcfile ]]
+      ####################################
+      # send control files to misc
+      ####################################
+      if [[ $SENDCOM = "YES" ]]; then
+        echo "$PDY$cyc$fhr" > $pcfile
+      fi
+    fi # [[ ! -s $pcfile ]]
 
-	fi # [[ $found = "yes" ]]
+  fi # [[ $found = "yes" ]]
 done # for hour in $hours
 
 echo "$(date -u) end ${.sh.file}"
