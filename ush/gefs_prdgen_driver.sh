@@ -74,6 +74,7 @@ EOF
 export MP_LABELIO=YES
 export GRID=$jobgrid   # GRID is part of the DBN message
 
+CDUMP="gefs" #${RUNMEM}
 ############################################################
 # clean up missing markers from previous run
 ############################################################
@@ -107,9 +108,9 @@ for hour in $hours; do
 			export mcfile=""
 			export makepgrb2b="no"
 		else
-			export mafile=${COMIN}/$COMPONENT/gefs.$cycle.master.grb2anl
-			export mifile=${COMIN}/$COMPONENT/gefs.$cycle.master.grb2ianl
-			export mcfile=$COMIN/misc/post/gefs.$cycle.master.control.anl
+			export mafile=${COMIN}/$COMPONENT/${CDUMP}.$cycle.master.grb2anl
+			export mifile=${COMIN}/$COMPONENT/${CDUMP}.$cycle.master.grb2ianl
+			export mcfile=$COMIN/misc/post/${CDUMP}.$cycle.master.control.anl
 			if [[ -z "$pgbd" ]]; then
 				export makepgrb2b="no"
 			else
@@ -118,16 +119,16 @@ for hour in $hours; do
 		fi # [[ $RUNMEM = "gegfs" ]]
 
 		if [[ $SENDCOM == "YES" ]]; then
-			export pcfile=$COMOUT/$COMPONENT/misc/$submc/gefs.$cycle.prdgen.control.anl
-			export fileaout=$COMOUT/$COMPONENT/$pgad/gefs.$cycle.${pgapre}anl
+			export pcfile=$COMOUT/$COMPONENT/misc/$submc/${CDUMP}.$cycle.prdgen.control.anl
+			export fileaout=$COMOUT/$COMPONENT/$pgad/${CDUMP}.$cycle.${pgapre}anl
 			export fileaouti=${fileaout}.idx
-			export filebout=$COMOUT/$COMPONENT/$pgbd/gefs.$cycle.${pgbpre}anl
+			export filebout=$COMOUT/$COMPONENT/$pgbd/${CDUMP}.$cycle.${pgbpre}anl
 			export filebouti=${filebout}.idx
 		else
-			export pcfile=$DATA/$submc/gefs.$cycle.prdgen.control.anl
-			export fileaout=$DATA/gefs.$cycle.${pgapre}anl
+			export pcfile=$DATA/$submc/${CDUMP}.$cycle.prdgen.control.anl
+			export fileaout=$DATA/${CDUMP}.$cycle.${pgapre}anl
 			export fileaouti=${fileaout}.idx
-			export filebout=$DATA/gefs.$cycle.${pgbpre}anl
+			export filebout=$DATA/${CDUMP}.$cycle.${pgbpre}anl
 			export filebouti=${filebout}.idx
 		fi
 
@@ -167,7 +168,7 @@ for hour in $hours; do
 			###############################
 			if [ $ic -eq $SLEEP_LOOP_MAX ]; then
 				if [[ $SENDCOM == "YES" ]]; then
-					date >$COMOUT/$COMPONENT/misc/$submc/gefs.t${cyc}z.anl.missing
+					date >$COMOUT/$COMPONENT/misc/$submc/${CDUMP}.t${cyc}z.anl.missing
 				fi
 				sDate=$(date)
 				cat <<-EOF
@@ -250,9 +251,9 @@ for hour in $hours; do
 		export mcfile=""
 		export makepgrb2b="no"
 	else 
-		export mafile=${COMIN}/$COMPONENT/gefs.$cycle.master.grb2f$fhr
-		export mifile=${mafile} #{COMIN}/$COMPONENT/gefs.$cycle.master.grb2if$fhr
-		export mcfile=${mafile} #$COMIN/$COMPONENT/misc/post/gefs.$cycle.master.control.f$fhr
+		export mafile=${COMIN}/$COMPONENT/${CDUMP}.$cycle.master.grb2f$fhr
+		export mifile=${COMIN}/$COMPONENT/${CDUMP}.$cycle.master.grb2if$fhr #${mafile}
+		export mcfile=${COMIN}/$COMPONENT/misc/post/${CDUMP}.$cycle.master.control.f$fhr #${mafile}
 		if [[ -z "$pgbd" ]]; then
 			export makepgrb2b="no"
 		else
@@ -261,29 +262,29 @@ for hour in $hours; do
 	fi # [[ $RUNMEM = "gegfs" ]]
 
 	if [[ $SENDCOM == "YES" ]]; then
-		export pcfile=$COMOUT/$COMPONENT/misc/$submc/gefs.t${cyc}z.prdgen.control.f$fhr
-		export fileaout=$COMOUT/$COMPONENT/$pgad/gefs.$cycle.${pgapre}f${fhr}
+		export pcfile=$COMOUT/$COMPONENT/misc/$submc/${CDUMP}.t${cyc}z.prdgen.control.f$fhr
+		export fileaout=$COMOUT/$COMPONENT/$pgad/${CDUMP}.$cycle.${pgapre}f${fhr}
 		export fileaouti=${fileaout}.idx
 		if [[ $RUNMEM = "geaer" ]]; then
 			export fileaout=$COMOUT/$pgad/${NET}.${COMPONENT}.$cycle.${pgapre}f${fhr}.grib2
 			export fileaouti=${fileaout}.idx
 		fi
-		export filebout=$COMOUT/$COMPONENT/$pgbd/gefs.$cycle.${pgbpre}f${fhr}
+		export filebout=$COMOUT/$COMPONENT/$pgbd/${CDUMP}.$cycle.${pgbpre}f${fhr}
 		export filebouti=${filebout}.idx
 	else
-		export pcfile=$DATA/$submc/gefs.t${cyc}z.prdgen.control.f$fhr
-		export fileaout=$DATA/gefs.$cycle.${pgapre}f${fhr}
+		export pcfile=$DATA/$submc/${CDUMP}.t${cyc}z.prdgen.control.f$fhr
+		export fileaout=$DATA/${CDUMP}.$cycle.${pgapre}f${fhr}
 		export fileaouti=${fileaout}.idx
-		export filebout=$DATA/gefs.$cycle.${pgbpre}f${fhr}
+		export filebout=$DATA/${CDUMP}.$cycle.${pgbpre}f${fhr}
 		export filebouti=${filebout}.idx
 	fi
 
 	if [[ $SENDCOM == "YES" && $save_pgrb2_p5 = YES ]] && (( FHOUR > FHMAXHF )); then
-		export mafile_p5=$COMOUT/$COMPONENT/pgrb2p5/gefs.$cycle.pgrb2.0p50.f${fhr}
+		export mafile_p5=$COMOUT/$COMPONENT/pgrb2p5/${CDUMP}.$cycle.pgrb2.0p50.f${fhr}
 		export mifile_p5=${mafile_p5}.idx
 	fi
 	if [[ $SENDCOM == "YES" && $save_pgrb2_p25 = YES ]] && (( FHOUR <= FHMAXHF )); then
-		export mafile_p25=$COMOUT/$COMPONENT/pgrb2p25/gefs.$cycle.pgrb2.0p25.f${fhr}
+		export mafile_p25=$COMOUT/$COMPONENT/pgrb2p25/${CDUMP}.$cycle.pgrb2.0p25.f${fhr}
 		export mifile_p25=${mifile_p25}.idx
 	fi
 
@@ -299,15 +300,15 @@ for hour in $hours; do
 		else # [[ $RUNMEM = "gegfs" ]]
 			# Check if control file has been created, to make sure file is complete before using
 			testfhr=-1
-#			if [[ -f $mcfile ]]; then
-#				teststring=$(cat $mcfile|head -1)
-#				if [[ $teststring != '' ]]; then
-#					if [[ -f $mifile ]]; then
-#						testfhr=$(echo $teststring | cut -c11-13)
-#					fi
-#				fi # [[ $teststring != '' ]]
-#			fi # [[ -f $mcfile ]]
-      testfhr=999
+			if [[ -f $mcfile ]]; then
+				teststring=$(cat $mcfile|head -1)
+				if [[ $teststring != '' ]]; then
+					if [[ -f $mifile ]]; then
+						testfhr=$(echo $teststring | cut -c11-13)
+					fi
+				fi # [[ $teststring != '' ]]
+			fi # [[ -f $mcfile ]]
+      #testfhr=999
 			echo "testfhr=$testfhr fhr=$fhr"
 
 			if (( testfhr >= fhr )); then
@@ -326,7 +327,7 @@ for hour in $hours; do
 		###############################
 		if [ $ic -eq $SLEEP_LOOP_MAX ]; then
 			if [[ $SENDCOM == "YES" ]]; then
-				date >$COMOUT/$COMPONENT/misc/$submc/gefs.t${cyc}z.f$fhr.missing
+				date >$COMOUT/$COMPONENT/misc/$submc/${CDUMP}.t${cyc}z.f$fhr.missing
 			fi
 			sDate=$(date)
 			cat <<-EOF

@@ -10,10 +10,6 @@ fi
 
 export RERUN=${RERUN:-RESTART}
 
-export HOMEgfs=${HOMEgfs:-$HOMEgefs}
-export FIXgfs=${FIXgfs:-$HOMEgfs/fix/fix_am}
-export PARMgfs=${PARMgfs:-$HOMEgfs/parm}
-
 echo "PRDGEN_STREAMS = $PRDGEN_STREAMS"
 
 # 20150622 RLW change to "yes" to remake prdgen when post is remade
@@ -84,17 +80,6 @@ for stream in ${PRDGEN_STREAMS[@]}; do
 
 	EOF
 done
-
-export NTHREADS=1
-
-####################################
-# Specify Process ID
-####################################
-export IGEN_ANL=107
-export IGEN_FCST=107
-
-export DO_HD_PGRB=NO
-export HDMAX=00
 
 #################################
 # Run Post if Needed
