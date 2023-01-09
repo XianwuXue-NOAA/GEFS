@@ -307,7 +307,7 @@ if [[ $err != 0 ]]; then
   exit $err
 fi
 
-if [[ $SENDCOM == "YES" ]]; then
+if [[ $SENDCOM == "YES" && $WRITE_DOPOST == ".true." ]]; then
 	mkdir -m 775 -p ${memdir}/misc/post
 
   # Convert output settings into an explicit list
@@ -327,7 +327,7 @@ if [[ $SENDCOM == "YES" ]]; then
     FH3=$(printf %03i $fhr)
 
     mafile=${memdir}/${CDUMP}.$cycle.master.grb2f${FH3}
-    mifile=${memdir}/${CDUMP}.$cycle.master.grb2i${FH3}
+    mifile=${memdir}/${CDUMP}.$cycle.master.grb2if${FH3}
     mcfile=${memdir}/misc/post/${CDUMP}.$cycle.master.control.f${FH3}
 
     if [[ ! -s $mcfile ]]; then
