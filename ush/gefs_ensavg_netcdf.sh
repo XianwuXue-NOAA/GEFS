@@ -33,7 +33,7 @@ export FHOUTHF="${3}"
 export FHOUTLF="${4}"
 export FHMAXFH="${5}"
 export FHOUR="${6}"
-export ensavg_nemsio_log="${7}"
+export ensavg_netcdf_log="${7}"
 cd $jobdir
 
 export CASE=${CASE:-384}
@@ -43,7 +43,7 @@ ntiles=${ntiles:-6}
 NCP=${NCP:-"/bin/cp -p"}
 NLN=${NLN:-"/bin/ln -sf"}
 NMV=${NMV:-"/bin/mv -uv"}
-nemsioget=${nemsioget:-${NWPROD}/exec/nemsio_get}
+#nemsioget=${nemsioget:-${NWPROD}/exec/nemsio_get}
 
 GETATMENSMEANEXEC=${GETATMENSMEANEXEC:-$HOMEgsi/exec/getsigensmeanp_smooth.x}
 GETSFCENSMEANEXEC=${GETSFCENSMEANEXEC:-$HOMEgsi/exec/getsfcensmeanp.x}
@@ -62,10 +62,11 @@ $NCP $GETSFCENSMEANEXEC $DATA
 FHINC=$FHOUTHF
 fhr=$SHOUR
 while [[ $fhr -le $FHOUR ]]; do
+  CDUMP_ENS=gefs #geavg
 	fhr=$(printf %03i $fhr)
-	logfile="$COMOUT/$COMPONENT/sfcsig/geavg.${cycle}.logf${fhr}.nemsio"
+	logfile="$COMOUT/stats/$COMPONENT/${CDUMP_ENS}.${cycle}.logf${fhr}.txt"
 	if [[ -f $logfile ]]; then
-		echo "NEMSIO average file $logfile exists, skipping."
+		echo "netcdf average file $logfile exists, skipping."
 		if [ $fhr -ge $FHMAXFH ]; then
 			FHINC=$FHOUTLF
 		fi
@@ -77,11 +78,12 @@ while [[ $fhr -le $FHOUR ]]; do
 	for mem in $memberlist; do
 		mem2=$(echo $mem | cut -c2-)
 		mem3=$(printf "%03.i" $mem2)
+    CDUMP="gefs" #ge${mem}
 		ic=0
 		while [ $ic -le $SLEEP_LOOP_MAX ]; do
-			if [ -f  $COMIN/$COMPONENT/sfcsig/ge${mem}.${cycle}.logf${fhr}.nemsio ]; then
-				$NLN $COMIN/$COMPONENT/sfcsig/ge${mem}.${cycle}.atmf${fhr}.nemsio ./atm_mem$mem3
-				$NLN $COMIN/$COMPONENT/sfcsig/ge${mem}.${cycle}.sfcf${fhr}.nemsio ./sfc_mem$mem3
+			if [ -f  $COMIN/${mem}/$COMPONENT/${CDUMP}.${cycle}.logf${fhr}.txt ]; then
+				$NLN $COMIN/${mem}/$COMPONENT/${CDUMP}.${cycle}.atmf${fhr}.nc ./atm_mem$mem3
+				$NLN $COMIN/${mem}/$COMPONENT/${CDUMP}.${cycle}.sfcf${fhr}.nc ./sfc_mem$mem3
 				break
 			else
 				ic=$(($ic + 1))
@@ -92,9 +94,9 @@ while [[ $fhr -le $FHOUR ]]; do
 				echo <<- EOF
 					WARNING: ${job} could not find forecast $mem at $(date -u) after waiting ${SLEEP_TIME}s
 						Looked for the following files:
-							Log file: $COMIN/$COMPONENT/sfcsig/ge${mem}.${cycle}.logf${fhr}.nemsio
-							Atm file: $COMIN/$COMPONENT/sfcsig/ge${mem}.${cycle}.atmf${fhr}.nemsio
-							Sfc file: $COMIN/$COMPONENT/sfcsig/ge${mem}.${cycle}.sfcf${fhr}.nemsio
+							Log file: $COMIN/${mem}/$COMPONENT/ge${CDUMP}.${cycle}.logf${fhr}.txt
+							Atm file: $COMIN/${mem}/$COMPONENT/ge${CDUMP}.${cycle}.atmf${fhr}.nc
+							Sfc file: $COMIN/${mem}/$COMPONENT/ge${CDUMP}.${cycle}.sfcf${fhr}.nc
 					EOF
 				msg="WARNING: ${job} was unable to find $mem; will continue but mean may be degraded!"
 				echo "$msg" | mail.py -c $MAIL_LIST
@@ -110,9 +112,10 @@ while [[ $fhr -le $FHOUR ]]; do
 		exit $err
 	fi # [ $ic
 	
+  
 	if [[ $SENDCOM == "YES" ]]; then
-		$NLN $COMOUT/$COMPONENT/sfcsig/geavg.${cycle}.atmf${fhr}.nemsio ./atm_ensmean
-		$NLN $COMOUT/$COMPONENT/sfcsig/geavg.${cycle}.sfcf${fhr}.nemsio ./sfc_ensmean
+		$NLN $COMOUT/stats/$COMPONENT/${CDUMP_ENS}.${cycle}.atmf${fhr}.nc ./atm_ensmean
+		$NLN $COMOUT/stats/$COMPONENT/${CDUMP_ENS}.${cycle}.sfcf${fhr}.nc ./sfc_ensmean
 	fi
 	$APRUN ${DATA}/$(basename $GETATMENSMEANEXEC) ./ atm_ensmean atm $nfile
 	export err=$?
@@ -132,7 +135,7 @@ while [[ $fhr -le $FHOUR ]]; do
 		exit $err
 	fi
 
-	echo "f${fhr}_done --- $(date -u)" >> $ensavg_nemsio_log
+	echo "f${fhr}_done --- $(date -u)" >> $ensavg_netcdf_log
 	
 	export err=$?
 	$ERRSCRIPT || exit $err

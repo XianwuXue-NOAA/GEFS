@@ -29,26 +29,26 @@ export FHOUT_HF=${FHOUTHF:-3}
 export FHOUT_LF=${FHOUTLF:-6}
 export FHMAX_HF=${FHMAXHF:-240}
 
-export GRIBVERSION=${GRIBVERSION:-grib2}
-export nemsioget=$EXECgfs/nemsio_get
-export ensavg_nemsio_log=$DATA/ensavg_nemsio.$FORECAST_SEGMENT.log
+#export GRIBVERSION=${GRIBVERSION:-grib2}
+#export nemsioget=$EXECgfs/nemsio_get
+export ensavg_netcdf_log=$DATA/ensavg_netcdf.$FORECAST_SEGMENT.log
 
 #############################################################
 # Execute the script
-$HOMEgefs/ush/gefs_ensavg_nemsio.sh $DATA $SHOUR $FHOUT_HF $FHOUT_LF $FHMAXHF $FHOUR $ensavg_nemsio_log
+$HOMEgefs/ush/gefs_ensavg_netcdf.sh $DATA $SHOUR $FHOUT_HF $FHOUT_LF $FHMAXHF $FHOUR $ensavg_netcdf_log
 export err=$?
 if [[ $err != 0 ]]; then
-	echo "FATAL ERROR in ${.sh.file}: gefs_ensavg_nemsio.sh returned a non-zero value!"
+	echo "FATAL ERROR in ${.sh.file}: gefs_ensavg_netcdf.sh returned a non-zero value!"
 	exit $err
 fi
 
 #############################################################
 # SENDCOM
 if [[ $SENDCOM == "YES" ]]; then
-	if [ ! -d $COMOUT/$COMPONENT/misc ]; then
-		mkdir -m 775 -p $COMOUT/$COMPONENT/misc
+	if [ ! -d $COMOUT/stats/$COMPONENT/misc ]; then
+		mkdir -m 775 -p $COMOUT/stats/$COMPONENT/misc
 	fi
-	mv $ensavg_nemsio_log $COMOUT/$COMPONENT/misc/ensavg_nemsio
+	mv $ensavg_netcdf_log $COMOUT/stats/$COMPONENT/misc/ensavg_netcdf
 fi
 #############################################################
 

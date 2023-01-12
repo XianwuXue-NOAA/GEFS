@@ -67,11 +67,11 @@ export PARMgefs=${PARMgefs:-$HOMEgefs/parm}
 ver=${ver:-$(echo ${gefs_ver}|cut -c1-5)}
 export COMIN=${COMIN:-$(compath.py $envir/com/$NET/${ver})/${RUN}.${PDY}/$cyc}
 export COMOUT=${COMOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDY}/$cyc}
-
+mkdir -p ${COMOUT}/stats/atmos
 #############################
 # Source relevant config files
 #############################
-configs="gefs gefs_atmos_ensavg_nemsio"
+configs="gefs gefs_atmos_ensavg_netcdf"
 config_path=$PARMgefs
 for config in $configs; do
     . $config_path/$config.parm
@@ -89,7 +89,7 @@ env | sort
 
 #############################################################
 # Execute the script
-$HOMEgefs/scripts/exgefs_atmos_ensavg_nemsio.sh
+$HOMEgefs/scripts/exgefs_atmos_ensavg_netcdf.sh
 export err=$?
 if [[ $err == 0 ]]; then
     echo "$job completed normally!"
