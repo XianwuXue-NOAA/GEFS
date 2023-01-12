@@ -64,7 +64,7 @@ case $FORECAST_SEGMENT in
     CDATE_1=$($NDATE +$FHINI $PDY$cyc)
     fRestart=$RSTDIR/$(echo $CDATE_1 | cut -c1-8).$(echo $CDATE_1 | cut -c9-10)0000.coupler.res
     if [ -f $fRestart ]; then
-      (( FHINI_2 = fhmaxh + restart_interval ))
+      (( FHINI_2 = fhmaxh + restart_interval_gfs ))
       CDATE_2=$($NDATE +$FHINI_2 $PDY$cyc)
       #fRestart=$RSTDIR/${CDATE_2}.${cyc}0000.coupler.res
       fRestart=$RSTDIR/$(echo $CDATE_2 | cut -c1-8).$(echo $CDATE_2 | cut -c9-10)0000.coupler.res
@@ -93,6 +93,7 @@ case $FORECAST_SEGMENT in
     ;;
 esac
 
+export FHMAX_GFS=$FHMAX
 
 
 export RERUN=${RERUN:-NO}
