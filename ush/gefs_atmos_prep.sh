@@ -29,8 +29,8 @@ if [[ $USE_EARLY_ENKF == YES ]]; then
 
   if [[ $mem = c00 ]]; then
     echo "Working on c00"
-    gmemdir=${COMINgdas}
-    memdir=${COMINgfs}
+    gmemdir=${COMINgdas}/atmos
+    memdir=${COMINgfs}/atmos
   else
     echo "Working on ${mem}"
 
@@ -40,8 +40,8 @@ if [[ $USE_EARLY_ENKF == YES ]]; then
     fi
     memchar="mem"$(printf %03i $cmem)
 
-    gmemdir=${COMINenkf}/${memchar}
-    memdir=${COMINenkfgfs}/${memchar}
+    gmemdir=${COMINenkf}/${memchar}/atmos
+    memdir=${COMINenkfgfs}/${memchar}/atmos
   fi
 
   export INIDIR=$DATA
