@@ -18,122 +18,36 @@ case "$case_in" in
 esac
 export ICERES=$OCNRES
 
+# Source model specific information that is resolution dependent
+source $HOMEgefs/parm/gefs_fv3.parm
 
 echo "BEGIN: config.fcst"
 # Turn off waves if not used for this CDUMP
-#case $WAVE_CDUMP in
-#  both | $CDUMP ) ;; # Don't change
-#  *) DO_WAVE="NO" ;; # Turn waves off
-#esac
+case $WAVE_CDUMP in
+  both | $CDUMP ) ;; # Don't change
+  *) DO_WAVE="NO" ;; # Turn waves off
+esac
 
 # Source component configs if necessary
-#for component in WAVE OCN ICE AERO; do
-#  control="DO_${component}"
-#  if [[ $(eval echo \$$control) == "YES" ]]; then
-#    . $EXPDIR/config.$(echo "$component" | awk '{ print tolower($1) }')
-#  fi
-#done
+for component in WAVE OCN ICE AERO; do
+  control="DO_${component}"
+  if [[ $(eval echo \$$control) == "YES" ]]; then
+    . $EXPDIR/config.$(echo "$component" | awk '{ print tolower($1) }')
+  fi
+done
 
 # Get task specific resources
-#. $EXPDIR/config.resources fcst
-
-if [[ "${machine}" = "WCOSS2" ]]; then
-   export npe_node_max=128
-elif [[ "${machine}" = "JET" ]]; then
-   if [[ ${PARTITION_BATCH} = "xjet" ]]; then
-     export npe_node_max=24
-   elif [[ ${PARTITION_BATCH} = "vjet" || ${PARTITION_BATCH} = "sjet" ]]; then
-     export npe_node_max=16
-   elif [[ ${PARTITION_BATCH} = "kjet" ]]; then
-     export npe_node_max=40
-   fi
-elif [[ ${machine} = "HERA" ]]; then
-   export npe_node_max=40
-elif [[ ${machine} = "S4" ]]; then
-   if [[ ${PARTITION_BATCH} = "s4" ]]; then
-      export npe_node_max=32
-   elif [[ ${PARTITION_BATCH} = "ivy" ]]; then
-      export npe_node_max=20
-   fi
-elif [[ ${machine} = "ORION" ]]; then
-   export npe_node_max=40
-fi
-
-echo "BEGIN: config.nsst" #-------------
-
-# NSST parameters contained within nstf_name
-
-# nstf_name(1) : NST_MODEL (NSST Model) : 0 = OFF, 1 = ON but uncoupled, 2 = ON and coupled
-export NST_MODEL=2
-
-# nstf_name(2) : NST_SPINUP : 0 = OFF, 1 = ON,
-export NST_SPINUP=0
-if [[ "$CDATE" -lt "2017072000" ]]; then
-    export NST_SPINUP=1
-fi
-
-# nstf_name(3) : NST_RESV (Reserved, NSST Analysis) : 0 = OFF, 1 = ON
-export NST_RESV=0
-
-# nstf_name(4,5) : ZSEA1, ZSEA2 the two depths to apply vertical average (bias correction)
-export ZSEA1=0
-export ZSEA2=0
-
-export NST_GSI=3          # default 0: No NST info at all;
-                          #         1: Input NST info but not used in GSI;
-                          #         2: Input NST info, used in CRTM simulation, no Tr analysis
-                          #         3: Input NST info, used in both CRTM simulation and Tr analysis
-export NSTINFO=0          # number of elements added in obs. data array (default = 0)
-if [ $NST_GSI -gt 0 ]; then export NSTINFO=4; fi
-
-echo "END: config.nsst" #-------------
-
+source $HOMEgefs/parm/gefs_fcst_resources.parm
 export domains_stack_size="16000000"
 
-export is_exclusive=True
-
-# org GEFS
-export DELTIM=$DELTIM
-if [[ $FORECAST_SEGMENT = lr ]]; then
-  export DELTIM=$DELTIMLR
+if [[ "$DONST" = "YES" ]]; then
+  source $HOMEgefs/parm/gefs_nsst.parm
 fi
-
-#FV3
-if [[ $FORECAST_SEGMENT = lr ]]; then
-  layout_x=${layout_x_lr:-6}
-  layout_y=${layout_y_lr:-8}
-else
-  if [[ $cplchm = ".true." ]]; then
-    layout_x=${layout_x_chem:-6}
-    layout_y=${layout_y_chem:-8}
-  else
-    layout_x=${layout_x:-6}
-    layout_y=${layout_y:-6}
-  fi
-fi
-export LEVS=${LEVS:-128}
-
-export n_sponge=${n_sponge:-23}
 
 #Writing out
 #export QUILTING=.true.
-
-if [[ $FORECAST_SEGMENT = lr ]]; then
-  export WRITE_GROUP=${WRITE_GROUP_lr:-1}
-  export WRTTASK_PER_GROUP=${WRTTASK_PER_GROUP_lr:-32}
-else
-  if [[ $cplchm = ".true." ]]; then
-    export WRITE_GROUP=${WRITE_GROUP_chem:-1}
-    export WRTTASK_PER_GROUP=${WRTTASK_PER_GROUP_chem:-42}
-  else
-    export WRITE_GROUP=${WRITE_GROUP:-1}
-    export WRTTASK_PER_GROUP=${WRTTASK_PER_GROUP:-16}
-  fi
-fi
 export NUM_FILES=2
 
-export WRITE_NEMSIOFILE=.true.
-export WRITE_NEMSIOFLIP=.true.
 # export LONB=$LONB
 # export LATB=$LATB
 export NSOUT=0
@@ -153,29 +67,14 @@ export FLTFILEGFS=$PARM_POST/postxconfig-NT-GEFS.txt
 export FLTFILEGFSF00=$PARM_POST/postxconfig-NT-GEFS-F00.txt
 export POSTGRB2TBL=$PARM_POST/params_grib2_tbl_new
 
-if [ $OUTPUT_FILE = "nemsio" ]; then
-  export DO_CALC_INCREMENT="YES"
-  export DO_CALC_ANALYSIS="NO"
-fi
-
 # suffix options depending on file format
-if [ $OUTPUT_FILE = "netcdf" ]; then
-  export SUFFIX=".nc"
-  export NEMSIO_IN=".false."
-  export NETCDF_IN=".true."
-else
-  export SUFFIX=".nemsio"
-  export NEMSIO_IN=".true."
-  export NETCDF_IN=".false."
-fi
+export SUFFIX=".nc"
+export NEMSIO_IN=".false."
+export NETCDF_IN=".true."
 #-----
 
 # CPU geopmetry
 export ntiles=${ntiles:-6}
-#export NTASKS_FV3=$(( ${layout_x} * ${layout_y} * 6 + ${WRITE_GROUP} * ${WRTTASK_PER_GROUP} ))
-#export npe_fv3=$NTASKS_FV3
-#export npe_node_max
-
 #PE geometry
 export hyperthread=${hyperthread:-".false."}
 if [[ $FORECAST_SEGMENT = lr ]]; then
@@ -187,93 +86,12 @@ else
     export NTHREADS_FV3=${parallel_threads:-1}
   fi
 fi
-COREPERNODE=${COREPERNODE:-128}
-export cores_per_node=$COREPERNODE
-
-# ---resources - fcst --\/\/
-(( ATMPETS = layout_x * layout_y * 6 ))
-
-# Mediator only uses the atm model PETS or less
-export MEDPETS=${MEDPETS:-ATMPETS}
-
-if [[ ${DO_AERO} == "YES" ]]; then
-  # Aerosol model only uses the atm model PETS
-  export CHMPETS=${ATMPETS}
-  # Aerosol model runs on same PETs as ATM, so don't add to $NTASKS_TOT
-
-  if [[ ${machine} == "HERA" ]]; then
-    # Need more memory on Hera for aerosols, so increase threads to spread it out
-    nth_fv3_gfs=${nth_fv3_gfs:-4}
-  fi
-fi
-
-# If using in-line post, add the write tasks to the ATMPETS
-if [[ ${QUILTING} == ".true." ]]; then
-    (( ATMPETS = ATMPETS + WRITE_GROUP * WRTTASK_PER_GROUP ))
-fi
-export ATMPETS
-NTASKS_TOT=${ATMPETS}
-
-export nth_fcst=${nth_fv3:-2}
-#export nth_fcst_gfs=${nth_fv3_gfs:-2}
-
-export npe_node_fcst=$(echo "${npe_node_max} / ${nth_fcst}" | bc)
-#export npe_node_fcst_gfs=$(echo "${npe_node_max} / ${nth_fcst_gfs}" | bc)
-
-if [[ ${DO_WAVE} == "YES" ]]; then
-  case ${waveGRD} in
-    'gnh_10m aoc_9km gsh_15m') export WAVPETS=140 ;;
-    'gwes_30m') export WAVPETS=100 ;;
-    'mx050') export WAVPETS=240 ;;
-    'mx025') export WAVPETS=80 ;;
-    *)
-      echo "FATAL: Number of PEs not defined for wave grid '${waveGRD}'"
-      echo "  Please add an entry to config.resources within fcst for this grid"
-      exit 3
-  esac
-  (( NTASKS_TOT = NTASKS_TOT + WAVPETS ))
-fi
-
-if [[ ${DO_OCN} == "YES" ]]; then
-  case ${OCNRES} in
-    # Except for 025, these are guesses for now
-    100) export OCNPETS=20 ;;
-    050) export OCNPETS=60 ;;
-    025) export OCNPETS=220 ;;
-    *)
-      echo "FATAL: Number of PEs not defined for ocean resolution ${OCNRES}"
-      echo "  Please add an entry to config.resources within fcst for this resolution"
-      exit 3
-  esac
-  (( NTASKS_TOT = NTASKS_TOT + OCNPETS ))
-fi
-
-if [[ ${DO_ICE} == "YES" ]]; then
-  case ${ICERES} in
-    # Except for 025, these are guesses for now
-    100) export ICEPETS=10 ;;
-    050) export ICEPETS=30 ;;
-    025) export ICEPETS=120 ;;
-    *)
-      echo "FATAL: Number of PEs not defined for ice resolution ${ICERES}"
-      echo "  Please add an entry to config.resources within fcst for this resolution"
-      exit 3
-  esac
-  (( NTASKS_TOT = NTASKS_TOT + ICEPETS ))
-fi
-
-export npe_fcst=${NTASKS_TOT}
 
 # ---resources - fcst --/\/\
 
-# config.fcst
-
-#if [[ "$DONST" = "YES" ]]; then
-#    . $EXPDIR/config.nsst
-#fi
-
 export esmf_profile=".false."
 export esmf_logkind="ESMF_LOGKIND_MULTI_ON_ERROR" #Options: ESMF_LOGKIND_MULTI_ON_ERROR, ESMF_LOGKIND_MULTI, ESMF_LOGKIND_NONE
+
 
 #######################################################################
 # COUPLING COMPONENTS
@@ -313,26 +131,29 @@ fi
 # COUPLING COMPONENTS
 export use_coldstart=".false."
 
-# ---
 
-#FV dynamics parameters
-export TYPE=${TYPE:-"nh"}    # choices:  nh, hydro
-export MONO=${MONO:-"non-mono"}
+#######################################################################
 
 # add two tiered SST options
 export sst2tier=${sst2tier:-NO}
 
 export FCSTEXEC=${FCSTEXEC:-ufs_model.x}
-
 export APRUN=${APRUN:-""}
 
 # OTHER FV# FCST related environment
 export warm_start=${warm_start:-".false."}
 export read_increment=${read_increment:-".false."}
 REMAP_GRID=none     # temporay setting, to void the latlon default
-export REMAP_GRID=${REMAP_GRID:-latlon}        #gaussian or latlon for using fregrid or regrid_nemsio for remapping
+export REMAP_GRID=${REMAP_GRID:-latlon}
 
-# --- config.fcst
+#######################################################################
+# Model configuration
+export TYPE=${TYPE:-"nh"}    # choices:  nh, hydro
+export MONO=${MONO:-"non-mono"}
+
+# Use stratosphere h2o physics
+export h2o_phys=".true."
+
 # Options of stratosphere O3 physics reaction coefficients
 export new_o3forc="YES"
 
@@ -385,7 +206,7 @@ export rf_cutoff=7.5e2
 export d2_bg_k1=0.20
 export d2_bg_k2=0.04
 export dz_min=6
-export n_sponge=42
+export n_sponge=${n_sponge:-42} # gefs is 23
 
 # PBL/turbulance schemes
 export hybedmf=".false."
@@ -418,8 +239,8 @@ export dnats=0
 export cal_pre=".true."
 export do_sat_adj=".false."
 export random_clds=".true."
-# --- config.fcst
 
+#-----------------------For GEFS ----------\/\/-------------
 # set fixed k_split and n_split for dt=450s and 300s
 if [[ $DELTIM = 450 ]]; then
   export k_split=2
@@ -427,7 +248,7 @@ if [[ $DELTIM = 450 ]]; then
 elif [[ $DELTIM = 300 ]]; then
   export k_split=1
   export n_split=8
-else 
+else
   export k_split=${k_split:-2}
   export n_split=${n_split:-6}
 fi
@@ -504,44 +325,11 @@ export FHCYC=${FHCYC:-24}
 #export lgfdlmprad=.true.
 #export effr_in=.true.
 
+#-----------------------For GEFS ----------/\/\-------------
+
 export cnvcld=".true."
-# export imp_physics=${imp_physics:-"11"}
+
 # imp_physics is set in gefs.parm because it is needed in other jobs
-if [[ $imp_physics = 99 ]]; then # ZhaoCarr
-  export ncld=1
-  export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/field_table_zhaocarr"
-  export nwat=2
-elif [[ $imp_physics = 6 ]]; then # WSM6
-  export ncld=2
-  export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/field_table_wsm6"
-  export nwat=6
-elif [[ $imp_physics = 8 ]]; then # Thompson
-  export ncld=2
-  export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/field_table_thompson"
-  export nwat=6
-elif [[ $imp_physics = 11 ]]; then # GFDL
-  export ncld=5
-  if [[ $cplchm = ".true." ]]; then
-    export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/chm_field_table_gfdl"
-  else
-    export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/field_table_gfdl"
-  fi
-
-  export nwat=6
-  export dnats=1
-  export cal_pre=".false."
-  export do_sat_adj=".true."
-  export random_clds=".false."
-  export hord_mt_nh_nonmono=5
-  export hord_xx_nh_nonmono=5
-  export vtdm4_nh_nonmono=0.02
-  export nord=2
-  export dddmp=0.1
-  export d4_bg=0.12
-else
-  echo "Unknown microphysics option, ABORT!"
-fi
-
 if [[ "$imp_physics" -eq 99 ]]; then # ZhaoCarr
   export ncld=1
   export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/field_table_zhaocarr${tbf}"
@@ -574,9 +362,14 @@ elif [[ "$imp_physics" -eq 8 ]]; then # Thompson
   export nord=2
   export dddmp=0.1
   export d4_bg=0.12
+
 elif [[ "$imp_physics" -eq 11 ]]; then # GFDL
   export ncld=5
-  export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/field_table_gfdl${tbf}"
+  if [[ $cplchm = ".true." ]]; then
+    export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/chm_field_table_gfdl"
+  else
+    export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/field_table_gfdl${tbf}"
+  fi
   export nwat=6
   export dnats=1
   export cal_pre=".false."
@@ -601,9 +394,7 @@ fi
 #Use STTP or SPPT
 export ENS_SPS=${ENS_SPS:-.false.}
 
-########################################
 # Stochastic physics parameters
-########################################
 export DO_SPPT=${DO_SPPT:-"YES"}
 export DO_SKEB=${DO_SKEB:-"YES"}
 export DO_SHUM=${DO_SHUM:-"NO"}

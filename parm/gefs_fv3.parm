@@ -119,6 +119,39 @@ case ${case_in} in
         ;;
 esac
 
+# From GEFS gefs_fcst.parm --\/\/--
+export DELTIM=$DELTIM
+if [[ $FORECAST_SEGMENT = lr ]]; then
+  export DELTIM=$DELTIMLR
+fi
+
+if [[ $FORECAST_SEGMENT = lr ]]; then
+  layout_x=${layout_x_lr:-6}
+  layout_y=${layout_y_lr:-8}
+else
+  if [[ $cplchm = ".true." ]]; then
+    layout_x=${layout_x_chem:-6}
+    layout_y=${layout_y_chem:-8}
+  else
+    layout_x=${layout_x:-6}
+    layout_y=${layout_y:-6}
+  fi
+fi
+
+if [[ $FORECAST_SEGMENT = lr ]]; then
+  export WRITE_GROUP=${WRITE_GROUP_lr:-1}
+  export WRTTASK_PER_GROUP=${WRTTASK_PER_GROUP_lr:-32}
+else
+  if [[ $cplchm = ".true." ]]; then
+    export WRITE_GROUP=${WRITE_GROUP_chem:-1}
+    export WRTTASK_PER_GROUP=${WRTTASK_PER_GROUP_chem:-42}
+  else
+    export WRITE_GROUP=${WRITE_GROUP:-1}
+    export WRTTASK_PER_GROUP=${WRTTASK_PER_GROUP:-16}
+  fi
+fi
+# From GEFS gefs_fcst.parm --/\/\--
+
 if [[ "${WRTTASK_PER_GROUP}" -gt "${npe_node_max}" ]]; then export WRTTASK_PER_GROUP=${npe_node_max} ; fi
 #if [[ "${WRTTASK_PER_GROUP_GFS}" -gt "${npe_node_max}" ]]; then export WRTTASK_PER_GROUP_GFS=${npe_node_max} ; fi
 

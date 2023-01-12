@@ -1,0 +1,118 @@
+#! /usr/bin/env bash
+
+########## config.resources ##########
+# Set resource information for job tasks
+# e.g. walltime, node, cores per node, memory etc.
+
+echo "BEGIN: config.resources"
+
+if [[ "${machine}" = "WCOSS2" ]]; then
+   export npe_node_max=128
+elif [[ "${machine}" = "JET" ]]; then
+   if [[ ${PARTITION_BATCH} = "xjet" ]]; then
+     export npe_node_max=24
+   elif [[ ${PARTITION_BATCH} = "vjet" || ${PARTITION_BATCH} = "sjet" ]]; then
+     export npe_node_max=16
+   elif [[ ${PARTITION_BATCH} = "kjet" ]]; then
+     export npe_node_max=40
+   fi
+elif [[ ${machine} = "HERA" ]]; then
+   export npe_node_max=40
+elif [[ ${machine} = "S4" ]]; then
+   if [[ ${PARTITION_BATCH} = "s4" ]]; then
+      export npe_node_max=32
+   elif [[ ${PARTITION_BATCH} = "ivy" ]]; then
+      export npe_node_max=20
+   fi
+elif [[ ${machine} = "ORION" ]]; then
+   export npe_node_max=40
+fi
+
+# fcst
+export is_exclusive=True
+
+# During workflow creation, we need resources for all CDUMPs and CDUMP is undefined
+CDUMP_LIST=${CDUMP:-"gdas gfs"}
+for CDUMP in ${CDUMP_LIST}; do
+    if [[ ${CDUMP} == "gfs" ]]; then
+        export layout_x=${layout_x_gfs}
+        export layout_y=${layout_y_gfs}
+        export WRITE_GROUP=${WRITE_GROUP_GFS}
+        export WRTTASK_PER_GROUP=${WRTTASK_PER_GROUP_GFS}
+    fi
+
+    (( ATMPETS = layout_x * layout_y * 6 ))
+
+    # Mediator only uses the atm model PETS or less
+    export MEDPETS=${MEDPETS:-ATMPETS}
+
+    if [[ ${DO_AERO} == "YES" ]]; then
+        # Aerosol model only uses the atm model PETS
+        export CHMPETS=${ATMPETS}
+        # Aerosol model runs on same PETs as ATM, so don't add to $NTASKS_TOT
+
+        if [[ ${machine} == "HERA" ]]; then
+            # Need more memory on Hera for aerosols, so increase threads to spread it out
+            nth_fv3_gfs=${nth_fv3_gfs:-4}
+        fi
+    fi
+
+    # If using in-line post, add the write tasks to the ATMPETS
+    if [[ ${QUILTING} == ".true." ]]; then
+        (( ATMPETS = ATMPETS + WRITE_GROUP * WRTTASK_PER_GROUP ))
+    fi
+    export ATMPETS
+    NTASKS_TOT=${ATMPETS}
+
+    export nth_fcst=${nth_fv3:-2}
+    #export nth_fcst_gfs=${nth_fv3_gfs:-2}
+
+    export npe_node_fcst=$(echo "${npe_node_max} / ${nth_fcst}" | bc)
+    #export npe_node_fcst_gfs=$(echo "${npe_node_max} / ${nth_fcst_gfs}" | bc)
+
+    if [[ ${DO_WAVE} == "YES" ]]; then
+        case ${waveGRD} in
+            'gnh_10m aoc_9km gsh_15m') export WAVPETS=140 ;;
+            'gwes_30m') export WAVPETS=100 ;;
+            'mx050') export WAVPETS=240 ;;
+            'mx025') export WAVPETS=80 ;;
+            *)
+                echo "FATAL: Number of PEs not defined for wave grid '${waveGRD}'"
+                echo "  Please add an entry to config.resources within fcst for this grid"
+                exit 3
+        esac
+        (( NTASKS_TOT = NTASKS_TOT + WAVPETS ))
+    fi
+
+    if [[ ${DO_OCN} == "YES" ]]; then
+        case ${OCNRES} in
+            # Except for 025, these are guesses for now
+            100) export OCNPETS=20 ;;
+            050) export OCNPETS=60 ;;
+            025) export OCNPETS=220 ;;
+            *)
+                echo "FATAL: Number of PEs not defined for ocean resolution ${OCNRES}"
+                echo "  Please add an entry to config.resources within fcst for this resolution"
+                exit 3
+        esac
+        (( NTASKS_TOT = NTASKS_TOT + OCNPETS ))
+    fi
+
+    if [[ ${DO_ICE} == "YES" ]]; then
+        case ${ICERES} in
+            # Except for 025, these are guesses for now
+            100) export ICEPETS=10 ;;
+            050) export ICEPETS=30 ;;
+            025) export ICEPETS=120 ;;
+            *)
+                echo "FATAL: Number of PEs not defined for ice resolution ${ICERES}"
+                echo "  Please add an entry to config.resources within fcst for this resolution"
+                exit 3
+        esac
+        (( NTASKS_TOT = NTASKS_TOT + ICEPETS ))
+    fi
+
+    export npe_fcst=${NTASKS_TOT}
+done
+
+echo "END: config.resources"

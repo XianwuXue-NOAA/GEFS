@@ -114,6 +114,12 @@ export LONBLR=${LONBLR:-1536}
 export MTNRSLLR=${MTNRSLLR:-766.1536.768}
 export NTRACLR=${NTRACLR:-3}
 
+if [[ ${FORECAST_SEGMENT} == "hr" ]]; then
+  export LEVS=$((LEVSHR + 1))
+else
+  export LEVS=$((LEVSLR + 1))
+fi
+
 #for new vertical coordinate
 export IDVC=${IDVC:-2}
 #export IDVM=32
