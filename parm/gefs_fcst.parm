@@ -18,15 +18,21 @@ case "$case_in" in
 esac
 export ICERES=$OCNRES
 
+if [[ ${FORECAST_SEGMENT} == "hr" ]]; then
+  export LEVS=$((LEVSHR + 1))
+else
+  export LEVS=$((LEVSLR + 1))
+fi
+
 # Source model specific information that is resolution dependent
 source $HOMEgefs/parm/gefs_fv3.parm
 
 echo "BEGIN: config.fcst"
 # Turn off waves if not used for this CDUMP
-case $WAVE_CDUMP in
-  both | $CDUMP ) ;; # Don't change
-  *) DO_WAVE="NO" ;; # Turn waves off
-esac
+#case $WAVE_CDUMP in
+#  both | $CDUMP ) ;; # Don't change
+#  *) DO_WAVE="NO" ;; # Turn waves off
+#esac
 
 # Source component configs if necessary
 for component in WAVE OCN ICE AERO; do
@@ -36,16 +42,7 @@ for component in WAVE OCN ICE AERO; do
   fi
 done
 
-# Get task specific resources
-source $HOMEgefs/parm/gefs_fcst_resources.parm
-export domains_stack_size="16000000"
-
-if [[ "$DONST" = "YES" ]]; then
-  source $HOMEgefs/parm/gefs_nsst.parm
-fi
-
 #Writing out
-#export QUILTING=.true.
 export NUM_FILES=2
 
 # export LONB=$LONB
@@ -72,6 +69,15 @@ export SUFFIX=".nc"
 export NEMSIO_IN=".false."
 export NETCDF_IN=".true."
 #-----
+
+# Get task specific resources
+source $HOMEgefs/parm/gefs_fcst_resources.parm
+export domains_stack_size="16000000"
+
+if [[ "$DONST" = "YES" ]]; then
+  source $HOMEgefs/parm/gefs_nsst.parm
+fi
+
 
 # CPU geopmetry
 export ntiles=${ntiles:-6}

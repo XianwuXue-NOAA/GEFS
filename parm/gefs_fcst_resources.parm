@@ -32,15 +32,6 @@ fi
 export is_exclusive=True
 
 # During workflow creation, we need resources for all CDUMPs and CDUMP is undefined
-CDUMP_LIST=${CDUMP:-"gdas gfs"}
-for CDUMP in ${CDUMP_LIST}; do
-    if [[ ${CDUMP} == "gfs" ]]; then
-        export layout_x=${layout_x_gfs}
-        export layout_y=${layout_y_gfs}
-        export WRITE_GROUP=${WRITE_GROUP_GFS}
-        export WRTTASK_PER_GROUP=${WRTTASK_PER_GROUP_GFS}
-    fi
-
     (( ATMPETS = layout_x * layout_y * 6 ))
 
     # Mediator only uses the atm model PETS or less
@@ -113,6 +104,5 @@ for CDUMP in ${CDUMP_LIST}; do
     fi
 
     export npe_fcst=${NTASKS_TOT}
-done
 
 echo "END: config.resources"
