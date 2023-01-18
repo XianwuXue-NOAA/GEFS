@@ -45,10 +45,10 @@ fi
 #############################################################
 # SENDCOM
 if [[ $SENDCOM == "YES" ]]; then
-	if [ ! -d $COMOUT/stats/$COMPONENT/misc ]; then
-		mkdir -m 775 -p $COMOUT/stats/$COMPONENT/misc
+	if [ ! -d $COMOUT/${mem_ens}/$COMPONENT/misc ]; then
+		mkdir -m 775 -p $COMOUT/${mem_ens}/$COMPONENT/misc
 	fi
-	mv $ensavg_netcdf_log $COMOUT/stats/$COMPONENT/misc/ensavg_netcdf
+	mv $ensavg_netcdf_log $COMOUT/${mem_ens}/$COMPONENT/misc/ensavg_netcdf
 fi
 #############################################################
 
