@@ -64,7 +64,7 @@ fhr=$SHOUR
 while [[ $fhr -le $FHOUR ]]; do
   CDUMP_ENS=gefs #geavg
 	fhr=$(printf %03i $fhr)
-	logfile="$COMOUT/stats/$COMPONENT/${CDUMP_ENS}.${cycle}.logf${fhr}.txt"
+	logfile="$COMOUT/${mem_ens}/$COMPONENT/${CDUMP_ENS}.${cycle}.logf${fhr}.txt"
 	if [[ -f $logfile ]]; then
 		echo "netcdf average file $logfile exists, skipping."
 		if [ $fhr -ge $FHMAXFH ]; then
@@ -114,8 +114,8 @@ while [[ $fhr -le $FHOUR ]]; do
 	
   
 	if [[ $SENDCOM == "YES" ]]; then
-		$NLN $COMOUT/stats/$COMPONENT/${CDUMP_ENS}.${cycle}.atmf${fhr}.nc ./atm_ensmean
-		$NLN $COMOUT/stats/$COMPONENT/${CDUMP_ENS}.${cycle}.sfcf${fhr}.nc ./sfc_ensmean
+		$NLN $COMOUT/${mem_ens}/$COMPONENT/${CDUMP_ENS}.${cycle}.atmf${fhr}.nc ./atm_ensmean
+		$NLN $COMOUT/${mem_ens}/$COMPONENT/${CDUMP_ENS}.${cycle}.sfcf${fhr}.nc ./sfc_ensmean
 	fi
 	$APRUN ${DATA}/$(basename $GETATMENSMEANEXEC) ./ atm_ensmean atm $nfile
 	export err=$?
