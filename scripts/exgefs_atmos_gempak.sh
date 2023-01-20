@@ -13,18 +13,6 @@ for var in DATA npert GEMPAK_RES COMIN COMOUT COMPONENT fstart fend FHMAXHF FHOU
 	echo "$var = ${!var}"
 done
 
-if [[ $SENDCOM == "YES" ]]; then
-    gempak_out=${COMOUT}/$COMPONENT/gempak
-    gempak_log_out=${COMOUT}/$COMPONENT/misc/gempak
-else
-    gempak_out=${DATA}/gempak_out
-    gempak_log_out=${DATA}/misc/gempak
-fi
-
-if [ ! -d "${gempak_log_out}" ]; then
-    mkdir -p ${gempak_log_out}
-fi
-
 ########################################################
 ## Get member list
 ########################################################
@@ -36,21 +24,34 @@ echo memberlist=$memberlist
 ########################################################
 for member in $memberlist; do
     export RUNM=ge${member}
+
+    if [[ $SENDCOM == "YES" ]]; then
+        gempak_out=${COMOUT}/${member}/$COMPONENT/products/gempak
+        gempak_log_out=${COMOUT}/${member}/$COMPONENT/misc/gempak
+    else
+        gempak_out=${DATA}/gempak_out
+        gempak_log_out=${DATA}/misc/gempak
+    fi
+
+    if [ ! -d "${gempak_log_out}" ]; then
+        mkdir -p ${gempak_log_out}
+    fi
+
     for resolution in ${GEMPAK_RES}; do
         case $resolution in
             (1p00)
-                gempak_in=$COMIN/$COMPONENT/pgrb2a1p0
-                export pdgrbType=pgrb2a
+                gempak_in=$COMIN/${member}/$COMPONENT/products/1p00a #pgrb2a1p0
+                export pdgrbType=${resolution}a #pgrb2a
                 export fend=${fhmaxh:-384}
                 ;;
             (0p50)
-                gempak_in=$COMIN/$COMPONENT/pgrb2ap5
-                export pdgrbType=pgrb2a
+                gempak_in=$COMIN/${member}/$COMPONENT/products/0p50a #pgrb2ap5
+                export pdgrbType=${resolution}a #pgrb2a
                 export fend=${fhmaxh:-384}
                 ;;
             (0p25)
-                gempak_in=$COMIN/$COMPONENT/pgrb2sp25
-                export pdgrbType=pgrb2s
+                gempak_in=$COMIN/${member}/$COMPONENT/products/0p25s #pgrb2sp25
+                export pdgrbType=${resolution}s #pgrb2s
                 export fend=${FHMAXHF:-240}
                 ;;
             (*)
