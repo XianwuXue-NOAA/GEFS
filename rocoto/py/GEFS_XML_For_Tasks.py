@@ -1029,7 +1029,7 @@ def get_param_of_task(dicBase, taskname):
                         sDep += '\n\t<datadep><cyclestr>&WORKDIR;/nwges/dev/gefs.@Y@m@d/@H/c00/fv3_increment.nc</cyclestr></datadep>'
                 else:
                     if DoesTaskExist(dicBase, "atmos_prep"):
-                        sDep += '\n\t<taskdep task="atmos_prep_#member#"/>'
+                        sDep += '\n\t<taskdep task="atmos_prep_#member#"/>\n\t<taskdep task="atmos_prep_c00"/>'
 
                 # elif DoesTaskExist(dicBase, "atmos_prep"):  # *_Reloc
                 #    sDep += '\n\t<taskdep task="atmos_prep"/>'
