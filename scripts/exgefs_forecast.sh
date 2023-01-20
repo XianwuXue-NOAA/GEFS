@@ -52,7 +52,7 @@ case $FORECAST_SEGMENT in
      if [[ $RERUN != "YES" ]] ; then
       export CDATE_RST=$($NDATE +$FHINI $PDY$cyc)
     fi
-    CASE=$CASEHR; FHMAX=$fhmaxh; FHOUT=$FHOUTLF; FHZER=6;
+    CASE=$CASEHR; FHMAX=$((fhmaxh+1)); FHOUT=$FHOUTLF; FHZER=6;
     MTNRSL=$MTNRSLFV; LONB=$LONBFV; LATB=$LATBFV;
     FHMAX_HF=$FHMAXHF; FHOUT_HF=$FHOUTHF; 
     FHINI=$FHINI;
@@ -122,10 +122,6 @@ export ENS_NUM=1
 # Forecast Input Variables
 #
 export fhstoch=$restart_interval
-
-if [[ $FORECAST_SEGMENT = hr ]] ; then
-  (( FHMAX = FHMAX + 1 ))
-fi
 
 if [[ $RERUN = "YES" ]] ; then
   export warm_start=.true.
