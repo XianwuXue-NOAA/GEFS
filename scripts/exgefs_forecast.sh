@@ -42,7 +42,7 @@ case $FORECAST_SEGMENT in
   hr)
     echo "Integrate the model for the Half-Month range segment"
     filecount=$(ls -l $RSTDIR/*coupler* | wc -l )
-    if (( filecount < 3 )); then
+    if (( filecount < 1 )); then
       export RERUN="NO" 
     else
       export RERUN="YES"
@@ -80,7 +80,7 @@ case $FORECAST_SEGMENT in
     fi
     export RERUN="YES"
     export cplwav=.false.
-    CASE=$CASELR; FHMAX=$fhmax; FHOUT=$FHOUTLF; FHZER=6;
+    CASE=$CASELR; FHMAX=$((fhmax+1)); FHOUT=$FHOUTLF; FHZER=6;
     MTNRSL=$MTNRSLLR; LONB=$LONBLR; LATB=$LATBLR;
     FHMAX_HF=$FHMAXHF; FHOUT_HF=$FHOUTHF;
     FHINI=$FHINI;
