@@ -14,12 +14,8 @@ else
     fi
 fi
 
-if [[ $target == "wcoss2" ]] || [[ $target == "wcoss_dell_p3" ]] || [[ $target == "hera" ]]; then
-    module use ${cwd}/../modulefiles/gefs
-    module load ${progname}.${target}.lua
-else
-    source ../modulefiles/gefs/${progname}.$target
-fi
+module use ${cwd}/../modulefiles/gefs
+module load ${progname}.${target}.lua
 
 # Check final exec folder exists
 if [ ! -d "../exec" ]; then
