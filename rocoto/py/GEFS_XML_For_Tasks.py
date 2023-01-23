@@ -107,6 +107,12 @@ def config_tasknames(dicBase):
             sTaskName = "taskname_{0}".format(iTaskName_Num)
             dicBase[sTaskName.upper()] = "enspost_hr"
 
+            # ---atmos_awips_hr
+            if dicBase['RUN_MAKESBN'].upper()[0] == "Y":
+                iTaskName_Num += 1
+                sTaskName = "taskname_{0}".format(iTaskName_Num)
+                dicBase[sTaskName.upper()] = "atmos_awips_hr"
+
             if dicBase['cplwav'] == ".true.":
                 # ---wave_post
                 iTaskName_Num += 1
@@ -152,6 +158,12 @@ def config_tasknames(dicBase):
             sTaskName = "taskname_{0}".format(iTaskName_Num)
             dicBase[sTaskName.upper()] = "enspost_lr"
 
+            # -- atmos_awips_lr
+            if dicBase['RUN_MAKESBN'].upper()[0] == "Y":
+                iTaskName_Num += 1
+                sTaskName = "taskname_{0}".format(iTaskName_Num)
+                dicBase[sTaskName.upper()] = "atmos_awips_lr"
+
         # #    <!-- gempak jobs -->
         if dicBase['RUN_GEMPAK'].upper()[0] == "Y":
             # ---gempak
@@ -184,18 +196,6 @@ def config_tasknames(dicBase):
             iTaskName_Num += 1
             sTaskName = "taskname_{0}".format(iTaskName_Num)
             dicBase[sTaskName.upper()] = "postsnd"
-
-         # #    <!-- atmos_awips jobs -->
-        if dicBase['RUN_MAKESBN'].upper()[0] == "Y":
-            # ---atmos_awips_hr
-            iTaskName_Num += 1
-            sTaskName = "taskname_{0}".format(iTaskName_Num)
-            dicBase[sTaskName.upper()] = "atmos_awips_hr"
-
-            # ---atmos_awips_lr
-            iTaskName_Num += 1
-            sTaskName = "taskname_{0}".format(iTaskName_Num)
-            dicBase[sTaskName.upper()] = "atmos_awips_lr"
 
         # #    <!-- track and gensis jobs -->
         if dicBase['RUN_TRACK'].upper()[0] == "Y":
@@ -368,8 +368,6 @@ def create_metatask_task(dicBase, taskname="atmos_prep", sPre="\t", GenTaskEnt=F
         strings += sPre_2 + '<walltime>{0}</walltime>\n'.format(sWalltime)
 
     if WHERE_AM_I.upper() == "wcoss2".upper():
-        ppn = dicBase["{0}_ppn".format(taskname).upper()]
-        strings += sPre_2 + '<nodesize>{0}</nodesize>\n'.format(ppn)
         strings += sPre_2 + '<native>-l debug=true</native>\n'
         strings += sPre_2 + '<native>-j oe</native>\n'
         strings += sPre_2 + '<native>-S /bin/bash</native>\n'
@@ -383,28 +381,10 @@ def create_metatask_task(dicBase, taskname="atmos_prep", sPre="\t", GenTaskEnt=F
 
     # -------------------sNodes-------------------
     if sNodes != "":
-        if WHERE_AM_I.upper() == "cray".upper() and sQueue.upper() == "&TRANSFER_QUEUE;":
-            strings += sPre_2 + '<nodes>{0}</nodes><shared></shared>\n'.format(sNodes)
-        else:
-            strings += sPre_2 + '<nodes>{0}</nodes>\n'.format(sNodes)
-
-        if WHERE_AM_I.upper() in ["wcoss_dell_p3".upper(), "wcoss_dell_p35".upper()]:
-            if sQueue.endswith("_shared"):
-                strings += sPre_2 + '<native>-R "affinity[core(1):distribute=pack]"</native>\n'
-                if sMemory == "":
-                    strings += sPre_2 + '<native>-R "rusage[mem=4608]"</native>\n'
-                else:
-                    if sMemory.endswith("M"):
-                        iMemory = sMemory.replace("M","")
-                    strings += sPre_2 + '<native>-R "rusage[mem={0}]"</native>\n'.format(iMemory)
+        strings += sPre_2 + '<nodes>{0}</nodes>\n'.format(sNodes)
 
     # -------------------sNodes-------------------
-
-    if WHERE_AM_I.upper() == "cray".upper():
-        strings += sPre_2 + '<native>-cwd &tmpnwprd;</native>\n'
-    elif WHERE_AM_I.upper() == "hera".upper():
-        strings += ""
-    elif WHERE_AM_I.upper() in ["wcoss_dell_p3".upper(), "wcoss_dell_p35".upper()]:
+    if WHERE_AM_I.upper() == "hera".upper():
         strings += ""
     elif WHERE_AM_I.upper() == "wcoss2".upper():
         strings += ""
@@ -417,32 +397,13 @@ def create_metatask_task(dicBase, taskname="atmos_prep", sPre="\t", GenTaskEnt=F
     # -------------------Memory-------------------
 
     # -------------------Native-------------------
-    if WHERE_AM_I.upper() == "cray".upper():
-        if taskname in ["archive_atm", "archive_wave", "archive_chem"]:
-            strings += ""
-        else:
-            strings += sPre_2 + '<native>-extsched "CRAYLINUX[]"</native>\n'
-    elif WHERE_AM_I.upper() == "Hera".upper():
+    if WHERE_AM_I.upper() == "Hera".upper():
         strings += ""  # \n
-    elif WHERE_AM_I.upper() in ["wcoss_dell_p3".upper(), "wcoss_dell_p35".upper()]:
-        if taskname in metatask_names:
-            strings += ""
-        else:
-            if sQueue.endswith("_shared") and taskname in ['ensstat_hr', 'enspost_hr', 'ensstat_lr', 'enspost_lr', 'gempak', 'gempak_meta', 'avgspr_gempak_meta', 'ensavg_nemsio', 'postsnd', "fcst_post_manager", 'atmos_prep']:
-                strings += ""
-            else:
-                strings += sPre_2 + "<native>-R 'affinity[core(1)]'</native>\n"
     elif WHERE_AM_I.upper() == "wcoss2".upper():
-
         if sMemory == "":  # if there is no memory in user configure, then add "exclhost" on wcoss2
             strings += sPre_2 + '<native>-l place=vscatter:exclhost</native>\n'
         else:
             strings += sPre_2 + '<native>-l place=vscatter</native>\n'
-
-        #sVarName_prepost = "{0}_prepost".format(taskname).upper()
-        #if sVarName_prepost in dicBase:
-        #    strings += sPre_2 + f'<native>-l prepost={dicBase[sVarName_prepost]}</native>\n'
-
     else:
         strings += sPre_2 + '<native>-extsched "CRAYLINUX[]"</native>\n'
     # -------------------Native-------------------
@@ -490,35 +451,35 @@ def create_metatask_task(dicBase, taskname="atmos_prep", sPre="\t", GenTaskEnt=F
 
     # Add command
     sPRE = "&PRE; "
-    if WHERE_AM_I.upper() in ["wcoss_dell_p3".upper(), "wcoss_dell_p35".upper(), "WCOSS2".upper(), "hera".upper()]:
+    if WHERE_AM_I.upper() in ["WCOSS2".upper(), "hera".upper()]:
         sPRE = ""
 
     if taskname in ['keep_init', 'copy_init', 'keep_data_atm', 'archive_atm', 'cleanup_atm', 'keep_data_wave', 'archive_wave', 'cleanup_wave', 'keep_data_chem', 'archive_chem', 'cleanup_chem']:
-        if WHERE_AM_I.upper() in ["wcoss_dell_p3".upper(), "wcoss_dell_p35".upper(), "WCOSS2".upper()]:
+        if WHERE_AM_I.upper() in ["WCOSS2".upper()]:
             strings += sPre_2 + '<command><cyclestr>{1}&BIN;/{0}.sh</cyclestr></command>\n'.format(taskname, sPRE)
         else:
             strings += sPre_2 + '<command><cyclestr>{1}&BIN;/../py/{0}.py</cyclestr></command>\n'.format(taskname, sPRE)
     elif taskname in ['forecast_hr', 'forecast_lr', 'chem_forecast']:
         strings += sPre_2 + '<command><cyclestr>{1}&BIN;/{0}.sh</cyclestr></command>\n'.format("forecast_hr", sPRE)
     elif taskname in ['prdgen_hr', 'prdgen_lr', 'prdgen_gfs', 'chem_prdgen']:
-        if WHERE_AM_I.upper() in ["wcoss_dell_p3".upper(), "wcoss_dell_p35".upper(), "WCOSS2".upper()]:
+        if WHERE_AM_I.upper() in ["WCOSS2".upper()]:
             strings += sPre_2 + '<command><cyclestr>{1}&BIN;/{0}.sh</cyclestr></command>\n'.format("prdgen_hr", sPRE)
         else:
             strings += sPre_2 + '<command><cyclestr>{1}. &BIN;/{0}.sh</cyclestr></command>\n'.format("prdgen_hr", sPRE)
     elif taskname in ['post_hr', 'post_lr', 'chem_post']:
         strings += sPre_2 + '<command><cyclestr>{1}&BIN;/{0}.sh</cyclestr></command>\n'.format("post_hr", sPRE)
     elif taskname in ['ensstat_hr', 'ensstat_lr']:
-        if WHERE_AM_I.upper() in ["wcoss_dell_p3".upper(), "wcoss_dell_p35".upper(), "WCOSS2".upper()]:
+        if WHERE_AM_I.upper() in ["WCOSS2".upper()]:
             strings += sPre_2 + '<command><cyclestr>{1}&BIN;/{0}.sh</cyclestr></command>\n'.format("ensstat_hr", sPRE)
         else:
             strings += sPre_2 + '<command><cyclestr>{1}. &BIN;/{0}.sh</cyclestr></command>\n'.format("ensstat_hr", sPRE)
     elif taskname in ['enspost_hr', 'enspost_lr']:
-        if WHERE_AM_I.upper() in ["wcoss_dell_p3".upper(), "wcoss_dell_p35".upper(), "WCOSS2".upper()]:
+        if WHERE_AM_I.upper() in ["WCOSS2".upper()]:
             strings += sPre_2 + '<command><cyclestr>{1}&BIN;/{0}.sh</cyclestr></command>\n'.format("enspost", sPRE)
         else:
             strings += sPre_2 + '<command><cyclestr>{1}. &BIN;/{0}.sh</cyclestr></command>\n'.format("enspost", sPRE)
     elif taskname in ['atmos_awips_hr', 'atmos_awips_lr']:
-        if WHERE_AM_I.upper() in ["wcoss_dell_p3".upper(), "wcoss_dell_p35".upper(), "WCOSS2".upper()]:
+        if WHERE_AM_I.upper() in ["WCOSS2".upper()]:
             strings += sPre_2 + '<command><cyclestr>{1}&BIN;/{0}.sh</cyclestr></command>\n'.format("atmos_awips", sPRE)
         else:
             strings += sPre_2 + '<command><cyclestr>{1}. &BIN;/{0}.sh</cyclestr></command>\n'.format("atmos_awips", sPRE)
@@ -1370,11 +1331,7 @@ def get_param_of_task(dicBase, taskname):
     if taskname in ['forecast_hr', 'forecast_lr', 'chem_forecast']:
         iTotal_Tasks, iNodes, iPPN, iTPP = calc_fcst_resources(dicBase, taskname=taskname)
         WHERE_AM_I = dicBase['WHERE_AM_I'].upper()
-
-        if WHERE_AM_I.upper() in ["wcoss_dell_p3".upper(), "wcoss_dell_p35".upper()]:
-            sNodes = "{0}:ppn={1}".format(iNodes, iPPN)
-        else:
-            sNodes = "{0}:ppn={1}:tpp={2}".format(iNodes, iPPN, iTPP)
+        sNodes = "{0}:ppn={1}:tpp={2}".format(iNodes, iPPN, iTPP)
     # For gempak
     if taskname == "gempak":
         iTotal_Tasks, iNodes, iPPN, iTPP = calc_gempak_resources(dicBase)
@@ -1397,30 +1354,15 @@ def calc_gempak_resources(dicBase):
         iTotal_Tasks *= nGEMPAK_RES
 
     iTPP = 1
-    if WHERE_AM_I.upper() == "CRAY":
-        iNodes = iTotal_Tasks
-        iPPN = 1
 
-    elif WHERE_AM_I.upper() == "HERA":
-        if (npert + 1) <= ncores_per_node:
-            iNodes = nGEMPAK_RES
-            iPPN = (npert + 1 + 2)
-        #elif nGEMPAK_RES <= ncores_per_node:
-        #    iNodes = (npert + 1 + 2)
-        #    iPPN = nGEMPAK_RES
-        else:
-            #iNodes = (npert + 1 + 2)
-            #iPPN = nGEMPAK_RES
-            iPPN = ncores_per_node
-            iNodes = math.ceil(iTotal_Tasks / (iPPN * 1.0))
-
-    elif WHERE_AM_I.upper() in ["wcoss_dell_p3".upper(), "wcoss_dell_p35".upper()]:
+    if WHERE_AM_I.upper() == "HERA":
         if (npert + 1) <= ncores_per_node:
             iNodes = nGEMPAK_RES
             iPPN = (npert + 1 + 2)
         else:
             iPPN = ncores_per_node
             iNodes = math.ceil(iTotal_Tasks / (iPPN * 1.0))
+
     elif WHERE_AM_I.upper() == "wcoss2".upper():
         iPPN = iTotal_Tasks
         iNodes = math.ceil(iTotal_Tasks / (iPPN * 1.0))
@@ -1449,13 +1391,7 @@ def calc_gempak_resources(dicBase):
 def Get_NCORES_PER_NODE(dicBase):
     WHERE_AM_I = dicBase['WHERE_AM_I'].upper()
 
-    if WHERE_AM_I == 'cray'.upper():
-        ncores_per_node = 24
-    elif WHERE_AM_I == "hera".upper():
-        ncores_per_node = 40
-    elif WHERE_AM_I == "wcoss_dell_p3".upper():
-        ncores_per_node = 28
-    elif WHERE_AM_I == "wcoss_dell_p35".upper():
+    if WHERE_AM_I == "hera".upper():
         ncores_per_node = 40
     elif WHERE_AM_I == "wcoss2".upper():
         ncores_per_node = 128
