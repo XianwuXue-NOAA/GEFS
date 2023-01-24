@@ -7,9 +7,9 @@ case $cyc in
     18) memshift=60;;
 esac
 
-export pdycycp=$($NDATE -$fhrp $PDY$cyc)
-export pdyp=$(echo $pdycycp|cut -c1-8)
-export cycp=$(echo $pdycycp|cut -c9-10)
+#export pdycycp=$($NDATE -$fhrp $PDY$cyc)
+#export pdyp=$(echo $pdycycp|cut -c1-8)
+#export cycp=$(echo $pdycycp|cut -c9-10)
 
 export CDATE=$PDY$cyc
 

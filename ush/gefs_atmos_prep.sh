@@ -14,7 +14,11 @@ export nmem=$(echo $mem|cut -c 2-)
 nmem=${nmem#0}
 
 #export INIDIR=$DATA
-export OUTDIR=${COMOUT}/$mem/atmos/INPUT
+if [[ ${NewCOM} == "YES" ]]; then
+  export OUTDIR=${COMOUT}/$mem/atmos/INPUT
+else
+  export OUTDIR=${COMOUT}/atmos/init/${mem}
+fi
 #mkdir -p $INIDIR
 mkdir -p $OUTDIR
 
@@ -150,7 +154,11 @@ if [[ $SENDCOM == "YES" ]]; then
   #fi
   if [[ $CONVERT_SFC == ".true." ]]; then
     for mem2 in $memberlist; do
-      COMDIR2=$COMOUT/${mem2}/atmos/INPUT #init/$mem2
+      if [[ ${NewCOM} == "YES" ]]; then
+        COMDIR2=$COMOUT/${mem2}/atmos/INPUT #init/$mem2
+      else
+        COMDIR2=$COMOUT/atmos/init/${mem2}
+      fi
       mkdir -p $COMDIR2
       for tile in tile1 tile2 tile3 tile4 tile5 tile6; do
         #$NCP $GESOUT/init/$mem/sfc_data.${tile}.nc $COMDIR2

@@ -38,7 +38,6 @@ export infile="${3}"                   # ${DATA}/${stream}/${stream}.in
 # grid_spec=                # PRDGEN_GRID_SPEC[$stream]
 # hours=                    # PRDGEN_HOURS[$stream]
 # submc=                    # PRDGEN_SUBMC[$stream]
-# submc=                    # PRDGEN_SUBMC[$stream]
 # pgad=                     # PRDGEN_A_DIR[$stream]
 # pgapre=                   # PRDGEN_A_PREFIX[$stream]
 # parmlist_a00=             # PRDGEN_A_LIST_F00[$stream]
@@ -75,7 +74,11 @@ EOF
 export MP_LABELIO=YES
 export GRID=$jobgrid   # GRID is part of the DBN message
 
-CDUMP="gefs" #${RUNMEM}
+if [[ ${NewCOM} == "YES" ]]; then
+  CDUMP="gefs"
+else
+  CDUMP=${RUNMEM}
+fi
 ############################################################
 # clean up missing markers from previous run
 ############################################################
@@ -252,9 +255,15 @@ for hour in $hours; do
     export mcfile=""
     export makepgrb2b="no"
   else
-    export mafile=${COMIN}/$COMPONENT/${CDUMP}.$cycle.master.grb2f$fhr
-    export mifile=${COMIN}/$COMPONENT/${CDUMP}.$cycle.master.grb2if$fhr #${mafile}
-    export mcfile=${COMIN}/$COMPONENT/misc/post/${CDUMP}.$cycle.master.control.f$fhr #${mafile}
+    if [[ ${NewCOM} == "YES" ]]; then
+      export mafile=${COMIN}/$COMPONENT/${CDUMP}.$cycle.master.grb2f$fhr
+      export mifile=${COMIN}/$COMPONENT/${CDUMP}.$cycle.master.grb2if$fhr #${mafile}
+      export mcfile=${COMIN}/$COMPONENT/misc/post/${CDUMP}.$cycle.master.control.f$fhr #${mafile}
+    else
+      export mafile=${COMIN}/$COMPONENT/sfcsig/${CDUMP}.$cycle.master.grb2f$fhr
+      export mifile=${COMIN}/$COMPONENT/sfcsig/${CDUMP}.$cycle.master.grb2if$fhr #${mafile}
+      export mcfile=${COMIN}/$COMPONENT/misc/post/${CDUMP}.$cycle.master.control.f$fhr #${mafile}
+    fi
     if [[ -z "$pgbd" ]]; then
       export makepgrb2b="no"
     else

@@ -26,8 +26,13 @@ for member in $memberlist; do
     export RUNM=ge${member}
 
     if [[ $SENDCOM == "YES" ]]; then
-        gempak_out=${COMOUT}/${member}/$COMPONENT/products/gempak
-        gempak_log_out=${COMOUT}/${member}/$COMPONENT/misc/gempak
+        if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+            gempak_out=${COMOUT}/${member}/$COMPONENT/products/gempak
+            gempak_log_out=${COMOUT}/${member}/$COMPONENT/misc/gempak
+        else
+            gempak_out=${COMOUT}/$COMPONENT/gempak
+            gempak_log_out=${COMOUT}/$COMPONENT/misc/gempak
+        fi
     else
         gempak_out=${DATA}/gempak_out
         gempak_log_out=${DATA}/misc/gempak
@@ -40,18 +45,33 @@ for member in $memberlist; do
     for resolution in ${GEMPAK_RES}; do
         case $resolution in
             (1p00)
-                gempak_in=$COMIN/${member}/$COMPONENT/products/1p00a #pgrb2a1p0
-                export pdgrbType=${resolution}a #pgrb2a
+                if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+                    gempak_in=$COMIN/${member}/$COMPONENT/products/1p00a #pgrb2a1p0
+                    export pdgrbType=${resolution}a #pgrb2a
+                else
+                    gempak_in=$COMIN/$COMPONENT/pgrb2a1p0
+                    export pdgrbType=pgrb2a
+                fi
                 export fend=${fhmaxh:-384}
                 ;;
             (0p50)
-                gempak_in=$COMIN/${member}/$COMPONENT/products/0p50a #pgrb2ap5
-                export pdgrbType=${resolution}a #pgrb2a
+                if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+                    gempak_in=$COMIN/${member}/$COMPONENT/products/0p50a #pgrb2ap5
+                    export pdgrbType=${resolution}a #pgrb2a
+                else
+                    gempak_in=$COMIN/$COMPONENT/pgrb2ap5
+                    export pdgrbType=pgrb2a
+                fi
                 export fend=${fhmaxh:-384}
                 ;;
             (0p25)
-                gempak_in=$COMIN/${member}/$COMPONENT/products/0p25s #pgrb2sp25
-                export pdgrbType=${resolution}s #pgrb2s
+                if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+                    gempak_in=$COMIN/${member}/$COMPONENT/products/0p25s #pgrb2sp25
+                    export pdgrbType=${resolution}s #pgrb2s
+                else
+                    gempak_in=$COMIN/$COMPONENT/pgrb2sp25
+                    export pdgrbType=pgrb2s
+                fi
                 export fend=${FHMAXHF:-240}
                 ;;
             (*)

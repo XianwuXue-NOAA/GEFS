@@ -83,29 +83,13 @@ for config in $configs; do
     fi
 done
 
-#export USE_EARLY_ENKF="YES" # NO means read f006; YES means reading early restart files
-#if [[ $USE_EARLY_ENKF == YES ]]; then
-    mem=$(echo $RUNMEM|cut -c3-5)
-    export COMOUT=${COMOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDY}/$cyc} #/${mem}/$COMPONENT}
-    #export GESOUT=${GESOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDY}/$cyc/${mem}/$COMPONENT}
+export COMOUT=${COMOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDY}/$cyc}
+export COMOUT=${COMOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDY}/${cyc}}
 
-    #export DOIAU=${DOIAU:-"YES"}
-    #export IAUFHRS=${IAUFHRS:-"3,6,9"}
-    #export PREFIX_ATMINC=${PREFIX_ATMINC:-""}
-
-#else
-#    export COMOUT=${COMOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDY}/$cyc/$COMPONENT}
-#    export GESOUT=${GESOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDY}/$cyc/nwges}
-#fi
 export COMINgfs=${COMINgfs:-$(compath.py ${envir}/com/gfs/${gfs_ver})/gfs.${PDY}/${cyc}}
-#export COMINenkf=${COMINenkf:-$(compath.py ${envir}/com/gfs/${gfs_ver})/enkfgdas.${pdyp}/${cycp}}
-#if [[ $USE_EARLY_ENKF == YES ]]; then
-#    export COMINgdas=${COMINgdas:-$(compath.py ${envir}/com/gfs/${gfs_ver})/gdas.${pdyp}/${cycp}}
-    export COMINenkfgfs=${COMINenkfgfs:-$(compath.py ${envir}/com/gfs/${gfs_ver})/enkfgfs.${PDY}/${cyc}}
-#    export NLN=${NLN:-"/bin/ln -sf"}
-#fi
+export COMINenkfgfs=${COMINenkfgfs:-$(compath.py ${envir}/com/gfs/${gfs_ver})/enkfgfs.${PDY}/${cyc}}
 
-NCP=${NCP:-"/bin/cp -rfp"}
+NCP=${NCP:-"/bin/cp -p"}
 
 echo "Environment before calling script"
 env | sort

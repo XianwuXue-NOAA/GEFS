@@ -49,7 +49,12 @@ cp $GEMPAKgefs/fix/*.tbl .
 
 NAGRIB_TABLE=${NAGRIB_TABLE:-${GEMPAKgefs}/fix/nagrib.tbl}
 NAGRIB=nagrib2_nc
-CDUMP_ENS=gefs #${RUNM}
+
+if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+  CDUMP_ENS=gefs #${RUNM}
+else
+  CDUMP_ENS=${RUNM}
+fi
 #
 
 entry=$(grep "^$RUNM " $NAGRIB_TABLE | awk 'index($1,"#") != 1 {print $0}')
@@ -117,7 +122,11 @@ while [ $fhcnt -le $fend ] ; do
 			GEMGRD=${RUNM}${model}_${PDY}${cyc}f${fhr3}
 		else
 			# This is for gefs
-			GRIBIN=${gempak_in}/${CDUMP_ENS}.${cycle}.${pgrdbType}.grb2f${fhr} #${RUNM}.${cycle}.${pgrdbType}.${resolution}.f${fhr}
+      if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+			  GRIBIN=${gempak_in}/${CDUMP_ENS}.${cycle}.${pgrdbType}.grb2f${fhr} #${RUNM}.${cycle}.${pgrdbType}.${resolution}.f${fhr}
+      else
+        GRIBIN=${gempak_in}/${CDUMP_ENS}.${cycle}.${pgrdbType}.${resolution}.f${fhr}
+      fi
 			if [ $resolution = "1p00" ]; then
 				GEMGRD=${CDUMP_ENS}_${PDY}${cyc}f${fhr} #${RUNM}_${PDY}${cyc}f${fhr}
 			else

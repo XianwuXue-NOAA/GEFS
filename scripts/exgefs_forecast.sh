@@ -30,10 +30,19 @@ export COMPONENTwave=${COMPONENTwave:-${RUN}.wave}
 export ERRSCRIPT=err_chk
 export LOGSCRIPT=startmsg
 
-export memdir=${COMIN}/${mem}/${COMPONENT}
-export gmemdir=${COMIN}/${mem}/${COMPONENT}
-export ICSDIR=${COMIN}/${mem}/${COMPONENT}
-export RSTDIR=${COMIN}/${mem}/${COMPONENT}/RESTART
+#export memdir=${COMIN}/${mem}/${COMPONENT}
+#export gmemdir=${COMIN}/${mem}/${COMPONENT}
+if [[ ${NewCOM} == "YES" ]]; then
+  export memdir=${COMIN}/${mem}/${COMPONENT}
+  export gmemdir=${COMIN}/${mem}/${COMPONENT}
+  export ICSDIR=${COMIN}/${mem}/${COMPONENT}/INPUT
+  export RSTDIR=${COMIN}/${mem}/${COMPONENT}/RESTART
+else
+  export memdir=${COMIN}/${COMPONENT}/sfcsig
+  export gmemdir=${COMIN}/${COMPONENT}/sfcsig
+  export ICSDIR=${COMIN}/${COMPONENT}/init/${mem}
+  export RSTDIR=${COMIN}/${COMPONENT}/init/${mem}/RESTART
+fi
 export RSTDIR_ATM=$RSTDIR
 
 mkdir -m 755 -p ${RSTDIR}
@@ -210,8 +219,13 @@ export VERBOSE=YES
 
 ################################################################################
 export CDATE=$PDY$cyc
-export rCDUMP=gefs #$RUNMEM
-export CDUMP=gefs #$RUNMEM
+if [[ ${NewCOM} == "YES" ]]; then
+  export rCDUMP=gefs
+  export CDUMP=gefs
+else
+  export rCDUMP=${RUNMEM}
+  export CDUMP=${RUNMEM}
+fi
 
 if [[ $cplwav = ".true." ]]; then
   # CPU partitioning
