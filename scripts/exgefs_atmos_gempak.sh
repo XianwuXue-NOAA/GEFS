@@ -1,6 +1,6 @@
-#!/bin/ksh
+#! /usr/bin/env bash
 
-echo "$(date -u) begin ${.sh.file}"
+echo "$(date -u) begin ${BASH_SOURCE}"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
@@ -9,7 +9,7 @@ if [[ ${STRICT:-NO} == "YES" ]]; then
 fi
 
 # Print inherited environmnent variables
-for var in DATA npert GEMPAK_RES COMIN COMOUT COMPONENT fstart fend FHMAXHF FHOUTHF FHOUTLF pdgrbType; do
+for var in DATA npert GEMPAK_RES COMIN COMOUT COMPONENT fstart fend FHMAXHF FHOUTHF FHOUTLF; do
 	echo "$var = ${!var}"
 done
 
@@ -75,7 +75,7 @@ for member in $memberlist; do
                 export fend=${FHMAXHF:-240}
                 ;;
             (*)
-                echo "FATAL ERROR in ${.sh.file}: resolution $resoltion not supported!"
+                echo "FATAL ERROR in ${BASH_SOURCE}: resolution $resoltion not supported!"
                 export err=5
                 exit $err
                 ;;
@@ -100,11 +100,11 @@ $APRUN_MPMD
 export err=$?
 
 if [[ $err != 0 ]]; then
-    echo "FATAL ERROR in ${.sh.file}: One or more gempak resolutions in $MP_CMDFILE failed!"
+    echo "FATAL ERROR in ${BASH_SOURCE}: One or more gempak resolutions in $MP_CMDFILE failed!"
     exit $err
 fi
 #############################################################
 
-echo "$(date -u) end ${.sh.file}"
+echo "$(date -u) end ${BASH_SOURCE}"
 
 exit $err

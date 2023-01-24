@@ -1,4 +1,4 @@
-#!/bin/ksh -l
+#! /usr/bin/env bash
 
 set -x
 ulimit -s unlimited
