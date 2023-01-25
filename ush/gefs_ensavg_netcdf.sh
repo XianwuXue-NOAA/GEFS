@@ -1,6 +1,6 @@
-#!/bin/ksh
+#! /usr/bin/env bash
 
-echo "$(date -u) begin ${.sh.file}"
+echo "$(date -u) begin ${BASH_SOURCE}"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
@@ -12,7 +12,7 @@ echo DATA=$DATA
 
 VERBOSE=${VERBOSE:-"YES"}
 if [ $VERBOSE = "YES" ]; then
-   echo $(date) EXECUTING ${.sh.file} $* >&2
+   echo $(date) EXECUTING ${BASH_SOURCE} $* >&2
    set -x
 fi
 
@@ -59,31 +59,44 @@ echo "memberlist=$memberlist"
 $NCP $GETATMENSMEANEXEC $DATA
 $NCP $GETSFCENSMEANEXEC $DATA
 
+if [[ ${NewCOM} == "YES" ]]; then
+  CDUMP_ENS=gefs
+  OUTDIR=${COMOUT}/${COMPONENT}
+else
+  CDUMP_ENS=geavg
+  OUTDIR=${COMOUT}/${COMPONENT}/sfcsig
+fi
 FHINC=$FHOUTHF
 fhr=$SHOUR
 while [[ $fhr -le $FHOUR ]]; do
-  CDUMP_ENS=gefs #geavg
-	fhr=$(printf %03i $fhr)
-	logfile="$COMOUT/${mem_ens}/$COMPONENT/${CDUMP_ENS}.${cycle}.logf${fhr}.txt"
+	fhr=$(printf %03i ${fhr})
+  #fhr0=$(printf %i 10#${fhr})
+	logfile="${OUTDIR}/${CDUMP_ENS}.${cycle}.logf${fhr}.txt"
 	if [[ -f $logfile ]]; then
 		echo "netcdf average file $logfile exists, skipping."
 		if [ $fhr -ge $FHMAXFH ]; then
 			FHINC=$FHOUTLF
 		fi
-		(( fhr = fhr + FHINC ))
+		fhr=$( expr ${fhr} + ${FHINC} )
 		continue
 	fi
 
 	nfile=$npert
 	for mem in $memberlist; do
 		mem2=$(echo $mem | cut -c2-)
-		mem3=$(printf "%03.i" $mem2)
-    CDUMP="gefs" #ge${mem}
+		mem3=$(printf %03i $mem2) #$(printf "%03.i" $mem2)
+    if [[ ${NewCOM} == "YES" ]]; then
+      CDUMP="gefs"
+      INDIR=${COMIN}/${mem}/${COMPONENT}
+    else
+      CDUMP=ge${mem}
+      INDIR=${COMIN}/${COMPONENT}/sfcsig
+    fi
 		ic=0
 		while [ $ic -le $SLEEP_LOOP_MAX ]; do
-			if [ -f  $COMIN/${mem}/$COMPONENT/${CDUMP}.${cycle}.logf${fhr}.txt ]; then
-				$NLN $COMIN/${mem}/$COMPONENT/${CDUMP}.${cycle}.atmf${fhr}.nc ./atm_mem$mem3
-				$NLN $COMIN/${mem}/$COMPONENT/${CDUMP}.${cycle}.sfcf${fhr}.nc ./sfc_mem$mem3
+			if [ -f  ${INDIR}/${CDUMP}.${cycle}.logf${fhr}.txt ]; then
+				$NLN ${INDIR}/${CDUMP}.${cycle}.atmf${fhr}.nc ./atm_mem${mem3}
+				$NLN ${INDIR}/${CDUMP}.${cycle}.sfcf${fhr}.nc ./sfc_mem${mem3}
 				break
 			else
 				ic=$(($ic + 1))
@@ -94,9 +107,9 @@ while [[ $fhr -le $FHOUR ]]; do
 				echo <<- EOF
 					WARNING: ${job} could not find forecast $mem at $(date -u) after waiting ${SLEEP_TIME}s
 						Looked for the following files:
-							Log file: $COMIN/${mem}/$COMPONENT/ge${CDUMP}.${cycle}.logf${fhr}.txt
-							Atm file: $COMIN/${mem}/$COMPONENT/ge${CDUMP}.${cycle}.atmf${fhr}.nc
-							Sfc file: $COMIN/${mem}/$COMPONENT/ge${CDUMP}.${cycle}.sfcf${fhr}.nc
+							Log file: ${INDIR}/${CDUMP}.${cycle}.logf${fhr}.txt
+							Atm file: ${INDIR}/${CDUMP}.${cycle}.atmf${fhr}.nc
+							Sfc file: ${INDIR}/${CDUMP}.${cycle}.sfcf${fhr}.nc
 					EOF
 				msg="WARNING: ${job} was unable to find $mem; will continue but mean may be degraded!"
 				echo "$msg" | mail.py -c $MAIL_LIST
@@ -105,7 +118,7 @@ while [[ $fhr -le $FHOUR ]]; do
 	done
 	if [ $nfile -le 1 ]; then
 		echo <<- EOF
-			FATAL ERROR in ${.sh.file}: Not enough forecast files available to create average at hour $fhr!
+			FATAL ERROR in ${BASH_SOURCE}: Not enough forecast files available to create average at hour $fhr!
 			EOF
 		export err=1
 		$ERRSCRIPT
@@ -114,14 +127,14 @@ while [[ $fhr -le $FHOUR ]]; do
 	
   
 	if [[ $SENDCOM == "YES" ]]; then
-		$NLN $COMOUT/${mem_ens}/$COMPONENT/${CDUMP_ENS}.${cycle}.atmf${fhr}.nc ./atm_ensmean
-		$NLN $COMOUT/${mem_ens}/$COMPONENT/${CDUMP_ENS}.${cycle}.sfcf${fhr}.nc ./sfc_ensmean
+		$NLN ${OUTDIR}/${CDUMP_ENS}.${cycle}.atmf${fhr}.nc ./atm_ensmean
+		$NLN ${OUTDIR}/${CDUMP_ENS}.${cycle}.sfcf${fhr}.nc ./sfc_ensmean
 	fi
 	$APRUN ${DATA}/$(basename $GETATMENSMEANEXEC) ./ atm_ensmean atm $nfile
 	export err=$?
 
 	if [[ $err != 0 ]]; then
-		echo "FATAL ERROR in ${.sh.file}: $(basename $GETATMENSMEANEXEC) failed for f${fhr}!"
+		echo "FATAL ERROR in ${BASH_SOURCE}: $(basename $GETATMENSMEANEXEC) failed for f${fhr}!"
 		$ERRSCRIPT
 		exit $err
 	fi
@@ -130,7 +143,7 @@ while [[ $fhr -le $FHOUR ]]; do
 	export err=$?
 
 	if [[ $err != 0 ]]; then
-		echo "FATAL ERROR in ${.sh.file}: $(basename $GETSFCENSMEANEXEC) failed for f${fhr}!"
+		echo "FATAL ERROR in ${BASH_SOURCE}: $(basename $GETSFCENSMEANEXEC) failed for f${fhr}!"
 		$ERRSCRIPT
 		exit $err
 	fi
@@ -145,9 +158,9 @@ while [[ $fhr -le $FHOUR ]]; do
 	if [ $fhr -ge $FHMAXFH ]; then
 		FHINC=$FHOUTLF
 	fi
-	(( fhr = fhr + FHINC ))
+	fhr=$( expr ${fhr} + ${FHINC} )
 done
 
-echo "$(date -u) end ${.sh.file}"
+echo "$(date -u) end ${BASH_SOURCE}"
 
 exit $err

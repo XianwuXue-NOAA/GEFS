@@ -1,6 +1,6 @@
-#! /bin/ksh
+#! /usr/bin/env bash
 
-echo "$(date -u) begin ${.sh.file}"
+echo "$(date -u) begin ${BASH_SOURCE}"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
@@ -15,7 +15,7 @@ if [[ $FORECAST_SEGMENT = hr ]] ; then
 elif [[ $FORECAST_SEGMENT = lr ]]; then
     LEVS=$LEVSLR 
 else
-	echo "FATAL ERROR in ${.sh.file}: FORECAST_SEGMENT ${FORECAST_SEGMENT} is not supported!"
+	echo "FATAL ERROR in ${BASH_SOURCE}: FORECAST_SEGMENT ${FORECAST_SEGMENT} is not supported!"
 	export err=9
 	exit $err
 fi
@@ -29,29 +29,34 @@ export FHOUT_HF=${FHOUTHF:-3}
 export FHOUT_LF=${FHOUTLF:-6}
 export FHMAX_HF=${FHMAXHF:-240}
 
-#export GRIBVERSION=${GRIBVERSION:-grib2}
-#export nemsioget=$EXECgfs/nemsio_get
 export ensavg_netcdf_log=$DATA/ensavg_netcdf.$FORECAST_SEGMENT.log
 
+#export mem_ens="avg"
+#mkdir -p ${COMOUT}/${mem_ens}/atmos
+if [[ ${NewCOM} == "YES" ]]; then
+  export mem_ens="avg"
+  export COMOUT=${COMOUT}/${mem_ens}
+fi
+mkdir -p ${COMOUT}/${COMPONENT}
 #############################################################
 # Execute the script
 $HOMEgefs/ush/gefs_ensavg_netcdf.sh $DATA $SHOUR $FHOUT_HF $FHOUT_LF $FHMAXHF $FHOUR $ensavg_netcdf_log
 export err=$?
 if [[ $err != 0 ]]; then
-	echo "FATAL ERROR in ${.sh.file}: gefs_ensavg_netcdf.sh returned a non-zero value!"
+	echo "FATAL ERROR in ${BASH_SOURCE}: gefs_ensavg_netcdf.sh returned a non-zero value!"
 	exit $err
 fi
 
 #############################################################
 # SENDCOM
 if [[ $SENDCOM == "YES" ]]; then
-	if [ ! -d $COMOUT/${mem_ens}/$COMPONENT/misc ]; then
-		mkdir -m 775 -p $COMOUT/${mem_ens}/$COMPONENT/misc
+	if [ ! -d ${COMOUT}/${COMPONENT}/misc ]; then
+		mkdir -m 775 -p ${COMOUT}/${COMPONENT}/misc
 	fi
-	mv $ensavg_netcdf_log $COMOUT/${mem_ens}/$COMPONENT/misc/ensavg_netcdf
+	mv $ensavg_netcdf_log ${COMOUT}/${COMPONENT}/misc/ensavg_netcdf
 fi
 #############################################################
 
-echo "$(date -u) end ${.sh.file}"
+echo "$(date -u) end ${BASH_SOURCE}"
 
 exit $err

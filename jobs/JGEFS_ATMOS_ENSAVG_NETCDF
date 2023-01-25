@@ -1,13 +1,13 @@
-#!/bin/ksh
+#! /usr/bin/env bash
 
-echo "$(date -u) begin ${.sh.file}"
+echo "$(date -u) begin ${BASH_SOURCE}"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
 	# Turn on strict bash error checking
 	set -eu
 fi
-export PS4='$SECONDS + $(basename ${.sh.file})[$LINENO] '
+export PS4='$SECONDS + $(basename ${BASH_SOURCE})[$LINENO] '
 
 ####################################
 # Determine Job Output Name on System
@@ -67,8 +67,6 @@ export PARMgefs=${PARMgefs:-$HOMEgefs/parm}
 ver=${ver:-$(echo ${gefs_ver}|cut -c1-5)}
 export COMIN=${COMIN:-$(compath.py $envir/com/$NET/${ver})/${RUN}.${PDY}/$cyc}
 export COMOUT=${COMOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDY}/$cyc}
-export mem_ens="avg"
-mkdir -p ${COMOUT}/${mem_ens}/atmos
 #############################
 # Source relevant config files
 #############################
@@ -78,7 +76,7 @@ for config in $configs; do
     . $config_path/$config.parm
     export err=$?
     if [[ $err != 0 ]]; then
-        echo "FATAL ERROR in ${.sh.file}: Error while loading parm file $config_path/$config.parm"
+        echo "FATAL ERROR in ${BASH_SOURCE}: Error while loading parm file $config_path/$config.parm"
         exit $err
     fi
 done
@@ -95,7 +93,7 @@ export err=$?
 if [[ $err == 0 ]]; then
     echo "$job completed normally!"
 else
-    echo "FATAL ERROR in ${.sh.file}: $job failed!"
+    echo "FATAL ERROR in ${BASH_SOURCE}: $job failed!"
     exit $err
 fi
 #############################################################
@@ -106,6 +104,6 @@ fi
 cd $DATAROOT
 if [ ${KEEPDATA:-NO} = NO ] ; then rm -rf $DATA ; fi
 
-echo "$(date -u) end ${.sh.file}"
+echo "$(date -u) end ${BASH_SOURCE}"
 
 exit $err
