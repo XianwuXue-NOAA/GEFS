@@ -74,8 +74,13 @@ export PARMgefs=${PARMgefs:-$HOMEgefs/parm}
 ##############################################
 ver=${ver:-$(echo ${gefs_ver}|cut -c1-5)}
 export mem=$(echo $RUNMEM|cut -c3-5)
-export COMIN=${COMIN:-$(compath.py $envir/com/$NET/${ver})/${RUN}.${PDY}/$cyc}/${mem}
-export COMOUT=${COMOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDY}/$cyc}/${mem}
+export COMIN=${COMIN:-$(compath.py $envir/com/$NET/${ver})/${RUN}.${PDY}/$cyc}
+export COMOUT=${COMOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDY}/$cyc}
+if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+    export mem=$(echo $RUNMEM|cut -c3-5)
+    export COMIN=${COMIN}/${mem}
+    export COMOUT=${COMOUT}/${mem}
+fi
 
 #############################
 # Source relevant config files

@@ -319,7 +319,11 @@ if [[ $err != 0 ]]; then
 fi
 
 if [[ $SENDCOM == "YES" && $WRITE_DOPOST == ".true." ]]; then
-	mkdir -m 775 -p ${memdir}/misc/post
+  if [[ ${NewCOM} == "YES" ]]; then
+    mkdir -m 775 -p ${memdir}/misc/post
+  else
+	  mkdir -m 775 -p ${memdir}/../misc/post
+  fi
 
   # Convert output settings into an explicit list
   OUTPUT_FH=""
@@ -339,7 +343,11 @@ if [[ $SENDCOM == "YES" && $WRITE_DOPOST == ".true." ]]; then
 
     mafile=${memdir}/${CDUMP}.$cycle.master.grb2f${FH3}
     mifile=${memdir}/${CDUMP}.$cycle.master.grb2if${FH3}
-    mcfile=${memdir}/misc/post/${CDUMP}.$cycle.master.control.f${FH3}
+    if [[ ${NewCOM} == "YES" ]]; then
+      mcfile=${memdir}/misc/post/${CDUMP}.$cycle.master.control.f${FH3}
+    else
+      mcfile=${memdir}/../misc/post/${CDUMP}.$cycle.master.control.f${FH3}
+    fi
 
     if [[ ! -s $mcfile ]]; then
       if [[ -s $mafile ]]; then
