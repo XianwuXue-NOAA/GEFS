@@ -25,8 +25,8 @@ echo "$(date -u) begin ${.sh.file}"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
-    # Turn on strict bash error checking
-    set -eu
+  # Turn on strict bash error checking
+  set -eu
 fi
 
 ########################################
@@ -42,16 +42,16 @@ gridp5="-170:221:0.50 75:121:-0.50"
 
 for var in apcp tmax tmin
 do
-    nvar=$(echo $var|tr '[a-z]' '[A-Z]')
-    if [ ${FORECAST_SEGMENT} = hr ]; then
-        ${USHgefs}/gefs_atmos_getsbn.sh avg ${var} ${nvar} pgrb2sp25 pgrb2s.0p25 0p25 006 240 6 "$gridp25"
-        export err=$?; if [[ $err != 0 ]]; then exit $err; fi
-        ${USHgefs}/gefs_atmos_getsbn.sh avg ${var} ${nvar} pgrb2ap5 pgrb2a.0p50 0p50 246 384 6 "$gridp5"
-        export err=$?; if [[ $err != 0 ]]; then exit $err; fi
-    else
-        ${USHgefs}/gefs_atmos_getsbn.sh avg ${var} ${nvar} pgrb2ap5 pgrb2a.0p50 0p50 390 840 6 "$gridp5"
-        export err=$?; if [[ $err != 0 ]]; then exit $err; fi
-    fi
+  nvar=$(echo $var|tr '[a-z]' '[A-Z]')
+  if [ ${FORECAST_SEGMENT} = hr ]; then
+    ${USHgefs}/gefs_atmos_getsbn.sh avg ${var} ${nvar} pgrb2sp25 pgrb2s.0p25 0p25 006 240 6 "$gridp25"
+    export err=$?; if [[ $err != 0 ]]; then exit $err; fi
+    ${USHgefs}/gefs_atmos_getsbn.sh avg ${var} ${nvar} pgrb2ap5 pgrb2a.0p50 0p50 246 384 6 "$gridp5"
+    export err=$?; if [[ $err != 0 ]]; then exit $err; fi
+  else
+    ${USHgefs}/gefs_atmos_getsbn.sh avg ${var} ${nvar} pgrb2ap5 pgrb2a.0p50 0p50 390 840 6 "$gridp5"
+    export err=$?; if [[ $err != 0 ]]; then exit $err; fi
+  fi
 done
 
 

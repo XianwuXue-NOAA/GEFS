@@ -20,37 +20,37 @@ echo "$(date -u) begin ${.sh.file}"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
-	# Turn on strict bash error checking
-	set -eu
+  # Turn on strict bash error checking
+  set -eu
 fi
 
 if [ "$F00FLAG" = "YES" ]; then
-	f00flag=".true."
+  f00flag=".true."
 else
-	f00flag=".false."
+  f00flag=".false."
 fi
 
 export pgm=gfs_bufr
 #. prep_step
 
 if [ "$MAKEBUFR" = "YES" ]; then
-	bufrflag=".true."
+  bufrflag=".true."
 else
-	bufrflag=".false."
+  bufrflag=".false."
 fi
 
 if [ -s ${COMIN}/$COMPONENT/sfcsig/${RUNMEM}.${cycle}.sfcf000.nemsio ]; then
-	SFCF="sfc"
-	CLASS="class1fv3"
+  SFCF="sfc"
+  CLASS="class1fv3"
 else
-	SFCF="flx"
-	CLASS="class1"
+  SFCF="flx"
+  CLASS="class1"
 fi
 
 if [[ $SENDCOM == "YES" ]]; then
-	dird="$COMOUT/$COMPONENT/bufr/$mem/bufr"
+  dird="$COMOUT/$COMPONENT/bufr/$mem/bufr"
 else
-	dird="$DATA/$mem/bufr"
+  dird="$DATA/$mem/bufr"
 fi
 
 cat <<- EOF > gfsparm
@@ -73,34 +73,34 @@ hh=$(printf %02i $FSTART)
 SLEEP_LOOP_MAX=$(($SLEEP_TIME / $SLEEP_INT))
 
 while [ $hh -le $FEND ]; do
-	hh3=$(printf %03i $hh)
+  hh3=$(printf %03i $hh)
 
-	#---------------------------------------------------------
-	# Make sure all files are available:
-	ic=0
-	while [ $ic -lt $SLEEP_LOOP_MAX ]; do
-		fcstchk=$COMIN/$COMPONENT/sfcsig/${RUNMEM}.${cycle}.logf${hh3}.nemsio
-		if [ ! -f $fcstchk ]; then
-			sleep $SLEEP_INT
-			ic=$(($ic + 1))
-		else
-			break
-		fi        
+  #---------------------------------------------------------
+  # Make sure all files are available:
+  ic=0
+  while [ $ic -lt $SLEEP_LOOP_MAX ]; do
+    fcstchk=$COMIN/$COMPONENT/sfcsig/${RUNMEM}.${cycle}.logf${hh3}.nemsio
+    if [ ! -f $fcstchk ]; then
+      sleep $SLEEP_INT
+      ic=$(($ic + 1))
+    else
+      break
+    fi
 
-		if [ $ic -ge SLEEP_LOOP_MAX ]; then
-			echo <<- EOF
+    if [ $ic -ge SLEEP_LOOP_MAX ]; then
+      echo <<- EOF
 				FATAL ERROR in ${.sh.file}: Unable to find forecast output $fcstchk at $(date -u) after waiting ${SLEEP_TIME}s!
 				EOF
 			export err=6
-			err_chk
-			exit $err
-		fi
-	done
-	#------------------------------------------------------------------
-	ln -sf $COMIN/$COMPONENT/sfcsig/${RUNMEM}.${cycle}.atmf${hh3}.nemsio sigf${hh}
-	ln -sf $COMIN/$COMPONENT/sfcsig/${RUNMEM}.${cycle}.${SFCF}f${hh3}.nemsio flxf${hh}
+      err_chk
+      exit $err
+    fi
+  done
+  #------------------------------------------------------------------
+  ln -sf $COMIN/$COMPONENT/sfcsig/${RUNMEM}.${cycle}.atmf${hh3}.nemsio sigf${hh}
+  ln -sf $COMIN/$COMPONENT/sfcsig/${RUNMEM}.${cycle}.${SFCF}f${hh3}.nemsio flxf${hh}
 
-	hh=$(printf %02i $((10#$hh + $FINT)))
+  hh=$(printf %02i $((10#$hh + $FINT)))
 done
 
 #  define input BUFR table file.
@@ -112,9 +112,9 @@ $APRUN $EXECbufrsnd/gfs_bufr < gfsparm > out_gfs_bufr_$FEND
 export err=$?
 
 if [[ $err != 0 ]]; then
-	echo "FATAL ERROR in ${.sh.file}: gfs_bufr failed!"
-	err_chk
-	exit $err
+  echo "FATAL ERROR in ${.sh.file}: gfs_bufr failed!"
+  err_chk
+  exit $err
 fi
 
 exit $err

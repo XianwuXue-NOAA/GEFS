@@ -4,8 +4,8 @@ echo "$(date -u) begin ${.sh.file}"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
-	# Turn on strict bash error checking
-	set -eu
+  # Turn on strict bash error checking
+  set -eu
 fi
 export PS4='$SECONDS + $(basename ${.sh.file})[$LINENO] '
 
@@ -56,8 +56,8 @@ setpdy.sh
 source PDY
 
 if [ ${FORECAST_SEGMENT:-hr} = lr ]; then
-    export cyc=00
-    export cycle=t${cyc}z
+  export cyc=00
+  export cycle=t${cyc}z
 fi
 
 ####################################
@@ -77,9 +77,9 @@ export mem=$(echo $RUNMEM|cut -c3-5)
 export COMIN=${COMIN:-$(compath.py $envir/com/$NET/${ver})/${RUN}.${PDY}/$cyc}
 export COMOUT=${COMOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDY}/$cyc}
 if [[ ${NewCOM:-"YES"} == "YES" ]]; then
-    export mem=$(echo $RUNMEM|cut -c3-5)
-    export COMIN=${COMIN}/${mem}
-    export COMOUT=${COMOUT}/${mem}
+  export mem=$(echo $RUNMEM|cut -c3-5)
+  export COMIN=${COMIN}/${mem}
+  export COMOUT=${COMOUT}/${mem}
 fi
 
 #############################
@@ -88,18 +88,18 @@ fi
 configs="gefs gefs_prdgen"
 config_path=$PARMgefs
 for config in $configs; do
-    . $config_path/$config.parm
-    export err=$?
-    if [[ $err != 0 ]]; then
-        echo "FATAL ERROR in ${.sh.file}: Error while loading parm file $config_path/$config.parm"
-        exit $err
-    fi
+  . $config_path/$config.parm
+  export err=$?
+  if [[ $err != 0 ]]; then
+    echo "FATAL ERROR in ${.sh.file}: Error while loading parm file $config_path/$config.parm"
+    exit $err
+  fi
 done
 
 export COMINgfs=${COMINgfs:-$(compath.py $envir/com/gfs/${gfs_ver})/gfs.${PDY}/$cyc/atmos}
 
 if [[ $cplchm = ".true." ]]; then
-    COMPONENT="chem"
+  COMPONENT="chem"
 fi
 export COMPONENT=${COMPONENT:-atmos}
 
@@ -111,10 +111,10 @@ env | sort
 source $HOMEgefs/scripts/exgefs_atmos_prdgen.sh
 export err=$?
 if [[ $err == 0 ]]; then
-    echo "$job completed normally!"
+  echo "$job completed normally!"
 else
-    echo "FATAL ERROR in ${.sh.file}: $job failed!"
-    exit $err
+  echo "FATAL ERROR in ${.sh.file}: $job failed!"
+  exit $err
 fi
 #############################################################
 

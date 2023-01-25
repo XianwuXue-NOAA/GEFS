@@ -4,8 +4,8 @@ echo "$(date -u) begin ${.sh.file}"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
-	# Turn on strict bash error checking
-	set -eu
+  # Turn on strict bash error checking
+  set -eu
 fi
 export PS4='$SECONDS + $(basename ${.sh.file})[$LINENO] '
 
@@ -75,12 +75,12 @@ export COMOUT=${COMOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDY}/$cyc}
 configs="gefs gefs_postsnd"
 config_path=$PARMgefs
 for config in $configs; do
-    . $config_path/$config.parm
-    export err=$?
-    if [[ $err != 0 ]]; then
-        echo "FATAL ERROR in ${.sh.file}: Error while loading parm file $config_path/$config.parm"
-        exit $err
-    fi
+  . $config_path/$config.parm
+  export err=$?
+  if [[ $err != 0 ]]; then
+    echo "FATAL ERROR in ${.sh.file}: Error while loading parm file $config_path/$config.parm"
+    exit $err
+  fi
 done
 
 export COMPONENT=${COMPONENT:-atmos}
@@ -95,10 +95,10 @@ env | sort
 $HOMEgefs/scripts/exgefs_atmos_postsnd.sh
 export err=$?
 if [[ $err == 0 ]]; then
-    echo "$job completed normally!"
+  echo "$job completed normally!"
 else
-    echo "FATAL ERROR in ${.sh.file}: $job failed!"
-    exit $err
+  echo "FATAL ERROR in ${.sh.file}: $job failed!"
+  exit $err
 fi
 #############################################################
 

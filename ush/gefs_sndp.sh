@@ -10,8 +10,8 @@ echo "$(date -u) begin ${.sh.file}"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
-	# Turn on strict bash error checking
-	set -eu
+  # Turn on strict bash error checking
+  set -eu
 fi
 
 #  Create "collectives" consisting of groupings of the soundings
@@ -26,21 +26,21 @@ CCCC=KWBC
 file_list=gfs_collective${m}.list
 
 if [ $m -le 2 ]; then 
-	WMOHEAD=JUSA4$m
+  WMOHEAD=JUSA4$m
 elif [ $m -le 6 ]; then 
-	WMOHEAD=JUSB4$m
+  WMOHEAD=JUSB4$m
 else
-	WMOHEAD=JUSX4$m
+  WMOHEAD=JUSX4$m
 fi
 
 for stn in $(cat $file_list); do
-	 cp ${COMIN}/$COMPONENT/bufr/$mem/bufr.$stn.$PDY$cyc ${DATA}/${m}/bufrin
-	 export pgm=tocsbufr
-	 #. prep_step
-	 export FORT11=$DATA/${m}/bufrin
-	 export FORT51=./bufrout
+   cp ${COMIN}/$COMPONENT/bufr/$mem/bufr.$stn.$PDY$cyc ${DATA}/${m}/bufrin
+   export pgm=tocsbufr
+   #. prep_step
+   export FORT11=$DATA/${m}/bufrin
+   export FORT51=./bufrout
 
-	$EXECbufrsnd/tocsbufr <<- EOF
+  $EXECbufrsnd/tocsbufr <<- EOF
 		&INPUT
 			BULHED="$WMOHEAD",KWBX="$CCCC",
 			NCEP2STD=.TRUE.,
@@ -49,9 +49,9 @@ for stn in $(cat $file_list); do
 		/
 		EOF
 
-	 export err=$?
-	 if [ $err -ne 0 ]; then
-			echo <<- EOF
+   export err=$?
+   if [ $err -ne 0 ]; then
+      echo <<- EOF
 				FATAL ERROR in ${.sh.file}: $EXECbufrsnd/tocsbufr failed using the following namelist:
 					&INPUT
 						BULHED="$WMOHEAD",KWBX="$CCCC",
@@ -61,23 +61,23 @@ for stn in $(cat $file_list); do
 					/
 				EOF
 
-			err_chk
-			exit $err
-	 fi
+      err_chk
+      exit $err
+   fi
 
-	 cat $DATA/${m}/bufrout >> $DATA/${m}/${RUNMEM}_collective$m.fil
-	 rm $DATA/${m}/bufrin
-	 rm $DATA/${m}/bufrout
+   cat $DATA/${m}/bufrout >> $DATA/${m}/${RUNMEM}_collective$m.fil
+   rm $DATA/${m}/bufrin
+   rm $DATA/${m}/bufrout
 done
 
 if [ $SENDCOM = 'YES' ]; then 
-	cp $DATA/${m}/${RUNMEM}_collective$m.fil ${COMOUT}/$COMPONENT/bufr/$mem/.
-	if [ $SENDDBN = 'YES' ] ; then
-		MODCOM=$(echo ${NET}_${COMPONENT} | tr '[a-z]' '[A-Z]')
-		DBNTYP=${MODCOM}_BUFRTAR_COL
-		$DBNROOT/bin/dbn_alert MODEL ${DBNTYP} $job \
-		${COMOUT}/$COMPONENT/bufr/$mem/${RUNMEM}_collective$m.fil
-	fi
+  cp $DATA/${m}/${RUNMEM}_collective$m.fil ${COMOUT}/$COMPONENT/bufr/$mem/.
+  if [ $SENDDBN = 'YES' ] ; then
+    MODCOM=$(echo ${NET}_${COMPONENT} | tr '[a-z]' '[A-Z]')
+    DBNTYP=${MODCOM}_BUFRTAR_COL
+    $DBNROOT/bin/dbn_alert MODEL ${DBNTYP} $job \
+    ${COMOUT}/$COMPONENT/bufr/$mem/${RUNMEM}_collective$m.fil
+  fi
 # No approval for adding header to SBN yet
 #	if [ $SENDDBN_NTC = 'YES' ] ; then
 #		cp $DATA/${m}/${RUNMEM}_collective$m.fil $COMOUTwmo/${RUNMEM}_collective$m.postsnd_$cyc

@@ -1053,7 +1053,9 @@ def get_param_of_task(dicBase, taskname):
                 sDep = '<and>'
                 for i in range(npert):
                     sDep += '\n\t<datadep><cyclestr>&DATA_DIR;/gefs.@Y@m@d/@H/p{0:02}/atmos/gefs.t@Hz.logf000.txt</cyclestr></datadep>'.format(i + 1)
+                    #sDep += '\n\t<datadep><cyclestr>&DATA_DIR;/gefs.@Y@m@d/@H/atmos/sfcsig/gep{0:02}.t@Hz.logf000.nemsio</cyclestr></datadep>'.format(i + 1)
                 sDep += '\n\t<datadep><cyclestr>&DATA_DIR;/gefs.@Y@m@d/@H/c00/atmos/gefs.t@Hz.logf000.txt</cyclestr></datadep>'
+                #sDep += '\n\t<datadep><cyclestr>&DATA_DIR;/gefs.@Y@m@d/@H/atmos/sfcsig/gec00.t@Hz.logf000.nemsio</cyclestr></datadep>'
                 sDep += '\n</and>'
 
             # For ensstat_hr

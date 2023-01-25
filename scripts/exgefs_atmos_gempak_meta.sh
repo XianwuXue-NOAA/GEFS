@@ -4,8 +4,8 @@ echo "$(date -u) begin $(basename $BASH_SOURCE)"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
-    # Turn on strict bash error checking
-    set -eu
+  # Turn on strict bash error checking
+  set -eu
 fi
 
 cd $DATA
@@ -20,15 +20,15 @@ if [[ -s poescript ]]; then rm poescript; fi
 ################################################################
 
 for script in $(cat $FIXgempak/gefs_meta_${cyc}); do
-    eval echo "$script" >> $DATA/poescript
+  eval echo "$script" >> $DATA/poescript
 done
 
 num=$(cat $DATA/poescript |wc -l) 
 
 # Add dummy lines to execute if there are fewer scripts than tasks
 while [ $num -lt $total_tasks ] ; do
-   echo "hostname" >> poescript
-   num=$(($num + 1))
+ echo "hostname" >> poescript
+ num=$(($num + 1))
 done
 
 cat poescript
@@ -48,8 +48,8 @@ $APRUN_MPMD
 export err=$?
 
 if [[ $err != 0 ]]; then
-    echo "FATAL ERROR in $(basename $BASH_SOURCE): One or more gempak scripts in $MP_CMDFILE failed!"
-    exit $err
+  echo "FATAL ERROR in $(basename $BASH_SOURCE): One or more gempak scripts in $MP_CMDFILE failed!"
+  exit $err
 fi
 #############################################################
 

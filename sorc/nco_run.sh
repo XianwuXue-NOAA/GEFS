@@ -6,11 +6,11 @@ echo $sWS
 
 while getopts m:e: option
 do
-    case "${option}"
-    in
-        m) machine=${OPTARG};;
-        e) RunEnvir=${OPTARG};;
-    esac
+  case "${option}"
+  in
+    m) machine=${OPTARG};;
+    e) RunEnvir=${OPTARG};;
+  esac
 done
 
 machine=${machine:-wcoss2}
@@ -23,8 +23,8 @@ RunEnvir=${RunEnvir:-nco}
 # for Link
 cd $sWS/../sorc
 if [ $machine = "hera" ]; then
-    ./link_gefs.sh -e emc -m hera  > link_gefs.log 2>&1
+  ./link_gefs.sh -e emc -m hera  > link_gefs.log 2>&1
 elif [ $machine = "wcoss2" ]; then
-    ./link_gefs.sh -e $RunEnvir -m wcoss2 > link_gefs.log 2>&1
+  ./link_gefs.sh -e $RunEnvir -m wcoss2 > link_gefs.log 2>&1
 fi
 

@@ -322,7 +322,7 @@ if [[ $SENDCOM == "YES" && $WRITE_DOPOST == ".true." ]]; then
   if [[ ${NewCOM} == "YES" ]]; then
     mkdir -m 775 -p ${memdir}/misc/post
   else
-	  mkdir -m 775 -p ${memdir}/../misc/post
+    mkdir -m 775 -p ${memdir}/../misc/post
   fi
 
   # Convert output settings into an explicit list

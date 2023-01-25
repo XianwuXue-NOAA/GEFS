@@ -29,8 +29,8 @@ echo "$(date -u) begin ${.sh.file}"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
-	# Turn on strict bash error checking
-	set -eu
+  # Turn on strict bash error checking
+  set -eu
 fi
 
 export subdata="${1}"                  # ${DATA}/${stream}
@@ -41,7 +41,7 @@ export pgad="${5}"                     # PRDGEN_A_DIR[$stream]
 export pgapre="${6}"                   # PRDGEN_A_PREFIX[$stream]
 
 if [ "$jobgrid" = '2p5' ]; then
-        SENDDBN=NO
+  SENDDBN=NO
 fi
 
 cat <<-EOF
@@ -55,7 +55,7 @@ cat <<-EOF
 EOF
 
 if [[ ! -d $DATA ]]; then
-	mkdir -p $DATA
+  mkdir -p $DATA
 fi
 
 set -x
@@ -94,9 +94,9 @@ SLEEP_LOOP_MAX=$(($SLEEP_TIME / $SLEEP_INT))
 foundgfs=no
 
 for hour in $hours; do
-	export fhr=$(printf "%02.0f" $hour)        # Zero-pad to two places
-	export pfhr=$(printf "%03.0f" $hour)       # Zero-pad to three places
-	export ffhr="f${pfhr}"
+  export fhr=$(printf "%02.0f" $hour)        # Zero-pad to two places
+  export pfhr=$(printf "%03.0f" $hour)       # Zero-pad to three places
+  export ffhr="f${pfhr}"
 
   if [[ ${NewCOM} == "YES" ]]; then
     if [[ -f $COMOUT/avg/$COMPONENT/$pgad/gefs.${cycle}.$pgapre${ffhr}.idx ]] && [[ -f $COMOUT/spr/$COMPONENT/$pgad/gefs.${cycle}.$pgapre${ffhr}.idx ]]; then
@@ -104,151 +104,151 @@ for hour in $hours; do
       continue
     fi
   else
-	  if [[ -f $COMOUT/$COMPONENT/$pgad/geavg.${cycle}.$pgapre${ffhr}.idx ]] && [[ -f $COMOUT/$COMPONENT/$pgad/gespr.${cycle}.$pgapre${ffhr}.idx ]]; then
-		  echo "Skip geavg.${cycle}.$pgapre${ffhr} & gespr.${cycle}.$pgapre${ffhr}"
-		  continue
-	  fi
+    if [[ -f $COMOUT/$COMPONENT/$pgad/geavg.${cycle}.$pgapre${ffhr}.idx ]] && [[ -f $COMOUT/$COMPONENT/$pgad/gespr.${cycle}.$pgapre${ffhr}.idx ]]; then
+      echo "Skip geavg.${cycle}.$pgapre${ffhr} & gespr.${cycle}.$pgapre${ffhr}"
+      continue
+    fi
   fi
 
-	nenspost=0
+  nenspost=0
 
-	# set +x
-	ic=1
-	while [ $ic -le $SLEEP_LOOP_MAX ]; do
-		nfiles=0
-		nmem=0
-		foundall=yes
-		previncr=no
-		for mem in $memberlist; do
-			(( nmem = nmem + 1 ))
+  # set +x
+  ic=1
+  while [ $ic -le $SLEEP_LOOP_MAX ]; do
+    nfiles=0
+    nmem=0
+    foundall=yes
+    previncr=no
+    for mem in $memberlist; do
+      (( nmem = nmem + 1 ))
       if [[ ${NewCOM} == "YES" ]]; then
         testfile=$COMIN/${mem}/$COMPONENT/$pgad/gefs.${cycle}.$pgapre${ffhr}.idx
       else
-			  testfile=$COMIN/$COMPONENT/$pgad/ge${mem}.${cycle}.$pgapre${ffhr}.idx
+        testfile=$COMIN/$COMPONENT/$pgad/ge${mem}.${cycle}.$pgapre${ffhr}.idx
       fi
 
-			if [[ -f $testfile ]]; then
-				echo "testfile=$testfile found"
-				(( nfiles = nfiles + 1 ))
-				if [[ $mem = gfs ]]; then
-					foundgfs=yes
-				fi
-				echo "mem=$mem nfiles=$nfiles foundgfs=$foundgfs foundall=$foundall previncr=$previncr ic=$ic fhr=$fhr found"
-			else # [[ -f $testfile ]]
-				echo "testfile=$testfile not found"
-				if [[ $mem = gfs ]] && [[ $foundgfs = yes ]] && (( fhr > 180 )) && (( fhr % 12 > 0 )); then
-					previncr=yes
-				else
-					foundall=no
-				fi
-				echo "mem=$mem nfiles=$nfiles foundgfs=$foundgfs foundall=$foundall previncr=$previncr ic=$ic fhr=$fhr not found"
-			fi # [[ -f $testfile ]]
-		done # for mem in $memberlist
+      if [[ -f $testfile ]]; then
+        echo "testfile=$testfile found"
+        (( nfiles = nfiles + 1 ))
+        if [[ $mem = gfs ]]; then
+          foundgfs=yes
+        fi
+        echo "mem=$mem nfiles=$nfiles foundgfs=$foundgfs foundall=$foundall previncr=$previncr ic=$ic fhr=$fhr found"
+      else # [[ -f $testfile ]]
+        echo "testfile=$testfile not found"
+        if [[ $mem = gfs ]] && [[ $foundgfs = yes ]] && (( fhr > 180 )) && (( fhr % 12 > 0 )); then
+          previncr=yes
+        else
+          foundall=no
+        fi
+        echo "mem=$mem nfiles=$nfiles foundgfs=$foundgfs foundall=$foundall previncr=$previncr ic=$ic fhr=$fhr not found"
+      fi # [[ -f $testfile ]]
+    done # for mem in $memberlist
 
-		if [[ $foundall = yes ]]; then
-			if [[ $previncr = yes ]]; then
-				(( nfilesprev = nfiles + 1 ))
-			else
-				(( nfilesprev = nfiles ))
-			fi
-			echo "Search process ends nfilesprev=$nfilesprev foundgfs=$foundgfs foundall=$foundall previncr=$previncr ic=$ic fhr=$fhr"
-			echo "Process all $nfiles members"
-			break
-		else # [[ $foundall = yes ]]
-			if (( nfiles < nfilesprev )); then
-				ic=$(($ic + 1))
-				sleep $SLEEP_INT
-			else
-				if [[ $previncr = yes ]]; then
-					(( nfilesprev = nfiles + 1 ))
-				else
-					(( nfilesprev = nfiles ))
-				fi
-				echo "Search process ends nfilesprev=$nfilesprev foundgfs=$foundgfs foundall=$foundall previncr=$previncr ic=$ic fhr=$fhr"
-				echo "Continue processing with $nfiles members"
-				break
-			fi # (( nfiles < nfilesprev ))
-		fi # [[ $foundall = yes ]]
+    if [[ $foundall = yes ]]; then
+      if [[ $previncr = yes ]]; then
+        (( nfilesprev = nfiles + 1 ))
+      else
+        (( nfilesprev = nfiles ))
+      fi
+      echo "Search process ends nfilesprev=$nfilesprev foundgfs=$foundgfs foundall=$foundall previncr=$previncr ic=$ic fhr=$fhr"
+      echo "Process all $nfiles members"
+      break
+    else # [[ $foundall = yes ]]
+      if (( nfiles < nfilesprev )); then
+        ic=$(($ic + 1))
+        sleep $SLEEP_INT
+      else
+        if [[ $previncr = yes ]]; then
+          (( nfilesprev = nfiles + 1 ))
+        else
+          (( nfilesprev = nfiles ))
+        fi
+        echo "Search process ends nfilesprev=$nfilesprev foundgfs=$foundgfs foundall=$foundall previncr=$previncr ic=$ic fhr=$fhr"
+        echo "Continue processing with $nfiles members"
+        break
+      fi # (( nfiles < nfilesprev ))
+    fi # [[ $foundall = yes ]]
 
-		###############################
-		# If we reach this point assume
-		# fcst job never reached restart
-		# period and error exit
-		###############################
-		echo "$nfiles out of $nmem members were found"
-		if [ $ic -eq $SLEEP_LOOP_MAX ]; then
+    ###############################
+    # If we reach this point assume
+    # fcst job never reached restart
+    # period and error exit
+    ###############################
+    echo "$nfiles out of $nmem members were found"
+    if [ $ic -eq $SLEEP_LOOP_MAX ]; then
 
-			###############################
-			# MODIFY THIS STATEMENT TO
-			# USE ALL MEMBERS
-			#
-			###############################
-			(( nfilesmin = nmem ))
+      ###############################
+      # MODIFY THIS STATEMENT TO
+      # USE ALL MEMBERS
+      #
+      ###############################
+      (( nfilesmin = nmem ))
 
-			if (( nfiles < nfilesmin )); then
-				echo <<- EOF
+      if (( nfiles < nfilesmin )); then
+        echo <<- EOF
 					FATAL ERROR in ${.sh.file} ($stream): Insufficient members found for f${fhr} to calculate stats at $(date) after ${SLEEP_TIME}s!
 						Please rerun it after all members are ready!
 						Total members:         $nmem
 						Min members for stats: $nfilesmin
 						Members found:         $nfiles
 					EOF
-				msg="WARNING: ${job}, stream ${stream} did not find all ensemble member for f${fhr}! Please rerun it after all members are ready!"
-				echo "$msg" | mail.py -c $MAIL_LIST
-				export err=9
-				err_chk
-			else
-				if (( nfiles < nmem )); then
-					echo <<- EOF
+        msg="WARNING: ${job}, stream ${stream} did not find all ensemble member for f${fhr}! Please rerun it after all members are ready!"
+        echo "$msg" | mail.py -c $MAIL_LIST
+        export err=9
+        err_chk
+      else
+        if (( nfiles < nmem )); then
+          echo <<- EOF
 						WARNING in ${.sh.file} ($stream): Some members still missing for f${fhr} at $(date) after ${SLEEP_TIME}s
 							Will continue with $nfiles members, but products may be degraded.
 						EOF
 						msg="WARNING: ${job}, stream ${stream} did not find all ensemble member for f${fhr}! Will continue with fewer members, but products may be degraded."
-					echo "$msg" | mail.py -c $MAIL_LIST
-				fi
-				(( nfilesprev = nfiles ))
-				break
-			fi # (( nfiles < nfilesmin ))
-		fi # [ $ic -eq $SLEEP_LOOP_MAX ]
-	done # [ $ic -le $SLEEP_LOOP_MAX ]
-	# set -x
+          echo "$msg" | mail.py -c $MAIL_LIST
+        fi
+        (( nfilesprev = nfiles ))
+        break
+      fi # (( nfiles < nfilesmin ))
+    fi # [ $ic -eq $SLEEP_LOOP_MAX ]
+  done # [ $ic -le $SLEEP_LOOP_MAX ]
+  # set -x
 
-	echo "Starting ensstat generation for fhr=$fhr"
+  echo "Starting ensstat generation for fhr=$fhr"
 
-	#
-	#  Make namelist file
-	#
-	cat <<- EOF >namin
+  #
+  #  Make namelist file
+  #
+  cat <<- EOF >namin
 		&namdim
 			lfdim=${lfm:-''}
 		/
 		&namens
 		EOF
 	ifile=0
-	for mem in $memberlist; do
-		(( ifile = ifile + 1 ))
-		iskip=0
-		for nskip in $statskiplist; do
-			if [[ $mem = $nskip ]]; then
-				iskip=1
-			fi
-		done # for nskip in $statskiplist
+  for mem in $memberlist; do
+    (( ifile = ifile + 1 ))
+    iskip=0
+    for nskip in $statskiplist; do
+      if [[ $mem = $nskip ]]; then
+        iskip=1
+      fi
+    done # for nskip in $statskiplist
 
-		if [[ $iskip = 0 ]]; then
-			if [[ -a cfipg$ifile.$jobgrid ]]; then rm cfipg$ifile.$jobgrid; fi
+    if [[ $iskip = 0 ]]; then
+      if [[ -a cfipg$ifile.$jobgrid ]]; then rm cfipg$ifile.$jobgrid; fi
       if [[ ${NewCOM} == "YES" ]]; then
         ln -s ${COMIN}/${mem}/${COMPONENT}/${pgad}/gefs.${cycle}.$pgapre${ffhr} cfipg${ifile}.${jobgrid}
       else
-			  ln -s ${COMIN}/${COMPONENT}/${pgad}/ge${mem}.${cycle}.$pgapre${ffhr} cfipg${ifile}.${jobgrid}
+        ln -s ${COMIN}/${COMPONENT}/${pgad}/ge${mem}.${cycle}.$pgapre${ffhr} cfipg${ifile}.${jobgrid}
       fi
-		fi # [[ $iskip = 0 ]]
+    fi # [[ $iskip = 0 ]]
 
-		echo "	cfipg($ifile)"=\"cfipg$ifile.$jobgrid\", >>namin
-		echo "	iskip($ifile)"=$iskip, >>namin
+    echo "	cfipg($ifile)"=\"cfipg$ifile.$jobgrid\", >>namin
+    echo "	iskip($ifile)"=$iskip, >>namin
 
-	done # for mem in $memberlist
+  done # for mem in $memberlist
 
-	cat <<- EOF >>namin
+  cat <<- EOF >>namin
 
 			nfiles=$ifile
 			nenspost=$nenspost
@@ -260,60 +260,60 @@ for hour in $hours; do
 		/
 		EOF
 	echo
-	cat namin
-	echo
+  cat namin
+  echo
 
-	echo "####################### $(date) $fhr $jobgrid ensstat begin" >$pgmout.$jobgrid.$pfhr
-	$ENSSTAT <namin >$pgmout.$jobgrid.$pfhr.temp
-	export err=$?
-	if [[ $err != 0 ]]; then
-		echo <<- EOF
+  echo "####################### $(date) $fhr $jobgrid ensstat begin" >$pgmout.$jobgrid.$pfhr
+  $ENSSTAT <namin >$pgmout.$jobgrid.$pfhr.temp
+  export err=$?
+  if [[ $err != 0 ]]; then
+    echo <<- EOF
 			FATAL ERROR in ${.sh.file} ($stream): $ENSSTAT returned a non-zero error code for f${fhr}!
 				Namelist namin was used and had the following contents:
 					$(cat namin)
 			EOF
 		err_chk
-		exit $err
-	fi
-	cat $pgmout.$jobgrid.$pfhr.temp | fold -w 2000 >$pgmout.$jobgrid.$pfhr
-	rm $pgmout.$jobgrid.$pfhr.temp
-	echo "####################### $(date) $fhr $jobgrid ensstat end">>$pgmout.$jobgrid.$pfhr
-	for fhout in $statoutfhlist; do
-		if (( fhr == fhout )); then
-			cat $pgmout.$jobgrid.$pfhr >> $pgmout
-		else
-			lines=$(cat $pgmout.$jobgrid.$pfhr| wc -l)
-			lobeg=5
-			loend=40
-			echo lines=$lines lobeg=$lobeg loend=$loend
-			(( lskip = lines - lobeg - loend ))
-			if (( lskip > 100 )); then
-				head -$lobeg $pgmout.$jobgrid.$pfhr >>$pgmout
-				echo "####################### $lskip Lines Skipped">>$pgmout
-				tail -$loend $pgmout.$jobgrid.$pfhr >>$pgmout
-			else
-				cat $$pgmout.$jobgrid.$pfhr >> $pgmout
-			fi # (( lskip > 100 ))
-		fi # (( fhr == fhout ))
-	done # for fhout in $statoutfhlist
-	echo "$(date) check for missing or zero-length output files"
+    exit $err
+  fi
+  cat $pgmout.$jobgrid.$pfhr.temp | fold -w 2000 >$pgmout.$jobgrid.$pfhr
+  rm $pgmout.$jobgrid.$pfhr.temp
+  echo "####################### $(date) $fhr $jobgrid ensstat end">>$pgmout.$jobgrid.$pfhr
+  for fhout in $statoutfhlist; do
+    if (( fhr == fhout )); then
+      cat $pgmout.$jobgrid.$pfhr >> $pgmout
+    else
+      lines=$(cat $pgmout.$jobgrid.$pfhr| wc -l)
+      lobeg=5
+      loend=40
+      echo lines=$lines lobeg=$lobeg loend=$loend
+      (( lskip = lines - lobeg - loend ))
+      if (( lskip > 100 )); then
+        head -$lobeg $pgmout.$jobgrid.$pfhr >>$pgmout
+        echo "####################### $lskip Lines Skipped">>$pgmout
+        tail -$loend $pgmout.$jobgrid.$pfhr >>$pgmout
+      else
+        cat $$pgmout.$jobgrid.$pfhr >> $pgmout
+      fi # (( lskip > 100 ))
+    fi # (( fhr == fhout ))
+  done # for fhout in $statoutfhlist
+  echo "$(date) check for missing or zero-length output files"
 
-	for run in geavg gespr; do
-		if [[ -s ${run}.${cycle}.$pgapre${ffhr} ]]; then
-			ls -al ${run}.${cycle}.$pgapre${ffhr}
-		else
-			echo output file ${run}.${cycle}.$pgapre${ffhr} IS MISSING
-			export err=9
-			err_chk
-		fi # [[ -s ${run}.${cycle}.$pgapre${ffhr} ]]
-	done # for run in geavg gespr
+  for run in geavg gespr; do
+    if [[ -s ${run}.${cycle}.$pgapre${ffhr} ]]; then
+      ls -al ${run}.${cycle}.$pgapre${ffhr}
+    else
+      echo output file ${run}.${cycle}.$pgapre${ffhr} IS MISSING
+      export err=9
+      err_chk
+    fi # [[ -s ${run}.${cycle}.$pgapre${ffhr} ]]
+  done # for run in geavg gespr
 
-	echo "$(date) send $pgapre output begin"
+  echo "$(date) send $pgapre output begin"
 
-	if [ $SENDCOM = "YES" ]; then
-		MODCOM=$(echo ${NET}_${COMPONENT} | tr '[a-z]' '[A-Z]')
-		GRID=$(echo ${jobgrid} | tr '[a-z]' '[A-Z]')
-		for run in geavg gespr; do
+  if [ $SENDCOM = "YES" ]; then
+    MODCOM=$(echo ${NET}_${COMPONENT} | tr '[a-z]' '[A-Z]')
+    GRID=$(echo ${jobgrid} | tr '[a-z]' '[A-Z]')
+    for run in geavg gespr; do
       infile=${run}.${cycle}.$pgapre${ffhr}
       if [[ ${NewCOM} == "YES" ]]; then
         memin=$(echo ${run}|cut -c3-5)
@@ -323,28 +323,28 @@ for hour in $hours; do
         outfile=${infile}
         OUTDIR=${COMOUT}/${COMPONENT}/${pgad}
       fi
-			if [[ "$makegrb2i" = "yes" ]]; then
-				$WGRIB2 -s ${infile} >${infile}.idx
-			fi
-			if [[ -s ${infile} ]]; then
+      if [[ "$makegrb2i" = "yes" ]]; then
+        $WGRIB2 -s ${infile} >${infile}.idx
+      fi
+      if [[ -s ${infile} ]]; then
         mv ${infile} ${OUTDIR}/${outfile}
         mv ${infile}.idx ${OUTDIR}/${outfile}.idx
-			fi # [[ -s ${run}.${cycle}.$pgapre${ffhr} ]]
-			if [[ "${SENDDBN}" = 'YES' ]]; then
-				${DBNROOT}/bin/dbn_alert MODEL ${MODCOM}_PGB2A_${GRID} ${job} ${OUTDIR}/${outfile} #$COMOUT/$COMPONENT/$pgad/${run}.${cycle}.$pgapre${ffhr}
-				${DBNROOT}/bin/dbn_alert MODEL ${MODCOM}_PGB2A_${GRID}_IDX ${job} ${OUTDIR}/${outfile}.idx #$COMOUT/$COMPONENT/$pgad/${run}.${cycle}.$pgapre${ffhr}.idx
-			fi
-		done
+      fi # [[ -s ${run}.${cycle}.$pgapre${ffhr} ]]
+      if [[ "${SENDDBN}" = 'YES' ]]; then
+        ${DBNROOT}/bin/dbn_alert MODEL ${MODCOM}_PGB2A_${GRID} ${job} ${OUTDIR}/${outfile} #$COMOUT/$COMPONENT/$pgad/${run}.${cycle}.$pgapre${ffhr}
+        ${DBNROOT}/bin/dbn_alert MODEL ${MODCOM}_PGB2A_${GRID}_IDX ${job} ${OUTDIR}/${outfile}.idx #$COMOUT/$COMPONENT/$pgad/${run}.${cycle}.$pgapre${ffhr}.idx
+      fi
+    done
 
-	fi
-	echo "$(date) send pgrb2a output end"
-	
+  fi
+  echo "$(date) send pgrb2a output end"
+
 done #hour in $hours
 
 if [[ -s $pgmout ]]; then
-	echo ###############################$(date) cat $pgmout begin
-	cat $pgmout
-	echo ###############################$(date) cat $pgmout end
+  echo ###############################$(date) cat $pgmout begin
+  cat $pgmout
+  echo ###############################$(date) cat $pgmout end
 fi
 echo "$(date -u) end ${.sh.file}"
 

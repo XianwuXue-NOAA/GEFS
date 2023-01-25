@@ -4,13 +4,13 @@ echo "$(date -u) begin ${BASH_SOURCE}"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
-    # Turn on strict bash error checking
-    set -eu
+  # Turn on strict bash error checking
+  set -eu
 fi
 
 # Print inherited environmnent variables
 for var in DATA npert GEMPAK_RES COMIN COMOUT COMPONENT fstart fend FHMAXHF FHOUTHF FHOUTLF; do
-	echo "$var = ${!var}"
+  echo "$var = ${!var}"
 done
 
 ########################################################
@@ -23,66 +23,66 @@ echo memberlist=$memberlist
 ## Generate poescript
 ########################################################
 for member in $memberlist; do
-    export RUNM=ge${member}
+  export RUNM=ge${member}
 
-    if [[ $SENDCOM == "YES" ]]; then
-        if [[ ${NewCOM:-"YES"} == "YES" ]]; then
-            gempak_out=${COMOUT}/${member}/$COMPONENT/products/gempak
-            gempak_log_out=${COMOUT}/${member}/$COMPONENT/misc/gempak
-        else
-            gempak_out=${COMOUT}/$COMPONENT/gempak
-            gempak_log_out=${COMOUT}/$COMPONENT/misc/gempak
-        fi
+  if [[ $SENDCOM == "YES" ]]; then
+    if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+      gempak_out=${COMOUT}/${member}/$COMPONENT/products/gempak
+      gempak_log_out=${COMOUT}/${member}/$COMPONENT/misc/gempak
     else
-        gempak_out=${DATA}/gempak_out
-        gempak_log_out=${DATA}/misc/gempak
+      gempak_out=${COMOUT}/$COMPONENT/gempak
+      gempak_log_out=${COMOUT}/$COMPONENT/misc/gempak
     fi
+  else
+    gempak_out=${DATA}/gempak_out
+    gempak_log_out=${DATA}/misc/gempak
+  fi
 
-    if [ ! -d "${gempak_log_out}" ]; then
-        mkdir -p ${gempak_log_out}
-    fi
+  if [ ! -d "${gempak_log_out}" ]; then
+    mkdir -p ${gempak_log_out}
+  fi
 
-    for resolution in ${GEMPAK_RES}; do
-        case $resolution in
-            (1p00)
-                if [[ ${NewCOM:-"YES"} == "YES" ]]; then
-                    gempak_in=$COMIN/${member}/$COMPONENT/products/1p00a #pgrb2a1p0
-                    export pdgrbType=${resolution}a #pgrb2a
-                else
-                    gempak_in=$COMIN/$COMPONENT/pgrb2a1p0
-                    export pdgrbType=pgrb2a
-                fi
-                export fend=${fhmaxh:-384}
-                ;;
-            (0p50)
-                if [[ ${NewCOM:-"YES"} == "YES" ]]; then
-                    gempak_in=$COMIN/${member}/$COMPONENT/products/0p50a #pgrb2ap5
-                    export pdgrbType=${resolution}a #pgrb2a
-                else
-                    gempak_in=$COMIN/$COMPONENT/pgrb2ap5
-                    export pdgrbType=pgrb2a
-                fi
-                export fend=${fhmaxh:-384}
-                ;;
-            (0p25)
-                if [[ ${NewCOM:-"YES"} == "YES" ]]; then
-                    gempak_in=$COMIN/${member}/$COMPONENT/products/0p25s #pgrb2sp25
-                    export pdgrbType=${resolution}s #pgrb2s
-                else
-                    gempak_in=$COMIN/$COMPONENT/pgrb2sp25
-                    export pdgrbType=pgrb2s
-                fi
-                export fend=${FHMAXHF:-240}
-                ;;
-            (*)
-                echo "FATAL ERROR in ${BASH_SOURCE}: resolution $resoltion not supported!"
-                export err=5
-                exit $err
-                ;;
-        esac
-        
-        echo "$HOMEgefs/ush/gefs_nawips.sh $RUNM $member $resolution ${GEMPAKgefs} ${gempak_in} ${gempak_out} ${fstart} ${fend} ${FHMAXHF} ${FHOUTHF} ${FHOUTLF} ${pdgrbType} ${gempak_log_out}" >> poescript
-    done
+  for resolution in ${GEMPAK_RES}; do
+    case $resolution in
+      (1p00)
+        if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+          gempak_in=$COMIN/${member}/$COMPONENT/products/1p00a #pgrb2a1p0
+          export pdgrbType=${resolution}a #pgrb2a
+        else
+          gempak_in=$COMIN/$COMPONENT/pgrb2a1p0
+          export pdgrbType=pgrb2a
+        fi
+        export fend=${fhmaxh:-384}
+        ;;
+      (0p50)
+        if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+          gempak_in=$COMIN/${member}/$COMPONENT/products/0p50a #pgrb2ap5
+          export pdgrbType=${resolution}a #pgrb2a
+        else
+          gempak_in=$COMIN/$COMPONENT/pgrb2ap5
+          export pdgrbType=pgrb2a
+        fi
+        export fend=${fhmaxh:-384}
+        ;;
+      (0p25)
+        if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+          gempak_in=$COMIN/${member}/$COMPONENT/products/0p25s #pgrb2sp25
+          export pdgrbType=${resolution}s #pgrb2s
+        else
+          gempak_in=$COMIN/$COMPONENT/pgrb2sp25
+          export pdgrbType=pgrb2s
+        fi
+        export fend=${FHMAXHF:-240}
+        ;;
+      (*)
+        echo "FATAL ERROR in ${BASH_SOURCE}: resolution $resoltion not supported!"
+        export err=5
+        exit $err
+        ;;
+    esac
+
+    echo "$HOMEgefs/ush/gefs_nawips.sh $RUNM $member $resolution ${GEMPAKgefs} ${gempak_in} ${gempak_out} ${fstart} ${fend} ${FHMAXHF} ${FHOUTHF} ${FHOUTLF} ${pdgrbType} ${gempak_log_out}" >> poescript
+  done
 done
 
 cat poescript
@@ -100,8 +100,8 @@ $APRUN_MPMD
 export err=$?
 
 if [[ $err != 0 ]]; then
-    echo "FATAL ERROR in ${BASH_SOURCE}: One or more gempak resolutions in $MP_CMDFILE failed!"
-    exit $err
+  echo "FATAL ERROR in ${BASH_SOURCE}: One or more gempak resolutions in $MP_CMDFILE failed!"
+  exit $err
 fi
 #############################################################
 

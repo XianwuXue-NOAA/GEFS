@@ -4,20 +4,20 @@ echo "$(date -u) begin ${.sh.file}"
 
 set -x
 if [[ ${STRICT:-NO} == "YES" ]]; then
-    set -eu
+  set -eu
 fi
 
 # Set environment.
 VERBOSE=${VERBOSE:-"YES"}
 if [ $VERBOSE = "YES" ]; then
-    echo $(date) EXECUTING ${.sh.file} $* >&2
-    set -x
+  echo $(date) EXECUTING ${.sh.file} $* >&2
+  set -x
 fi
 
 if [[ $SENDCOM == "YES" ]]; then
-    export SSTDIR=${SSTDIR:-$COMOUT/cfssst}
+  export SSTDIR=${SSTDIR:-$COMOUT/cfssst}
 else
-    export SSTDIR=${SSTDIR:-$DATA/cfssst}
+  export SSTDIR=${SSTDIR:-$DATA/cfssst}
 fi
 mkdir -m 775 -p $SSTDIR
 
@@ -31,8 +31,8 @@ export EXECgfs=$HOMEgfs/exec
 
 # Executables.
 if [[ -z "$EXECgefs" ]]; then
-    echo "FATAL ERROR in ${.sh.file}: GEFS executable directory $EXECgefs does not exist"
-    exit 5
+  echo "FATAL ERROR in ${.sh.file}: GEFS executable directory $EXECgefs does not exist"
+  exit 5
 fi
 
 export GEFS_ANOM2_FCST=${GEFS_ANOM2_FCST:-$EXECgefs/gefs_anom2_fcst}
@@ -57,44 +57,44 @@ HFcfsMax=120  # 5 day backword search for cfs fcst
 HFcfs=24
 PDYcfs=$PDY
 while [ $HFcfs -le $HFcfsMax ] ; do
-    PDYcfscfc=$($NDATE -${HFcfs} ${PDY}${cyc})
-    PDYcfs=$(echo $PDYcfscfc | cut -c1-8)
+  PDYcfscfc=$($NDATE -${HFcfs} ${PDY}${cyc})
+  PDYcfs=$(echo $PDYcfscfc | cut -c1-8)
 
-    COMINcfs2=${COMINcfs}${PDYcfs}/${cyc}
-    sFile=${COMINcfs2}/time_grib_01/tmpsfc.01.${PDYcfs}${cyc}.daily.grb2
-    if [ -d $COMINcfs2 ]; then
-        if [[ -f $sFile ]]; then
-            $NLN $sFile $filenamein_CFSv2
-            break
-        fi
+  COMINcfs2=${COMINcfs}${PDYcfs}/${cyc}
+  sFile=${COMINcfs2}/time_grib_01/tmpsfc.01.${PDYcfs}${cyc}.daily.grb2
+  if [ -d $COMINcfs2 ]; then
+    if [[ -f $sFile ]]; then
+      $NLN $sFile $filenamein_CFSv2
+      break
     fi
+  fi
 
-    HFcfs=$(expr $HFcfs + 24) 
+  HFcfs=$(expr $HFcfs + 24)
 done
 
 if [ $HFcfs -gt $HFcfsMax ];  then
-    echo "FATAL ERROR in ${.sh.file}: Real-time CFSv2 does not exist: $sFile"
-    exit 92
+  echo "FATAL ERROR in ${.sh.file}: Real-time CFSv2 does not exist: $sFile"
+  exit 92
 fi
 
 #Link Real-time nst file
 sFile=$COMINgfs/gfs.${cycle}.sfcanl.nc
 if [[ -f $sFile ]]; then
-    test_tref=$(ncdump -h $sFile | grep tref)
-    if [ -z $test_tref ]; then
-        echo "FATAL ERROR in ${.sh.file}: Real-time nst does not exist in $sFile"
-        exit 93
-    fi
-    $NLN $sFile $filenamein_nst
-else
-    echo "FATAL ERROR in ${.sh.file}: gfs surface analysis $sFile does not exist"
+  test_tref=$(ncdump -h $sFile | grep tref)
+  if [ -z $test_tref ]; then
+    echo "FATAL ERROR in ${.sh.file}: Real-time nst does not exist in $sFile"
     exit 93
+  fi
+  $NLN $sFile $filenamein_nst
+else
+  echo "FATAL ERROR in ${.sh.file}: gfs surface analysis $sFile does not exist"
+  exit 93
 fi
 
 export err=$?
 if (( err != 0 )); then
-    echo "FATAL ERROR in ${.sh.file}: link sst files FAILED!"
-    exit 93
+  echo "FATAL ERROR in ${.sh.file}: link sst files FAILED!"
+  exit 93
 fi
 echo "real-time data link ends at $(date)"
 
@@ -103,8 +103,8 @@ echo "read nst file to save tref begin"
 $GEFS_NSTGEN $filenamein_nst $filenameout_nst
 export err=$?
 if (( err !=0 )); then
-    echo "FATAL ERROR in ${.sh.file}: Reading sfcanl file $filenamein_nst to save tref to $filenameout_nst failed!"
-    exit 94
+  echo "FATAL ERROR in ${.sh.file}: Reading sfcanl file $filenamein_nst to save tref to $filenameout_nst failed!"
+  exit 94
 fi
 
 echo "read nst file to save tref end!!!"
@@ -155,8 +155,8 @@ anlfileout=anl_sst_grb_latlon.$PDY
 $COPYGB -g"$grid" -x $filenameout_nst $anlfileout
 export err=$?
 if (( err !=0 )); then
-    echo "FATAL ERROR in ${.sh.file}: $filenameout_nst; $anlfileout!"
-    exit 96
+  echo "FATAL ERROR in ${.sh.file}: $filenameout_nst; $anlfileout!"
+  exit 96
 fi
 cat $anlfileout > $fn_rawfc    # This is lead 0 forecast
 
@@ -168,27 +168,27 @@ mkdir -p $rawgb2trimdir
 rawgb2trim_short=$rawgb2trimdir/tmpsfc.01.${PDY}${cyc}.daily.short.grb2
 rawgb2trim=$rawgb2trimdir/tmpsfc.01.${PDY}${cyc}.daily.grb2
 if [ ! -f $rawgb2trim  ]; then
-    #$COPYGB2 -g "$grid_new" -x  $filenamein_CFSv2 $rawgb2trim
-    $WGRIB2 $filenamein_CFSv2 -for_n 1:150 -grib $rawgb2trim_short
-    $WGRIB2  $rawgb2trim_short $option1 $option21 -new_grid $grid0p25 $rawgb2trim
-    export err=$?
-    if (( err !=0 )); then
-        echo "FATAL ERROR in ${.sh.file}: WGRIB2 failed on $filenamein_CFSv2; $rawgb2trim!"
-        exit 96
-    fi
+  #$COPYGB2 -g "$grid_new" -x  $filenamein_CFSv2 $rawgb2trim
+  $WGRIB2 $filenamein_CFSv2 -for_n 1:150 -grib $rawgb2trim_short
+  $WGRIB2  $rawgb2trim_short $option1 $option21 -new_grid $grid0p25 $rawgb2trim
+  export err=$?
+  if (( err !=0 )); then
+    echo "FATAL ERROR in ${.sh.file}: WGRIB2 failed on $filenamein_CFSv2; $rawgb2trim!"
+    exit 96
+  fi
 fi
 
 rawgb2=$tmpraw/TMPsfc.${PDY}${cyc}.24h.grb2
 if [ -s $rawgb2 ] ; then
-    rm -f $rawgb2
+  rm -f $rawgb2
 fi
 #FH=24
 FH=$(expr 24 + ${HFcfs})
 NFHcfs=$(expr ${HFcfs} + ${NFH})
 echo $FH
 until [ $FH -gt $NFHcfs ] ; do
-    $WGRIB2 $rawgb2trim -append -if "TMP:surface:$FH hour fcst:" -grib $rawgb2 > /dev/null
-    FH=$(expr $FH + 24)
+  $WGRIB2 $rawgb2trim -append -if "TMP:surface:$FH hour fcst:" -grib $rawgb2 > /dev/null
+  FH=$(expr $FH + 24)
 done
 # convert from grib2 to grib and change resolution
 rawgb=$tmpraw/TMPsfc.${PDY}${cyc}.fcs.grb
@@ -203,17 +203,17 @@ CFSv2_clim_dir=${CFSv2_clim_dir:-${FIXgefs}/sstclim}
 
 climmgb2trim=${CFSv2_clim_dir}/${hh}/tmpsfc.$mm.$dd.${hh}Z.mean.clim.daily.grb2
 if [ ! -s $climmgb2trim ] ; then
-    echo "FATAL ERROR in ${.sh.file}: $climmgb2trim does not exist!"
-    exit 89
+  echo "FATAL ERROR in ${.sh.file}: $climmgb2trim does not exist!"
+  exit 89
 fi
 climmgb2=$tmpclim/tmpsfc.${PDY}${cyc}.mean.clim.daily.grb2
 if [ -s $climmgb2 ] ; then
-    rm -f $climmgb2
+  rm -f $climmgb2
 fi
 FH=24
 until [ $FH -gt $NFH ] ; do
-    $WGRIB2 $climmgb2trim -append -if "TMP:surface:$FH hour fcst:" -grib $climmgb2 > /dev/null
-    FH=$(expr $FH + 24)
+  $WGRIB2 $climmgb2trim -append -if "TMP:surface:$FH hour fcst:" -grib $climmgb2 > /dev/null
+  FH=$(expr $FH + 24)
 done
 
 climmgb=$tmpclim/tmpsfc.${PDY}${cyc}.mean.clim.daily.grb
@@ -223,7 +223,7 @@ cat $anlfileout $climmgb > $climmgb.plus  # This is to add rtg analysis as lead 
 echo "$climmgb.plus: $climmgb.plus"
 $WGRIB $climmgb.plus -d all -ieee -o fort.$un_climm
 if [ $? -eq 0 ] ; then
-    rm -f $climmgb2
+  rm -f $climmgb2
 fi
 
 #   # Observations (analysis). RTG i.c. are persisted 35 days
@@ -233,36 +233,36 @@ $WGRIB $anlfileout -d all -ieee -o fort.$un_rtgan
 # CFSR must be trimmed to the 35 days of the forecasts
 climogb2trim=${climogb2trim:-${FIXgefs}/sstclim/cfsr/tmpsfc.cfsr.mean.clim.daily.1999.2010.grb2}
 if [ ! -s $climogb2trim ] ; then
-    echo "FATAL ERROR in ${.sh.file}: $climogb2trim does not exist!"
-    exit 90
+  echo "FATAL ERROR in ${.sh.file}: $climogb2trim does not exist!"
+  exit 90
 fi
 climogb2=$tmpcfsr/tmpsfc.cfsr.${PDY}${cyc}.clim.daily.grb2
 cfsr_date=2000${mm}${dd}${hh}
 if [ -s $climogb2 ] ; then
-    rm -f $climogb2
+  rm -f $climogb2
 fi
 FH=0
 until [ $FH -gt $NFH ] ; do
-    $WGRIB2 $climogb2trim -append -if ":d=$cfsr_date:" -grib $climogb2 > /dev/null
-    FH=$(expr $FH + 24)
-    cfsr_date=$($NDATE +24 $cfsr_date)
-    yyn=$(echo $cfsr_date | cut -c1-4)
-    #      echo " reanalysis: year $yyn "
-    if [ $yyn = 2001 ] ; then
-        mmn=$(echo $cfsr_date | cut -c5-6)
-        ddn=$(echo $cfsr_date | cut -c7-8)
-        cfsr_date=2000${mmn}${ddn}${hh}
-    fi
+  $WGRIB2 $climogb2trim -append -if ":d=$cfsr_date:" -grib $climogb2 > /dev/null
+  FH=$(expr $FH + 24)
+  cfsr_date=$($NDATE +24 $cfsr_date)
+  yyn=$(echo $cfsr_date | cut -c1-4)
+  #      echo " reanalysis: year $yyn "
+  if [ $yyn = 2001 ] ; then
+    mmn=$(echo $cfsr_date | cut -c5-6)
+    ddn=$(echo $cfsr_date | cut -c7-8)
+    cfsr_date=2000${mmn}${ddn}${hh}
+  fi
 done
 climogb=$tmpcfsr/tmpsfc.cfsr.${PDY}${cyc}.clim.daily.grb
 $CNVGRIB -g21 $climogb2 $climogb
 echo "climogb: $climogb"
 $WGRIB $climogb -d all -ieee -o fort.$un_climo
 export err=$?
-if [ $? -eq 0 ] ;
-    then rm -f $climmgb2
+if [ $? -eq 0 ]; then
+  rm -f $climmgb2
 else
-    echo "FATAL ERROR in ${.sh.file}: CNVGRIB failed for $climogb"
+  echo "FATAL ERROR in ${.sh.file}: CNVGRIB failed for $climogb"
 fi
 
 #
@@ -272,31 +272,31 @@ fi
 kdate=${PDY}${cyc}
 FH=0
 until [ $FH -gt $NFH ] ; do
-    #     kdate=$($NDATE +24 $kdate)
-    kcc=$(echo $kdate | cut -c1-2)
-    kyy=$(echo $kdate | cut -c3-4)
-    kpds8=$(echo $kdate | cut -c3-4)
-    if [ "$kpds8" -eq "00" ] ; then
-        kpds8="100"
-    fi
-    kpds9=$(echo $kdate | cut -c5-6)
-    kpds10=$(echo $kdate | cut -c7-8)
+  #     kdate=$($NDATE +24 $kdate)
+  kcc=$(echo $kdate | cut -c1-2)
+  kyy=$(echo $kdate | cut -c3-4)
+  kpds8=$(echo $kdate | cut -c3-4)
+  if [ "$kpds8" -eq "00" ] ; then
+    kpds8="100"
+  fi
+  kpds9=$(echo $kdate | cut -c5-6)
+  kpds10=$(echo $kdate | cut -c7-8)
 
-    if [ "$kcc" -eq "19" ] ; then
-        kpds21="20"
-    elif [ "$kcc" -eq "20" ] ; then
-        kpds21="21"
-    fi
+  if [ "$kcc" -eq "19" ] ; then
+    kpds21="20"
+  elif [ "$kcc" -eq "20" ] ; then
+    kpds21="21"
+  fi
 
-    if [ "$kyy" -eq "00" ] ; then
-        kpds21="20"
-    fi
+  if [ "$kyy" -eq "00" ] ; then
+    kpds21="20"
+  fi
 
-    echo $kpds8 $kpds9 $kpds10 $kpds21 >> $kpdsfile
+  echo $kpds8 $kpds9 $kpds10 $kpds21 >> $kpdsfile
 
-    kdate=$($NDATE +24 $kdate)
+  kdate=$($NDATE +24 $kdate)
 
-    FH=$(expr $FH + 24)
+  FH=$(expr $FH + 24)
 done
 echo "$kpdsfile: $kpdsfile"
 #
@@ -304,23 +304,23 @@ echo "$kpdsfile: $kpdsfile"
 # -- Uses persistence with growing weight towards CFSv2 as lead time increases NCEP grib T126 (Gaussian 384*190)
 echo "fn_anom_fc: $fn_anom_fc"
 if [ -s $fn_anom_fc ] ; then
-    rm -f $fn_anom_fc
+  rm -f $fn_anom_fc
 fi
 
 echo "$fn_rawfc $un_climm $un_climo $un_rtgan $fn_anom_fc $kpdsfile"
 $GEFS_ANOM2_FCST $fn_rawfc $un_climm $un_climo $un_rtgan $fn_anom_fc $kpdsfile $HFcfs
 export err=$?
 if [[ $err != 0 ]]; then
-    echo "FATAL ERROR in ${.sh.file}: Bias correction failed in $GEFS_ANOM2_FCST"
-    exit $err
+  echo "FATAL ERROR in ${.sh.file}: Bias correction failed in $GEFS_ANOM2_FCST"
+  exit $err
 fi
 
 $NCP $fn_anom_fc $SSTDIR/TMPsfc.${PDY}${cyc}.24hr.anom.grb
 export err=$?
 
 if [[ $err != 0 ]]; then
-    echo "FATAL ERROR in ${.sh.file}: Could not copy $fn_anom_fc to $SSTDIR"
-    exit $err
+  echo "FATAL ERROR in ${.sh.file}: Could not copy $fn_anom_fc to $SSTDIR"
+  exit $err
 fi
 
 echo "$(date -u) end ${.sh.file}"

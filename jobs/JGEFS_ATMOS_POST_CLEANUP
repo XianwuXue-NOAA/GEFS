@@ -12,8 +12,8 @@ echo "$(date -u) begin ${.sh.file}"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
-	# Turn on strict bash error checking
-	set -eu
+  # Turn on strict bash error checking
+  set -eu
 fi
 export PS4='$SECONDS + $(basename ${.sh.file})[$LINENO] '
 
@@ -67,13 +67,13 @@ export PARMgefs=${PARMgefs:-$HOMEgefs/parm}
 ##############################################
 ver=${ver:-$(echo ${gefs_ver}|cut -c1-5)}
 if [ $cyc = 00 ]; then
-    export COMIN=${COMIN:-$(compath.py $envir/com/$NET/${ver})/${RUN}.${PDYm1}/$cyc}
-    export COMOUT=${COMOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDYm1}/$cyc}
-    export GESOUT=${GESOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDYm1}/$cyc/nwges}
+  export COMIN=${COMIN:-$(compath.py $envir/com/$NET/${ver})/${RUN}.${PDYm1}/$cyc}
+  export COMOUT=${COMOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDYm1}/$cyc}
+  export GESOUT=${GESOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDYm1}/$cyc/nwges}
 else
-    export COMIN=${COMIN:-$(compath.py $envir/com/$NET/${ver})/${RUN}.${PDY}/$cyc}
-    export COMOUT=${COMOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDY}/$cyc}
-    export GESOUT=${GESOUT:-$(compath.py $NET/${ver})/${RUN}.${PDY}/$cyc/nwges}
+  export COMIN=${COMIN:-$(compath.py $envir/com/$NET/${ver})/${RUN}.${PDY}/$cyc}
+  export COMOUT=${COMOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDY}/$cyc}
+  export GESOUT=${GESOUT:-$(compath.py $NET/${ver})/${RUN}.${PDY}/$cyc/nwges}
 fi
 
 ##############################################
@@ -82,12 +82,12 @@ echo set parameters using gefs.parm
 configs="gefs"
 config_path=$PARMgefs
 for config in $configs; do
-    . $config_path/$config.parm
-    export err=$?
-    if [[ $err != 0 ]]; then
-        echo "FATAL ERROR in ${.sh.file}: Error while loading parm file $config_path/$config.parm"
-        exit $err
-    fi
+  . $config_path/$config.parm
+  export err=$?
+  if [[ $err != 0 ]]; then
+    echo "FATAL ERROR in ${.sh.file}: Error while loading parm file $config_path/$config.parm"
+    exit $err
+  fi
 done
 export COMPONENT="atmos"
 
@@ -99,10 +99,10 @@ env | sort
 $HOMEgefs/scripts/exgefs_atmos_post_cleanup.sh
 export err=$?
 if [[ $err == 0 ]]; then
-    echo "$job completed normally!"
+  echo "$job completed normally!"
 else
-    echo "FATAL ERROR in ${.sh.file}: $job failed!"
-    exit $err
+  echo "FATAL ERROR in ${.sh.file}: $job failed!"
+  exit $err
 fi
 #############################################################
 

@@ -4,51 +4,51 @@ echo "$(date -u) begin ${.sh.file}"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
-	# Turn on strict bash error checking
-	set -eu
+  # Turn on strict bash error checking
+  set -eu
 fi
 
 case $FORECAST_SEGMENT in
-	hr)
-		start_hour=0
-		end_hour=${fhmaxh}
-		;;
-	lr)
-		start_hour=$((${fhmaxh}+1))
-		end_hour=${fhmax}
-		PRDGEN_STREAMS=$PRDGEN_STREAMS_LR
-		;;
-	*)
-		start_hour=0
-		end_hour=${fhmax}
-		;;
+  hr)
+    start_hour=0
+    end_hour=${fhmaxh}
+    ;;
+  lr)
+    start_hour=$((${fhmaxh}+1))
+    end_hour=${fhmax}
+    PRDGEN_STREAMS=$PRDGEN_STREAMS_LR
+    ;;
+  *)
+    start_hour=0
+    end_hour=${fhmax}
+    ;;
 esac # $FORECAST_SEGMENT in
 
 for stream in ${PRDGEN_STREAMS[@]}; do
-	# Filter out hours based on forecast segment
-	typeset -a hours=($(echo ${PRDGEN_HOURS[$stream]}))
-	echo "hours = $hours"
-	for i in "${!hours[@]}"; do
-		hour=${hours[i]}
-		echo "i = $i  hour = $hour"
-		if [[ $hour -lt $start_hour || $hour -gt $end_hour ]]; then
-			unset 'hours[i]'
-		fi
-	done
-	PRDGEN_HOURS[$stream]="${hours[@]}"
-	unset hours
+  # Filter out hours based on forecast segment
+  typeset -a hours=($(echo ${PRDGEN_HOURS[$stream]}))
+  echo "hours = $hours"
+  for i in "${!hours[@]}"; do
+    hour=${hours[i]}
+    echo "i = $i  hour = $hour"
+    if [[ $hour -lt $start_hour || $hour -gt $end_hour ]]; then
+      unset 'hours[i]'
+    fi
+  done
+  PRDGEN_HOURS[$stream]="${hours[@]}"
+  unset hours
 
-	# Ensure required variables are defined
-	for var in PRDGEN_GRID PRDGEN_GRID_SPEC PRDGEN_HOURS PRDGEN_SUBMC PRDGEN_A_DIR PRDGEN_A_PREFIX PRDGEN_A_LIST_F00 PRDGEN_A_LIST_FHH; do
-		pointer="$var[$stream]"
-		if [[ -z ${!pointer} ]]; then
-			echo "FATAL ERROR in ${.sh.file}: $var not defined for $stream"
-			exit -1
-		fi
-	done
+  # Ensure required variables are defined
+  for var in PRDGEN_GRID PRDGEN_GRID_SPEC PRDGEN_HOURS PRDGEN_SUBMC PRDGEN_A_DIR PRDGEN_A_PREFIX PRDGEN_A_LIST_F00 PRDGEN_A_LIST_FHH; do
+    pointer="$var[$stream]"
+    if [[ -z ${!pointer} ]]; then
+      echo "FATAL ERROR in ${.sh.file}: $var not defined for $stream"
+      exit -1
+    fi
+  done
 
-	# Print out settings for this stream
-	cat <<-EOF
+  # Print out settings for this stream
+  cat <<-EOF
 		Settings for prgden stream $stream:
 			Grid: ${PRDGEN_GRID[$stream]}
 			Grid Spec: ${PRDGEN_GRID_SPEC[$stream]}
@@ -63,20 +63,20 @@ for stream in ${PRDGEN_STREAMS[@]}; do
 done
 
 for stream in ${PRDGEN_STREAMS[@]}; do
-	subdata=${DATA}/${stream}
-	if [ ! -d ${subdata} ]; then mkdir -p ${subdata}; fi
-	outfile=${subdata}/${stream}.out
+  subdata=${DATA}/${stream}
+  if [ ! -d ${subdata} ]; then mkdir -p ${subdata}; fi
+  outfile=${subdata}/${stream}.out
 
-	jobgrid="${PRDGEN_GRID[$stream]}"
-	grid_spec="${PRDGEN_GRID_SPEC[$stream]}"
-	hours="${PRDGEN_HOURS[$stream]}"
-	submc="${PRDGEN_SUBMC[$stream]}"
-	pgad="${PRDGEN_A_DIR[$stream]}"
-	pgbd="${PRDGEN_B_DIR[$stream]}"
-	pgapre="${PRDGEN_A_PREFIX[$stream]}"
-	pgbpre="${PRDGEN_B_PREFIX[$stream]}"
-	do_analysis="${PRDGEN_DO_ANALYSIS[$stream]:-NO}"
-	if [[ $SENDCOM == "YES" && ! -d ${pgad} ]]; then
+  jobgrid="${PRDGEN_GRID[$stream]}"
+  grid_spec="${PRDGEN_GRID_SPEC[$stream]}"
+  hours="${PRDGEN_HOURS[$stream]}"
+  submc="${PRDGEN_SUBMC[$stream]}"
+  pgad="${PRDGEN_A_DIR[$stream]}"
+  pgbd="${PRDGEN_B_DIR[$stream]}"
+  pgapre="${PRDGEN_A_PREFIX[$stream]}"
+  pgbpre="${PRDGEN_B_PREFIX[$stream]}"
+  do_analysis="${PRDGEN_DO_ANALYSIS[$stream]:-NO}"
+  if [[ $SENDCOM == "YES" && ! -d ${pgad} ]]; then
     if [[ ${NewCOM} == "YES" ]]; then
       mkdir -m 775 -p $COMOUT/avg/$COMPONENT/${pgad}
       mkdir -m 775 -p $COMOUT/spr/$COMPONENT/${pgad}
@@ -84,8 +84,8 @@ for stream in ${PRDGEN_STREAMS[@]}; do
       mkdir -m 775 -p $COMOUT/$COMPONENT/${pgad}
     fi
   fi
-	
-	echo "$HOMEgefs/ush/gefs_ensstat.sh $subdata \"$stream\" \"$jobgrid\" \"$hours\" \"$pgad\" \"$pgapre\" 2>&1 >${outfile}" >> ensstat.cmdfile
+
+  echo "$HOMEgefs/ush/gefs_ensstat.sh $subdata \"$stream\" \"$jobgrid\" \"$hours\" \"$pgad\" \"$pgapre\" 2>&1 >${outfile}" >> ensstat.cmdfile
 
 done
 
@@ -104,8 +104,8 @@ $APRUN_MPMD
 export err=$?
 
 if [[ $err != 0 ]]; then
-    echo "FATAL ERROR in ${.sh.file}: One or more streams in $MP_CMDFILE failed!"
-    export err=100
+  echo "FATAL ERROR in ${.sh.file}: One or more streams in $MP_CMDFILE failed!"
+  export err=100
 fi
 #############################################################
 

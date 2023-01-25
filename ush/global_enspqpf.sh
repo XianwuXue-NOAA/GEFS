@@ -7,8 +7,8 @@ echo "$(date -u) begin ${.sh.file}"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
-	# Turn on strict bash error checking
-	set -eu
+  # Turn on strict bash error checking
+  set -eu
 fi
 
 export CDATE=$CDATE
@@ -55,13 +55,13 @@ $enspqpf < inputpqpf
 
 export err=$?;
 if [[ $err != 0 ]]; then
-	echo <<- EOF
+  echo <<- EOF
 		FATAL ERROR in ${.sh.file}: $enspqpf returned a non-zero error!"
 		  Namelist file inputpqpf contained:
 		  	$(cat inputpqpf)
 		EOF
 	err_chk
-	exit $err
+  exit $err
 fi
 
 echo "$(date -u) end ${.sh.file}"

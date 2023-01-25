@@ -22,8 +22,8 @@ echo "$(date -u) begin ${.sh.file}"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
-	# Turn on strict bash error checking
-	set -eu
+  # Turn on strict bash error checking
+  set -eu
 fi
 
 cd $DATA
@@ -44,13 +44,13 @@ export NINT3=$FHOUTLF        ##second period time interval
 export STARTHOUR=${STARTHOUR:-00}
 export ENDHOUR=${ENDHOUR:-180}
 if (( ENDHOUR > fhmaxh )); then
-	export ENDHOUR=$fhmaxh
+  export ENDHOUR=$fhmaxh
 fi
 if (( NEND1 >= ENDHOUR )); then
-	export NEND1=$ENDHOUR
+  export NEND1=$ENDHOUR
 fi
 if (( NEND1 >= FHMAXHF )); then
-	export NEND1=$FHMAXHF
+  export NEND1=$FHMAXHF
 fi
 
 export NZERO=6
@@ -62,11 +62,11 @@ export MODEL_OUT_FORM=binarynemsiompiio
 export mem=$(echo $RUNMEM|cut -c3-5)
 
 if [[ $SENDCOM == "YES" ]]; then
-	mkdir -p $COMOUT/$COMPONENT
-	mkdir -p $COMOUT/$COMPONENT/wmo
-	mkdir -p $COMOUT/$COMPONENT/gempak
+  mkdir -p $COMOUT/$COMPONENT
+  mkdir -p $COMOUT/$COMPONENT/wmo
+  mkdir -p $COMOUT/$COMPONENT/gempak
 
-	mkdir -m 775 -p $COMOUT/$COMPONENT/bufr/$mem
+  mkdir -m 775 -p $COMOUT/$COMPONENT/bufr/$mem
 fi # [[ $SENDCOM == "YES" ]]
 
 ### Loop for the hour and wait for the sigma and surface flux file:
@@ -75,60 +75,60 @@ export FSTART=$STARTHOUR
 SLEEP_LOOP_MAX=$(($SLEEP_TIME / $SLEEP_INT))
 
 while [ $FSTART -lt $ENDHOUR ]; do
-	export FINT=$NINT1
-	# Define the end hour for the input
-	export FEND=$(printf %03i $((10#$FSTART + $INCREMENT)))
-	if [ $FSTART -eq 00 ]; then 
-		export F00FLAG=YES
-	else
-		export F00FLAG=NO
-	fi
+  export FINT=$NINT1
+  # Define the end hour for the input
+  export FEND=$(printf %03i $((10#$FSTART + $INCREMENT)))
+  if [ $FSTART -eq 00 ]; then
+    export F00FLAG=YES
+  else
+    export F00FLAG=NO
+  fi
    
-	if [ $FEND -eq $ENDHOUR ]; then
-		export MAKEBUFR=YES
-	fi
+  if [ $FEND -eq $ENDHOUR ]; then
+    export MAKEBUFR=YES
+  fi
 
-	ic=0
-	while [ $ic -lt $SLEEP_LOOP_MAX ]; do
-		fcstchk=$COMIN/$COMPONENT/sfcsig/${RUNMEM}.${cycle}.logf$FEND.nemsio
-		if [ ! -f $fcstchk ]; then
-			ic=$(($ic + 1))
-			sleep $SLEEP_INT
-		else
-			break
-		fi
+  ic=0
+  while [ $ic -lt $SLEEP_LOOP_MAX ]; do
+    fcstchk=$COMIN/$COMPONENT/sfcsig/${RUNMEM}.${cycle}.logf$FEND.nemsio
+    if [ ! -f $fcstchk ]; then
+      ic=$(($ic + 1))
+      sleep $SLEEP_INT
+    else
+      break
+    fi
 
-		if [ $ic -ge $SLEEP_LOOP_MAX ]; then
-			echo <<- EOF
+    if [ $ic -ge $SLEEP_LOOP_MAX ]; then
+      echo <<- EOF
 				FATAL ERROR in ${.sh.file}: Unable to find forecast output $fcstchk at $(date -u) after waiting ${SLEEP_TIME}s!
 				EOF
 			export err=5
-			err_chk
-			exit $err
-		fi
-	done
+      err_chk
+      exit $err
+    fi
+  done
 
-	## 1-hourly output before $NEND1, 3-hourly output after
-	if [ $FEND -gt $NEND1 ]; then
-		export FINT=$NINT3
-	fi
-	$USHgefs/gefs_bufr.sh
-	export err=$?
-	if [[ $err != 0 ]]; then
-		echo "FATAL ERROR in ${.sh.file}: gefs_bufr failed for f$FSTART!"
-		err_chk
-		exit $err
-	fi
+  ## 1-hourly output before $NEND1, 3-hourly output after
+  if [ $FEND -gt $NEND1 ]; then
+    export FINT=$NINT3
+  fi
+  $USHgefs/gefs_bufr.sh
+  export err=$?
+  if [[ $err != 0 ]]; then
+    echo "FATAL ERROR in ${.sh.file}: gefs_bufr failed for f$FSTART!"
+    err_chk
+    exit $err
+  fi
 
-	export FSTART=$FEND
+  export FSTART=$FEND
 done
 
 ##############################################################
 # Tar and gzip the individual bufr files and send them to /com
 ##############################################################
 if [[ $SENDCOM == "YES" ]]; then
-	cd ${COMOUT}/$COMPONENT/bufr/${mem}
-	tar -cf - bufr.* | /usr/bin/gzip > ../${RUNMEM}.${cycle}.bufrsnd.tar.gz
+  cd ${COMOUT}/$COMPONENT/bufr/${mem}
+  tar -cf - bufr.* | /usr/bin/gzip > ../${RUNMEM}.${cycle}.bufrsnd.tar.gz
 fi
 cd $DATA
 
@@ -136,10 +136,10 @@ cd $DATA
 # Send the single tar file to OSO
 ########################################
 if [ "$SENDDBN" = 'YES' ]; then
-	MODCOM=$(echo ${NET}_${COMPONENT} | tr '[a-z]' '[A-Z]')
-	DBNTYP=${MODCOM}_BUFRSND_TAR
-	$DBNROOT/bin/dbn_alert MODEL ${DBNTYP} $job \
-	$COMOUT/$COMPONENT/bufr/${RUNMEM}.${cycle}.bufrsnd.tar.gz
+  MODCOM=$(echo ${NET}_${COMPONENT} | tr '[a-z]' '[A-Z]')
+  DBNTYP=${MODCOM}_BUFRSND_TAR
+  $DBNROOT/bin/dbn_alert MODEL ${DBNTYP} $job \
+  $COMOUT/$COMPONENT/bufr/${RUNMEM}.${cycle}.bufrsnd.tar.gz
 fi
 
 ########################################
@@ -151,7 +151,7 @@ collect=' 1 2 3 4 5 6 7 8 9'
 rm -rf mpmd_cmdfile
 echo "$USHgefs/gefs_bfr2gpk.sh " >> mpmd_cmdfile
 for m in ${collect}; do
-	echo "$USHgefs/gefs_sndp.sh $m " >> mpmd_cmdfile
+  echo "$USHgefs/gefs_sndp.sh $m " >> mpmd_cmdfile
 done
 
 cat mpmd_cmdfile
@@ -166,8 +166,8 @@ $APRUN_MPMD
 export err=$?
 
 if [[ $err != 0 ]]; then
-	echo "FATAL ERROR in ${.sh.file}: One or more BUFR regions in $MP_CMDFILE failed!"
-	exit $err
+  echo "FATAL ERROR in ${.sh.file}: One or more BUFR regions in $MP_CMDFILE failed!"
+  exit $err
 fi
 #############################################################
 

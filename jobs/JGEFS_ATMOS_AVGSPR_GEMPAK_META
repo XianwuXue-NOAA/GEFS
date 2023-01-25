@@ -4,8 +4,8 @@ echo "$(date -u) begin $(basename $BASH_SOURCE)"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
-	# Turn on strict bash error checking
-	set -eu
+  # Turn on strict bash error checking
+  set -eu
 fi
 export PS4='$SECONDS + $(basename $(basename $BASH_SOURCE))[$LINENO] '
 
@@ -77,12 +77,12 @@ export COMOUT=${COMOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDY}/$cyc}
 configs="gefs gefs_gempak_meta"
 config_path=$PARMgefs
 for config in $configs; do
-    . $config_path/$config.parm
-    export err=$?
-    if [[ $err != 0 ]]; then
-        echo "FATAL ERROR in $(basename $BASH_SOURCE): Error while loading parm file $config_path/$config.parm"
-        exit $err
-    fi
+  . $config_path/$config.parm
+  export err=$?
+  if [[ $err != 0 ]]; then
+    echo "FATAL ERROR in $(basename $BASH_SOURCE): Error while loading parm file $config_path/$config.parm"
+    exit $err
+  fi
 done
 
 export COMPONENT=${COMPONENT:-atmos}
@@ -96,9 +96,9 @@ env | sort
 $HOMEgefs/scripts/exgefs_atmos_avgspr_gempak_meta.sh
 export err=$?
 if [[ $err == 0 ]]; then
-    echo "$job completed normally!"
+  echo "$job completed normally!"
 else
-    echo "FATAL ERROR: $job failed!"
+  echo "FATAL ERROR: $job failed!"
 fi
 #############################################################
 

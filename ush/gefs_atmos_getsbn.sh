@@ -54,22 +54,22 @@ cd $DATA/$var
 file=grib2.gefs.t${cyc}z.${var}.f${bhr}_${ehr}
 hr=$bhr
 while (( hr <= $ehr )); do
-    hr3=`printf %03d $hr`
-    export pgm="postcheck"
-    set -x
-    file_temp=ge${mem}.t${cyc}z.${type}f${hr3}
-    ln -s ${COMIN}/atmos/${type}/ge${mem}.t${cyc}z.${fntype}.f${hr3} ${file_temp}
-    $WGRIB2 ${file_temp} | grep "$nvar" | $WGRIB2 -i ${file_temp} -grib ${file_temp}_$var
-    cat  ${file_temp}_$var >> $file
-    rm  ${file_temp}*
-    (( hr = hr + $ihr ))
+  hr3=`printf %03d $hr`
+  export pgm="postcheck"
+  set -x
+  file_temp=ge${mem}.t${cyc}z.${type}f${hr3}
+  ln -s ${COMIN}/atmos/${type}/ge${mem}.t${cyc}z.${fntype}.f${hr3} ${file_temp}
+  $WGRIB2 ${file_temp} | grep "$nvar" | $WGRIB2 -i ${file_temp} -grib ${file_temp}_$var
+  cat  ${file_temp}_$var >> $file
+  rm  ${file_temp}*
+  (( hr = hr + $ihr ))
 done
 
 #Cutting the files to latlon CONUS (170W-60W,75N-15N)
 $WGRIB2 $file $option1 $option21 $option22 $option23 $option24 \
-	    $option25 $option26 \
-	    -new_grid latlon $cutgrid \
-	    ${file}.conus_notoc
+  $option25 $option26 \
+  -new_grid latlon $cutgrid \
+  ${file}.conus_notoc
 
 ############################################
 # Processing GRIB2 GEFS grid 3 for MMEFS
@@ -86,8 +86,8 @@ export err=$?; err_chk
 echo " error from tocgrib2=",$err
 
 if [ $err -ne 0 ]; then
-	msg="WARNING: WMO header is not added to $FORT11"
-	echo "$msg"
+  msg="WARNING: WMO header is not added to $FORT11"
+  echo "$msg"
 fi 
 mv $FORT51 $DATA
 
@@ -96,21 +96,21 @@ cd $DATA
 # Sending files to COM area
 fileout=${file}.conus
 if [ -s $fileout ]; then
-	if [ "$SENDCOM" = YES ]; then
-        ##############################
-        # Post Files to COMOUTwmo
-        ##############################
-        cpfs $fileout $COMOUTwmo
+  if [ "$SENDCOM" = YES ]; then
+    ##############################
+    # Post Files to COMOUTwmo
+    ##############################
+    cpfs $fileout $COMOUTwmo
 
-        if [ "$SENDDBN_NTC" = YES ]; then
-            ##########################
-            # Distribute Data to NCF
-            #########################
-            $DBNROOT/bin/dbn_alert NTC_LOW $NET $job $COMOUTwmo/${fileout}
-        fi
-	fi
+    if [ "$SENDDBN_NTC" = YES ]; then
+      ##########################
+      # Distribute Data to NCF
+      #########################
+      $DBNROOT/bin/dbn_alert NTC_LOW $NET $job $COMOUTwmo/${fileout}
+    fi
+  fi
 else
-	err_exit "file $fileout was not generated"
+  err_exit "file $fileout was not generated"
 fi
 
 msg=" $var for $bhr to $ehr hours HAS COMPLETED NORMALLY!"

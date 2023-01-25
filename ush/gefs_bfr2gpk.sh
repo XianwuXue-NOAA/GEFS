@@ -13,8 +13,8 @@ echo "$(date -u) begin ${.sh.file}"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
-	# Turn on strict bash error checking
-	set -eu
+  # Turn on strict bash error checking
+  set -eu
 fi
 
 # Set GEMPAK paths.
@@ -28,11 +28,11 @@ cd $DATA
 #  Set input directory name.
 
 if [[ $SENDCOM == "YES" ]]; then
-	export BPATH=$COMOUT/$COMPONENT/bufr/${mem}
-	OUTDIR=$COMOUT/$COMPONENT/gempak
+  export BPATH=$COMOUT/$COMPONENT/bufr/${mem}
+  OUTDIR=$COMOUT/$COMPONENT/gempak
 else
-	export BPATH=$DATA/${mem}
-	OUTDIR=$DATA/gempak
+  export BPATH=$DATA/${mem}
+  OUTDIR=$DATA/gempak
 fi
 
 #  Set output directory:
@@ -55,7 +55,7 @@ namsnd <<- EOF > /dev/null
 
 export err=$?
 if [[ $err != 0 ]]; then
-	echo <<- EOF
+  echo <<- EOF
 		FATAL ERROR in ${.sh.file}: namsnd failed with the following settings:
 			SNBUFR   = bufr.combined
 			SNOUTF   = ${outfilbase}.snd
@@ -68,7 +68,7 @@ if [[ $err != 0 ]]; then
 			ex
 		EOF
 	err_chk
-	exit $err
+  exit $err
 fi
 date
 
@@ -77,17 +77,17 @@ date
 snd=${outfilbase}.snd
 sfc=${outfilbase}.sfc
 if [[ $SENDCOM == "YES" ]]; then
-	cp $snd $OUTDIR/.$snd
-	cp $sfc $OUTDIR/.$sfc
-	mv $OUTDIR/.$snd $OUTDIR/$snd
-	mv $OUTDIR/.$sfc $OUTDIR/$sfc
+  cp $snd $OUTDIR/.$snd
+  cp $sfc $OUTDIR/.$sfc
+  mv $OUTDIR/.$snd $OUTDIR/$snd
+  mv $OUTDIR/.$sfc $OUTDIR/$sfc
 fi
 
 if [ $SENDDBN = "YES" ]; then
-    MODCOM=$(echo ${NET}_${COMPONENT} | tr '[a-z]' '[A-Z]')
-    DBNTYP=${MODCOM}_PTYP
-    $DBNROOT/bin/dbn_alert MODEL ${DBNTYP}_SFC $job $OUTDIR/$sfc
-    $DBNROOT/bin/dbn_alert MODEL ${DBNTYP}_SND $job $OUTDIR/$snd
+  MODCOM=$(echo ${NET}_${COMPONENT} | tr '[a-z]' '[A-Z]')
+  DBNTYP=${MODCOM}_PTYP
+  $DBNROOT/bin/dbn_alert MODEL ${DBNTYP}_SFC $job $OUTDIR/$sfc
+  $DBNROOT/bin/dbn_alert MODEL ${DBNTYP}_SND $job $OUTDIR/$snd
 fi
 echo done > $DATA/gembufr.done
 

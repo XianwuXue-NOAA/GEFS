@@ -16,14 +16,14 @@ echo "$(date -u) begin ${.sh.file}"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
-	# Turn on strict bash error checking
-	set -eu
+  # Turn on strict bash error checking
+  set -eu
 fi
 
 if [[ $member == "c00" ]]; then
-    if [[ $cycle == "t06z" ]]; then
-        fhsave="${fhsave} f012"
-    fi
+  if [[ $cycle == "t06z" ]]; then
+    fhsave="${fhsave} f012"
+  fi
 fi
 
 export MP_LABELIO=YES
@@ -35,25 +35,25 @@ export fhr
 # Loop Through the Post Forecast Files
 ############################################################
 while [[ $fhr -le $FHOUR ]]; do
-	ffhr="f$(printf %03i $fhr)"
+  ffhr="f$(printf %03i $fhr)"
 
-	echo "$(date) $ffhr begin"
+  echo "$(date) $ffhr begin"
 
-	if [[ "$SENDCOM" = "YES" ]]; then
-		####################################
-		# Remove nemsio fcst and sflux files
-		####################################
-		if [[ "$fhsave" != *"$ffhr"* ]]; then
-			rm $COMOUT/$COMPONENT/sfcsig/ge$member.$cycle.atm${ffhr}.nemsio
-			rm $COMOUT/$COMPONENT/sfcsig/ge$member.$cycle.sfc${ffhr}.nemsio
-		fi
-	fi # [[ "$SENDCOM" = "YES" ]]
+  if [[ "$SENDCOM" = "YES" ]]; then
+    ####################################
+    # Remove nemsio fcst and sflux files
+    ####################################
+    if [[ "$fhsave" != *"$ffhr"* ]]; then
+      rm $COMOUT/$COMPONENT/sfcsig/ge$member.$cycle.atm${ffhr}.nemsio
+      rm $COMOUT/$COMPONENT/sfcsig/ge$member.$cycle.sfc${ffhr}.nemsio
+    fi
+  fi # [[ "$SENDCOM" = "YES" ]]
 
-	if (( fhr < FHMAXHF )); then
-		(( fhr = fhr + FHOUTHF ))
-	else
-		(( fhr = fhr + FHOUTLF ))
-	fi
+  if (( fhr < FHMAXHF )); then
+    (( fhr = fhr + FHOUTHF ))
+  else
+    (( fhr = fhr + FHOUTLF ))
+  fi
 done # [[ $fhr -le $FHOUR ]]
 
 echo "$(date -u) end ${.sh.file}"

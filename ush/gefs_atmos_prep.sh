@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /usr/bin/env bash
 
 echo "$(date -u) begin $(basename $BASH_SOURCE)"
 export PS4="${PS4}${1}: "
@@ -19,12 +19,8 @@ if [[ ${NewCOM} == "YES" ]]; then
 else
   export OUTDIR=${COMOUT}/atmos/init/${mem}
 fi
-#mkdir -p $INIDIR
+
 mkdir -p $OUTDIR
-
-#cd $INIDIR
-
-#mkdir $DATA
 cd $DATA
 
 if [[ $mem = c00 ]] ;then
@@ -107,27 +103,7 @@ if [[ $err != 0 ]]; then
 fi
 #############################################################
 
-# Move files to the nwges directory
-#for tile in tile1 tile2 tile3 tile4 tile5 tile6; do
-#  mv ${DATA}/out.atm.${tile}.nc $OUTDIR/gfs_data.${tile}.nc
-#done
-#mv ${DATA}/gfs_ctrl.nc $OUTDIR/.
-
 touch ${OUTDIR}/chgres_atm.log  # recenter can start now
-
-#if [[ $CONVERT_SFC == ".true." ]]; then
-#  # Copy sfc files to the nwges directory for all members
-#  for mem2 in $memberlist; do
-#    INITDIR2=${COMOUT}/${mem2}/atmos/INPUT #$GESOUT/init/$mem2
-#    mkdir -p $INITDIR2
-#    for tile in tile1 tile2 tile3 tile4 tile5 tile6; do
-#      $NCP ${DATA}/out.sfc.${tile}.nc $INITDIR2/sfc_data.${tile}.nc
-#    done
-#  done
-#fi
-
-## Copy control file to init
-#$NCP $OUTDIR/gfs_ctrl.nc $INITDIR
 
 if [[ $SENDCOM == "YES" ]]; then
   MODCOM=$(echo ${NET}_${COMPONENT} | tr '[a-z]' '[A-Z]')
@@ -138,20 +114,14 @@ if [[ $SENDCOM == "YES" ]]; then
   if [[ $SENDDBN = YES ]];then
     $DBNROOT/bin/dbn_alert MODEL $DBNTYP $job $COMDIR/gfs_ctrl.nc
   fi
-  #if [[ $mem == "c00" ]]; then
-    #$NCP $OUTDIR/gfs_data*.nc $COMDIR
-    #for tile in tile1 tile2 tile3 tile4 tile5 tile6; do
-    #  mv ${DATA}/out.atm.${tile}.nc $OUTDIR/gfs_data.${tile}.nc
-    #done
-    #if [[ $SENDDBN = YES ]];then
+
   for tile in tile1 tile2 tile3 tile4 tile5 tile6; do
     $NCP ${DATA}/out.atm.${tile}.nc $OUTDIR/gfs_data.${tile}.nc
     if [[ $SENDDBN = YES ]];then
       $DBNROOT/bin/dbn_alert MODEL $DBNTYP $job $COMDIR/gfs_data.${tile}.nc
     fi
   done
-  #  fi
-  #fi
+
   if [[ $CONVERT_SFC == ".true." ]]; then
     for mem2 in $memberlist; do
       if [[ ${NewCOM} == "YES" ]]; then

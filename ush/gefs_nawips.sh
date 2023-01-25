@@ -14,8 +14,8 @@ echo "$(date -u) begin ${BASH_SOURCE}"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
-	# Turn on strict bash error checking
-	set -eu
+  # Turn on strict bash error checking
+  set -eu
 fi
 
 cd $DATA
@@ -60,23 +60,23 @@ fi
 entry=$(grep "^$RUNM " $NAGRIB_TABLE | awk 'index($1,"#") != 1 {print $0}')
 
 if [ "$entry" != "" ] ; then
-	cpyfil=$(echo $entry  | awk 'BEGIN {FS="|"} {print $2}')
-	garea=$(echo $entry   | awk 'BEGIN {FS="|"} {print $3}')
-	gbtbls=$(echo $entry  | awk 'BEGIN {FS="|"} {print $4}')
-	maxgrd=$(echo $entry  | awk 'BEGIN {FS="|"} {print $5}')
-	kxky=$(echo $entry    | awk 'BEGIN {FS="|"} {print $6}')
-	grdarea=$(echo $entry | awk 'BEGIN {FS="|"} {print $7}')
-	proj=$(echo $entry    | awk 'BEGIN {FS="|"} {print $8}')
-	output=$(echo $entry  | awk 'BEGIN {FS="|"} {print $9}')
+  cpyfil=$(echo $entry  | awk 'BEGIN {FS="|"} {print $2}')
+  garea=$(echo $entry   | awk 'BEGIN {FS="|"} {print $3}')
+  gbtbls=$(echo $entry  | awk 'BEGIN {FS="|"} {print $4}')
+  maxgrd=$(echo $entry  | awk 'BEGIN {FS="|"} {print $5}')
+  kxky=$(echo $entry    | awk 'BEGIN {FS="|"} {print $6}')
+  grdarea=$(echo $entry | awk 'BEGIN {FS="|"} {print $7}')
+  proj=$(echo $entry    | awk 'BEGIN {FS="|"} {print $8}')
+  output=$(echo $entry  | awk 'BEGIN {FS="|"} {print $9}')
 else
-	cpyfil=gds
-	garea=dset
-	gbtbls=
-	maxgrd=4999
-	kxky=
-	grdarea=
-	proj=
-	output=T
+  cpyfil=gds
+  garea=dset
+  gbtbls=
+  maxgrd=4999
+  kxky=
+  grdarea=
+  proj=
+  output=T
 fi
 pdsext=no
 
@@ -88,88 +88,88 @@ SLEEP_LOOP_MAX=$(expr $SLEEP_TIME / $SLEEP_INT)\
 fhcnt=$fstart
 while [ $fhcnt -le $fend ] ; do
 
-	fhr=$(printf %03i $fhcnt)
-	
-	finc1=${FHOUTHF}
-	if [ $fhcnt -ge ${FHMAXHF} ]; then
-		finc1=${FHOUTLF}
-	fi
-	case $RUNM in
-	ens*)  
-		GRIBIN=$gempak_in/${model}.${member}.${PDY}.${cyc}
-		GEMGRD=${RUNM}_${PDY}${cyc} 
-		;;
-	ge*)  
-		if [ "$model" = "bc" -o "$model" = "an" -o "$model" = "wt" -o "$model" = "me" -o "$model" = "anv" ]; then
-			GRIBIN=$gempak_in/${RUNM}.${cycle}.pgrb2a_${model}f${fhr}
-			GEMGRD=${RUNM}${model}_${PDY}${cyc}f${fhr3}
+  fhr=$(printf %03i $fhcnt)
 
-			# create subdirectory for the bc and an gefs files, -- 05/16/2013
-			# so that the mag system can only take the expected gefs files
-			# gempak_out_hold=$gempak_out
-			if [ "$model" = "bc" -o "$model" = "an" ]; then
-				gempak_out=${gempak_out_hold}/${model}
-				mkdir -p -m 775 $gempak_out
-			 fi
-		elif [ "$model" = "glbanl" ]; then
-			GRIBIN=$gempak_in/${model}.${cycle}.pgrb2a_mdf${fhr}
-			GEMGRD=${model}_${PDYm2}${cyc}f${fhr3}
-		elif [ "$model" = "ndgd" ]; then
-			GRIBIN=$gempak_in/${RUNM}.${cycle}.${model}_conusf${fhr}
-			GEMGRD=${RUNM}${model}_${PDY}${cyc}f${fhr3}
-		elif [ "$model" = "ndgd_alaska" ]; then
-			GRIBIN=$gempak_in/${RUNM}.${cycle}.${model}f${fhr}
-			GEMGRD=${RUNM}${model}_${PDY}${cyc}f${fhr3}
-		else
-			# This is for gefs
+  finc1=${FHOUTHF}
+  if [ $fhcnt -ge ${FHMAXHF} ]; then
+    finc1=${FHOUTLF}
+  fi
+  case $RUNM in
+  ens*)
+    GRIBIN=$gempak_in/${model}.${member}.${PDY}.${cyc}
+    GEMGRD=${RUNM}_${PDY}${cyc}
+    ;;
+  ge*)
+    if [ "$model" = "bc" -o "$model" = "an" -o "$model" = "wt" -o "$model" = "me" -o "$model" = "anv" ]; then
+      GRIBIN=$gempak_in/${RUNM}.${cycle}.pgrb2a_${model}f${fhr}
+      GEMGRD=${RUNM}${model}_${PDY}${cyc}f${fhr3}
+
+      # create subdirectory for the bc and an gefs files, -- 05/16/2013
+      # so that the mag system can only take the expected gefs files
+      # gempak_out_hold=$gempak_out
+      if [ "$model" = "bc" -o "$model" = "an" ]; then
+        gempak_out=${gempak_out_hold}/${model}
+        mkdir -p -m 775 $gempak_out
+       fi
+    elif [ "$model" = "glbanl" ]; then
+      GRIBIN=$gempak_in/${model}.${cycle}.pgrb2a_mdf${fhr}
+      GEMGRD=${model}_${PDYm2}${cyc}f${fhr3}
+    elif [ "$model" = "ndgd" ]; then
+      GRIBIN=$gempak_in/${RUNM}.${cycle}.${model}_conusf${fhr}
+      GEMGRD=${RUNM}${model}_${PDY}${cyc}f${fhr3}
+    elif [ "$model" = "ndgd_alaska" ]; then
+      GRIBIN=$gempak_in/${RUNM}.${cycle}.${model}f${fhr}
+      GEMGRD=${RUNM}${model}_${PDY}${cyc}f${fhr3}
+    else
+      # This is for gefs
       if [[ ${NewCOM:-"YES"} == "YES" ]]; then
-			  GRIBIN=${gempak_in}/${CDUMP_ENS}.${cycle}.${pgrdbType}.grb2f${fhr} #${RUNM}.${cycle}.${pgrdbType}.${resolution}.f${fhr}
+        GRIBIN=${gempak_in}/${CDUMP_ENS}.${cycle}.${pgrdbType}.grb2f${fhr} #${RUNM}.${cycle}.${pgrdbType}.${resolution}.f${fhr}
       else
         GRIBIN=${gempak_in}/${CDUMP_ENS}.${cycle}.${pgrdbType}.${resolution}.f${fhr}
       fi
-			if [ $resolution = "1p00" ]; then
-				GEMGRD=${CDUMP_ENS}_${PDY}${cyc}f${fhr} #${RUNM}_${PDY}${cyc}f${fhr}
-			else
-				GEMGRD=${CDUMP_ENS}_${resolution}_${PDY}${cyc}f${fhr} #${RUNM}_${resolution}_${PDY}${cyc}f${fhr}
-			fi
-		fi
-		;;
+      if [ $resolution = "1p00" ]; then
+        GEMGRD=${CDUMP_ENS}_${PDY}${cyc}f${fhr} #${RUNM}_${PDY}${cyc}f${fhr}
+      else
+        GEMGRD=${CDUMP_ENS}_${resolution}_${PDY}${cyc}f${fhr} #${RUNM}_${resolution}_${PDY}${cyc}f${fhr}
+      fi
+    fi
+    ;;
 
-	*) 
-		GRIBIN=$gempak_in/${model}.${cycle}.${GRIB}${fhr}${EXT}
-		GEMGRD=${RUNM}_${PDY}${cyc}f${fhr3} 
-	esac
+  *)
+    GRIBIN=$gempak_in/${model}.${cycle}.${GRIB}${fhr}${EXT}
+    GEMGRD=${RUNM}_${PDY}${cyc}f${fhr3}
+  esac
 
     if [[ -f ${gempak_log_out}/${GEMGRD}.log ]]; then
         echo "Skip ${GEMGRD} because ${gempak_log_out}/${GEMGRD}.log exits!"
         fhcnt=$((fhcnt+finc1))
         continue
     fi
-	GRIBIN_chk=${GRIBIN}.idx
+  GRIBIN_chk=${GRIBIN}.idx
 
-	icnt=1
-	while [ $icnt -lt $SLEEP_LOOP_MAX ]; do
-		if [ -r $GRIBIN_chk ]; then
-			break
-		else
-			let "icnt=icnt+1"
-			if [ $icnt -eq $SLEEP_LOOP_MAX ]; then
+  icnt=1
+  while [ $icnt -lt $SLEEP_LOOP_MAX ]; do
+    if [ -r $GRIBIN_chk ]; then
+      break
+    else
+      let "icnt=icnt+1"
+      if [ $icnt -eq $SLEEP_LOOP_MAX ]; then
 				cat <<-EOF
 					FATAL ERROR in ${BASH_SOURCE}: GRIB index file $GRIBIN_chk still not found at $(date) after waiting ${SLEEP_TIME}s.
 					EOF
 				export err=1;
-				err_chk
-				exit $err
-			else
-				sleep $SLEEP_INT
-			fi
-		fi
+        err_chk
+        exit $err
+      else
+        sleep $SLEEP_INT
+      fi
+    fi
 
-	done
+  done
 
-	ln -s $GRIBIN grib$fhr
+  ln -s $GRIBIN grib$fhr
 
-	$GEMEXE/$NAGRIB <<- EOF
+  $GEMEXE/$NAGRIB <<- EOF
 		GBFILE   = grib$fhr
 		INDXFL   = 
 		GDOUTF   = $GEMGRD
@@ -188,8 +188,8 @@ while [ $fhcnt -le $fend ] ; do
 		EOF
 	
 	export err=$?
-	if [ $err -ne 0 ]; then
-		echo <<- EOF
+  if [ $err -ne 0 ]; then
+    echo <<- EOF
 			FATAL ERROR in ${BASH_SOURCE}: Gempak failed creating $GEMGRD for f${fhr} using the following settings:
 				GBFILE   = grib$fhr
 				INDXFL   = 
@@ -208,39 +208,39 @@ while [ $fhcnt -le $fend ] ; do
 				r
 			EOF
 		err_chk
-		exit $err
-	fi
+    exit $err
+  fi
 
-	#####################################################
-	# GEMPAK DOES NOT ALWAYS HAVE A NON ZERO RETURN CODE
-	# WHEN IT CAN NOT PRODUCE THE DESIRED GRID.  CHECK
-	# FOR THIS CASE HERE.
-	#####################################################
-	ls -l $GEMGRD
+  #####################################################
+  # GEMPAK DOES NOT ALWAYS HAVE A NON ZERO RETURN CODE
+  # WHEN IT CAN NOT PRODUCE THE DESIRED GRID.  CHECK
+  # FOR THIS CASE HERE.
+  #####################################################
+  ls -l $GEMGRD
 
-	# export pgm="GEMPAK CHECK FILE"
+  # export pgm="GEMPAK CHECK FILE"
 
-	if [ "$NAGRIB" = "nagrib2_nc" ]; then
-		gpend
-	fi
-	if [ $SENDCOM = "YES" ]; then
-		cpfs $GEMGRD $gempak_out/$GEMGRD
-        if [ $SENDDBN = "YES" ]; then
-            $DBNROOT/bin/dbn_alert MODEL ${DBN_ALERT_TYPE} $job \
-            $gempak_out/$GEMGRD
-        else
-            echo "##### DBN_ALERT_TYPE is: ${DBN_ALERT_TYPE} #####"
-        fi
-        echo "$(date -u) done!" > ${gempak_log_out}/${GEMGRD}.log
-	fi
+  if [ "$NAGRIB" = "nagrib2_nc" ]; then
+    gpend
+  fi
+  if [ $SENDCOM = "YES" ]; then
+    cpfs $GEMGRD $gempak_out/$GEMGRD
+    if [ $SENDDBN = "YES" ]; then
+      $DBNROOT/bin/dbn_alert MODEL ${DBN_ALERT_TYPE} $job \
+      $gempak_out/$GEMGRD
+    else
+      echo "##### DBN_ALERT_TYPE is: ${DBN_ALERT_TYPE} #####"
+    fi
+    echo "$(date -u) done!" > ${gempak_log_out}/${GEMGRD}.log
+  fi
 
-	let fhcnt=fhcnt+finc1
+  let fhcnt=fhcnt+finc1
 done
 
 if [[ $err != 0 ]]; then
-	echo "FATAL ERROR in ${BASH_SOURCE}: GRIB conversion failed!"
-	err_chk
-	exit $err    
+  echo "FATAL ERROR in ${BASH_SOURCE}: GRIB conversion failed!"
+  err_chk
+  exit $err
 fi
 
 echo "$(date -u) end ${BASH_SOURCE}"

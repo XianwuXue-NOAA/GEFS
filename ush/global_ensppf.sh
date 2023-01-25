@@ -11,15 +11,15 @@ echo "$(date -u) begin ${.sh.file}"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
-	# Turn on strict bash error checking
-	set -eu
+  # Turn on strict bash error checking
+  set -eu
 fi
 
 cd $DATA
 
 if [[ $# != 3 ]]; then
-	echo "Usage: ${.sh.file} gribin gribout npert"
-	exit 1
+  echo "Usage: ${.sh.file} gribin gribout npert"
+  exit 1
 fi
 
 export pgm=global_ensppf
@@ -33,14 +33,14 @@ $EXECgefs/global_ensppf <<-EOF 2>/dev/null
 
 export err=$?;
 if [[ $err != 0 ]]; then
-	echo <<- EOF
+  echo <<- EOF
 		FATAL ERROR in ${.sh.file}: $EXECgefs/global_ensppf returned a non-zero error!"
 		  Namelist file was provided directly and contained:
 		  		&namin
 					cpgb='$1',cpge='$2',npert=$3 /
 		EOF
 	err_chk
-	exit $err
+  exit $err
 fi
 
 echo "$(date -u) end ${.sh.file}"

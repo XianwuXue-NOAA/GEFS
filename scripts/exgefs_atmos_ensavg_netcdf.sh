@@ -4,26 +4,26 @@ echo "$(date -u) begin ${BASH_SOURCE}"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
-	# Turn on strict bash error checking
-	set -eu
+  # Turn on strict bash error checking
+  set -eu
 fi
 
 export FORECAST_SEGMENT=${FORECAST_SEGMENT:-hr}
 
 if [[ $FORECAST_SEGMENT = hr ]] ; then
-    LEVS=$LEVSHR 
+  LEVS=$LEVSHR
 elif [[ $FORECAST_SEGMENT = lr ]]; then
-    LEVS=$LEVSLR 
+  LEVS=$LEVSLR
 else
-	echo "FATAL ERROR in ${BASH_SOURCE}: FORECAST_SEGMENT ${FORECAST_SEGMENT} is not supported!"
-	export err=9
-	exit $err
+  echo "FATAL ERROR in ${BASH_SOURCE}: FORECAST_SEGMENT ${FORECAST_SEGMENT} is not supported!"
+  export err=9
+  exit $err
 fi
 
 export SHOUR=${SHOUR:-00}
 export FHOUR=${FHOUR:-180}
 if (( FHOUR > fhmaxh )); then
-	export FHOUR=$fhmaxh
+  export FHOUR=$fhmaxh
 fi
 export FHOUT_HF=${FHOUTHF:-3}
 export FHOUT_LF=${FHOUTLF:-6}
@@ -43,17 +43,17 @@ mkdir -p ${COMOUT}/${COMPONENT}
 $HOMEgefs/ush/gefs_ensavg_netcdf.sh $DATA $SHOUR $FHOUT_HF $FHOUT_LF $FHMAXHF $FHOUR $ensavg_netcdf_log
 export err=$?
 if [[ $err != 0 ]]; then
-	echo "FATAL ERROR in ${BASH_SOURCE}: gefs_ensavg_netcdf.sh returned a non-zero value!"
-	exit $err
+  echo "FATAL ERROR in ${BASH_SOURCE}: gefs_ensavg_netcdf.sh returned a non-zero value!"
+  exit $err
 fi
 
 #############################################################
 # SENDCOM
 if [[ $SENDCOM == "YES" ]]; then
-	if [ ! -d ${COMOUT}/${COMPONENT}/misc ]; then
-		mkdir -m 775 -p ${COMOUT}/${COMPONENT}/misc
-	fi
-	mv $ensavg_netcdf_log ${COMOUT}/${COMPONENT}/misc/ensavg_netcdf
+  if [ ! -d ${COMOUT}/${COMPONENT}/misc ]; then
+    mkdir -m 775 -p ${COMOUT}/${COMPONENT}/misc
+  fi
+  mv $ensavg_netcdf_log ${COMOUT}/${COMPONENT}/misc/ensavg_netcdf
 fi
 #############################################################
 
