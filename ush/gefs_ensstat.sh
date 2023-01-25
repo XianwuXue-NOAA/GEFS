@@ -74,9 +74,9 @@ export iens_msg=1
 #####################################
 # Define Script/Exec Variables
 #####################################
-export ENSPPF=$USHgefs/global_ensppf.sh
+#export ENSPPF=$USHgefs/global_ensppf.sh
 export ENSSTAT=$EXECgefs/gefs_ensstat
-export ENSPQPF=$USHgefs/global_enspqpf.sh
+#export ENSPQPF=$USHgefs/global_enspqpf.sh
 
 echo settings in ${.sh.file} WGRIB2=$WGRIB2
 parmlist=$PARMgefs/gefs_pgrb2a_fhh.parm
@@ -98,10 +98,17 @@ for hour in $hours; do
 	export pfhr=$(printf "%03.0f" $hour)       # Zero-pad to three places
 	export ffhr="f${pfhr}"
 
-	if [[ -f $COMOUT/$COMPONENT/$pgad/geavg.${cycle}.$pgapre${ffhr}.idx ]] && [[ -f $COMOUT/$COMPONENT/$pgad/gespr.${cycle}.$pgapre${ffhr}.idx ]]; then
-		echo "Skip geavg.${cycle}.$pgapre${ffhr} & gespr.${cycle}.$pgapre${ffhr}"
-		continue
-	fi
+  if [[ ${NewCOM} == "YES" ]]; then
+    if [[ -f $COMOUT/avg/$COMPONENT/$pgad/gefs.${cycle}.$pgapre${ffhr}.idx ]] && [[ -f $COMOUT/spr/$COMPONENT/$pgad/gefs.${cycle}.$pgapre${ffhr}.idx ]]; then
+      echo "Skip gefs.${cycle}.$pgapre${ffhr} for avg & spr!"
+      continue
+    fi
+  else
+	  if [[ -f $COMOUT/$COMPONENT/$pgad/geavg.${cycle}.$pgapre${ffhr}.idx ]] && [[ -f $COMOUT/$COMPONENT/$pgad/gespr.${cycle}.$pgapre${ffhr}.idx ]]; then
+		  echo "Skip geavg.${cycle}.$pgapre${ffhr} & gespr.${cycle}.$pgapre${ffhr}"
+		  continue
+	  fi
+  fi
 
 	nenspost=0
 
@@ -114,7 +121,11 @@ for hour in $hours; do
 		previncr=no
 		for mem in $memberlist; do
 			(( nmem = nmem + 1 ))
-			testfile=$COMIN/$COMPONENT/$pgad/ge${mem}.${cycle}.$pgapre${ffhr}.idx
+      if [[ ${NewCOM} == "YES" ]]; then
+        testfile=$COMIN/${mem}/$COMPONENT/$pgad/gefs.${cycle}.$pgapre${ffhr}.idx
+      else
+			  testfile=$COMIN/$COMPONENT/$pgad/ge${mem}.${cycle}.$pgapre${ffhr}.idx
+      fi
 
 			if [[ -f $testfile ]]; then
 				echo "testfile=$testfile found"
@@ -225,7 +236,11 @@ for hour in $hours; do
 
 		if [[ $iskip = 0 ]]; then
 			if [[ -a cfipg$ifile.$jobgrid ]]; then rm cfipg$ifile.$jobgrid; fi
-			ln -s $COMIN/$COMPONENT/$pgad/ge${mem}.${cycle}.$pgapre${ffhr} cfipg$ifile.$jobgrid
+      if [[ ${NewCOM} == "YES" ]]; then
+        ln -s ${COMIN}/${mem}/${COMPONENT}/${pgad}/gefs.${cycle}.$pgapre${ffhr} cfipg${ifile}.${jobgrid}
+      else
+			  ln -s ${COMIN}/${COMPONENT}/${pgad}/ge${mem}.${cycle}.$pgapre${ffhr} cfipg${ifile}.${jobgrid}
+      fi
 		fi # [[ $iskip = 0 ]]
 
 		echo "	cfipg($ifile)"=\"cfipg$ifile.$jobgrid\", >>namin
@@ -299,16 +314,25 @@ for hour in $hours; do
 		MODCOM=$(echo ${NET}_${COMPONENT} | tr '[a-z]' '[A-Z]')
 		GRID=$(echo ${jobgrid} | tr '[a-z]' '[A-Z]')
 		for run in geavg gespr; do
+      infile=${run}.${cycle}.$pgapre${ffhr}
+      if [[ ${NewCOM} == "YES" ]]; then
+        memin=$(echo ${run}|cut -c3-5)
+        outfile=gefs.${cycle}.${pgapre}${ffhr}
+        OUTDIR=${COMOUT}/${memin}/${COMPONENT}/${pgad}
+      else
+        outfile=${infile}
+        OUTDIR=${COMOUT}/${COMPONENT}/${pgad}
+      fi
 			if [[ "$makegrb2i" = "yes" ]]; then
-				$WGRIB2 -s ${run}.${cycle}.$pgapre${ffhr} >${run}.${cycle}.$pgapre${ffhr}.idx
+				$WGRIB2 -s ${infile} >${infile}.idx
 			fi
-			if [[ -s ${run}.${cycle}.$pgapre${ffhr} ]]; then
-				mv ${run}.${cycle}.$pgapre${ffhr} $COMOUT/$COMPONENT/$pgad
-				mv ${run}.${cycle}.$pgapre${ffhr}.idx $COMOUT/$COMPONENT/$pgad
+			if [[ -s ${infile} ]]; then
+        mv ${infile} ${OUTDIR}/${outfile}
+        mv ${infile}.idx ${OUTDIR}/${outfile}.idx
 			fi # [[ -s ${run}.${cycle}.$pgapre${ffhr} ]]
-			if [[ "$SENDDBN" = 'YES' ]]; then
-				$DBNROOT/bin/dbn_alert MODEL ${MODCOM}_PGB2A_${GRID} $job $COMOUT/$COMPONENT/$pgad/${run}.${cycle}.$pgapre${ffhr}
-				$DBNROOT/bin/dbn_alert MODEL ${MODCOM}_PGB2A_${GRID}_IDX $job $COMOUT/$COMPONENT/$pgad/${run}.${cycle}.$pgapre${ffhr}.idx
+			if [[ "${SENDDBN}" = 'YES' ]]; then
+				${DBNROOT}/bin/dbn_alert MODEL ${MODCOM}_PGB2A_${GRID} ${job} ${OUTDIR}/${outfile} #$COMOUT/$COMPONENT/$pgad/${run}.${cycle}.$pgapre${ffhr}
+				${DBNROOT}/bin/dbn_alert MODEL ${MODCOM}_PGB2A_${GRID}_IDX ${job} ${OUTDIR}/${outfile}.idx #$COMOUT/$COMPONENT/$pgad/${run}.${cycle}.$pgapre${ffhr}.idx
 			fi
 		done
 

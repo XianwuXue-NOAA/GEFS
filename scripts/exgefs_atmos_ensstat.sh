@@ -76,7 +76,14 @@ for stream in ${PRDGEN_STREAMS[@]}; do
 	pgapre="${PRDGEN_A_PREFIX[$stream]}"
 	pgbpre="${PRDGEN_B_PREFIX[$stream]}"
 	do_analysis="${PRDGEN_DO_ANALYSIS[$stream]:-NO}"
-	if [[ $SENDCOM == "YES" && ! -d ${pgad} ]]; then mkdir -m 775 -p $COMOUT/$COMPONENT/${pgad}; fi
+	if [[ $SENDCOM == "YES" && ! -d ${pgad} ]]; then
+    if [[ ${NewCOM} == "YES" ]]; then
+      mkdir -m 775 -p $COMOUT/avg/$COMPONENT/${pgad}
+      mkdir -m 775 -p $COMOUT/spr/$COMPONENT/${pgad}
+    else
+      mkdir -m 775 -p $COMOUT/$COMPONENT/${pgad}
+    fi
+  fi
 	
 	echo "$HOMEgefs/ush/gefs_ensstat.sh $subdata \"$stream\" \"$jobgrid\" \"$hours\" \"$pgad\" \"$pgapre\" 2>&1 >${outfile}" >> ensstat.cmdfile
 
