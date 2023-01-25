@@ -27,8 +27,8 @@ num=$(cat $DATA/poescript |wc -l)
 
 # Add dummy lines to execute if there are fewer scripts than tasks
 while [ $num -lt $total_tasks ] ; do
- echo "hostname" >>poescript
- num=$(($num + 1))
+  echo "hostname" >>poescript
+  num=$(($num + 1))
 done
 
 cat poescript
