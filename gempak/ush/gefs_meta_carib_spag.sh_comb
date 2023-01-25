@@ -17,8 +17,8 @@ echo "$(date -u) begin $(basename $BASH_SOURCE)"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
-	# Turn on strict bash error checking
-	set -eu
+  # Turn on strict bash error checking
+  set -eu
 fi
 
 echo memberlist=$memberlist
@@ -51,86 +51,86 @@ name="CARIB"
 
 
 for pres in 200 250 300; do 
-	name="${pres} MB"
-	if [ ${pres} = "200" ]; then
-		levels="1230 1234 1238 1242 1245 1248"
-	elif [ ${pres} = "250" ]; then
-		levels="1080 1084 1088 1092 1096"
-	else
-		levels="960 964 968 972"
-	fi
+  name="${pres} MB"
+  if [ ${pres} = "200" ]; then
+    levels="1230 1234 1238 1242 1245 1248"
+  elif [ ${pres} = "250" ]; then
+    levels="1080 1084 1088 1092 1096"
+  else
+    levels="960 964 968 972"
+  fi
 
-	#########################################################
-	# for testing only, restrict to one lvl and fcsthr. will comment these out 
-	# when implementing.
-	#    levels="1248 1096 972"
-	#########################################################
+  #########################################################
+  # for testing only, restrict to one lvl and fcsthr. will comment these out
+  # when implementing.
+  #    levels="1248 1096 972"
+  #########################################################
 
-	# START PRODUCTION OF METAFILE
+  # START PRODUCTION OF METAFILE
 
-	for level in ${levels}; do
-		echo "level = $level"
-		for fcsthr in ${fcsthrs}; do
-			fcsthr_6=$( printf %03i $(( 10#${fcsthr} + 6 )) )
-			fcsthr_ecm=$( printf %03i $(( 10#${fcsthr} + $ECM_fcsthrs )) )
-		
-			grids=${memberlist}
-			for fn in $(echo $grids); do
-				rm -rf $fn ${fn}_6
+  for level in ${levels}; do
+    echo "level = $level"
+    for fcsthr in ${fcsthrs}; do
+      fcsthr_6=$( printf %03i $(( 10#${fcsthr} + 6 )) )
+      fcsthr_ecm=$( printf %03i $(( 10#${fcsthr} + $ECM_fcsthrs )) )
 
-				if [ -r $COMIN/$COMPONENT/gempak/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr} ]; then
-					ln -s $COMIN/$COMPONENT/gempak/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr} $fn
-				fi
+      grids=${memberlist}
+      for fn in $(echo $grids); do
+        rm -rf $fn ${fn}_6
 
-				if [ -r $COMINs/gefs.${PDY_6}/${cyc_6}/atmos/gempak/ge${fn}${sGrid}_${PDY_6}${cyc_6}f${fcsthr_6} ]; then
-					ln -s $COMINs/gefs.${PDY_6}/${cyc_6}/atmos/gempak/ge${fn}${sGrid}_${PDY_6}${cyc_6}f${fcsthr_6} ${fn}_6
-				fi
-			done
+        if [ -r $COMIN/$COMPONENT/gempak/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr} ]; then
+          ln -s $COMIN/$COMPONENT/gempak/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr} $fn
+        fi
 
-			fn=gefs_avg
-			rm -rf ${fn}
-			if [ -r $COMIN/$COMPONENT/gempak/geavg${sGrid}_${PDY}${cyc}f${fcsthr} ]; then
-				ln -s $COMIN/$COMPONENT/gempak/geavg${sGrid}_${PDY}${cyc}f${fcsthr} ${fn}
-			fi
+        if [ -r $COMINs/gefs.${PDY_6}/${cyc_6}/atmos/gempak/ge${fn}${sGrid}_${PDY_6}${cyc_6}f${fcsthr_6} ]; then
+          ln -s $COMINs/gefs.${PDY_6}/${cyc_6}/atmos/gempak/ge${fn}${sGrid}_${PDY_6}${cyc_6}f${fcsthr_6} ${fn}_6
+        fi
+      done
 
-			fn=gefs_avg_6
-			rm -rf ${fn}
-			if [ -r $COMINs/gefs.${PDY_6}/${cyc_6}/atmos/gempak/geavg${sGrid}_${PDY_6}${cyc_6}f${fcsthr_6} ]; then
-				ln -s $COMINs/gefs.${PDY_6}/${cyc_6}/atmos/gempak/geavg${sGrid}_${PDY_6}${cyc_6}f${fcsthr_6} ${fn}
-			fi
+      fn=gefs_avg
+      rm -rf ${fn}
+      if [ -r $COMIN/$COMPONENT/gempak/geavg${sGrid}_${PDY}${cyc}f${fcsthr} ]; then
+        ln -s $COMIN/$COMPONENT/gempak/geavg${sGrid}_${PDY}${cyc}f${fcsthr} ${fn}
+      fi
 
-			fn=gfs
-			rm -rf ${fn}
-			if [ -r $COMINsgfs/gfs.${PDY}/${cyc}/gempak/gfs${sGrid}_${PDY}${cyc}f${fcsthr} ]; then
-				ln -s $COMINsgfs/gfs.${PDY}/${cyc}/gempak/gfs${sGrid}_${PDY}${cyc}f${fcsthr} ${fn}
-			fi
+      fn=gefs_avg_6
+      rm -rf ${fn}
+      if [ -r $COMINs/gefs.${PDY_6}/${cyc_6}/atmos/gempak/geavg${sGrid}_${PDY_6}${cyc_6}f${fcsthr_6} ]; then
+        ln -s $COMINs/gefs.${PDY_6}/${cyc_6}/atmos/gempak/geavg${sGrid}_${PDY_6}${cyc_6}f${fcsthr_6} ${fn}
+      fi
 
-			fn=gfs_6
-			rm -rf ${fn}
-			if [ -r $COMINsgfs/gfs.${PDY_6}/${cyc_6}/gempak/gfs${sGrid}_${PDY_6}${cyc_6}f${fcsthr_6} ]; then
-				ln -s $COMINsgfs/gfs.${PDY_6}/${cyc_6}/gempak/gfs${sGrid}_${PDY_6}${cyc_6}f${fcsthr_6} ${fn}
-			fi
+      fn=gfs
+      rm -rf ${fn}
+      if [ -r $COMINsgfs/gfs.${PDY}/${cyc}/gempak/gfs${sGrid}_${PDY}${cyc}f${fcsthr} ]; then
+        ln -s $COMINsgfs/gfs.${PDY}/${cyc}/gempak/gfs${sGrid}_${PDY}${cyc}f${fcsthr} ${fn}
+      fi
 
-			fn=ecmwf
-			rm -rf ${fn}
-			if [ -r ${COMINecmwf}.${ECM_PDY}/gempak/ecmwf_hr_${ECM_PDY}${ECM_cyc}f${fcsthr} ]; then
-				ln -s ${COMINecmwf}.${ECM_PDY}/gempak/ecmwf_hr_${ECM_PDY}${ECM_cyc}f${fcsthr} ${fn}
-			fi
+      fn=gfs_6
+      rm -rf ${fn}
+      if [ -r $COMINsgfs/gfs.${PDY_6}/${cyc_6}/gempak/gfs${sGrid}_${PDY_6}${cyc_6}f${fcsthr_6} ]; then
+        ln -s $COMINsgfs/gfs.${PDY_6}/${cyc_6}/gempak/gfs${sGrid}_${PDY_6}${cyc_6}f${fcsthr_6} ${fn}
+      fi
 
-			fn=ukmet
-			rm -rf ${fn}
-			if [ -r ${COMINukmet}.${ECM_PDY}/gempak/ukmet_hr_${ECM_PDY}${ECM_cyc}f${fcsthr_ecm} ]; then
-				ln -s ${COMINukmet}.${ECM_PDY}/gempak/ukmet_hr_${ECM_PDY}${ECM_cyc}f${fcsthr_ecm} ${fn}
-			fi
+      fn=ecmwf
+      rm -rf ${fn}
+      if [ -r ${COMINecmwf}.${ECM_PDY}/gempak/ecmwf_hr_${ECM_PDY}${ECM_cyc}f${fcsthr} ]; then
+        ln -s ${COMINecmwf}.${ECM_PDY}/gempak/ecmwf_hr_${ECM_PDY}${ECM_cyc}f${fcsthr} ${fn}
+      fi
 
-			fn=dgex
-			rm -rf ${fn}
-			if [ -r $COMINnawips/dgex.${PDY}/dgex_${PDY}${cyc}f${fcsthr} ]; then
-				ln -s $COMINnawips/dgex.${PDY}/dgex_${PDY}${cyc}f${fcsthr} ${fn}
-			fi
+      fn=ukmet
+      rm -rf ${fn}
+      if [ -r ${COMINukmet}.${ECM_PDY}/gempak/ukmet_hr_${ECM_PDY}${ECM_cyc}f${fcsthr_ecm} ]; then
+        ln -s ${COMINukmet}.${ECM_PDY}/gempak/ukmet_hr_${ECM_PDY}${ECM_cyc}f${fcsthr_ecm} ${fn}
+      fi
+
+      fn=dgex
+      rm -rf ${fn}
+      if [ -r $COMINnawips/dgex.${PDY}/dgex_${PDY}${cyc}f${fcsthr} ]; then
+        ln -s $COMINnawips/dgex.${PDY}/dgex_${PDY}${cyc}f${fcsthr} ${fn}
+      fi
 
 
-			cat > cmdfilecarib  <<- EOF
+      cat > cmdfilecarib  <<- EOF
 				GDATTIM	= F${fcsthr}
 				DEVICE	= ${device}
 				PANEL	= 0
@@ -159,12 +159,12 @@ for pres in 200 250 300; do
 
 				EOF
 
-			WrottenZERO=0
+      WrottenZERO=0
 
-			# ----- gfs -----
-			gdfn=gfs # gd file name
-			if [ -e ${gdfn} ]; then
-				cat >> cmdfilecarib  <<- EOF
+      # ----- gfs -----
+      gdfn=gfs # gd file name
+      if [ -e ${gdfn} ]; then
+        cat >> cmdfilecarib  <<- EOF
 					GDFILE  = ${gdfn}
 					LINE    = 22/2/2/0
 					TITLE   = 22/-2/~ ? GFS ${cyc}Z (DASHED) |~${name} ${level} DM
@@ -172,23 +172,23 @@ for pres in 200 250 300; do
 					run
 
 					EOF
-				
-				if [ $WrottenZERO -eq 0 ]; then            
-					cat >> cmdfilecarib  <<- EOF
+
+        if [ $WrottenZERO -eq 0 ]; then
+          cat >> cmdfilecarib  <<- EOF
 						MAP     = 0
 						LATLON  = 0
 						CLEAR   = no
 
 						EOF
-										
-				fi
-				WrottenZERO=1
-			fi
 
-			# ----- gfs_6 -----
-			gdfn=gfs_6 
-			if [ -e ${gdfn} ]; then
-				cat >> cmdfilecarib  <<- EOF
+        fi
+        WrottenZERO=1
+      fi
+
+      # ----- gfs_6 -----
+      gdfn=gfs_6
+      if [ -e ${gdfn} ]; then
+        cat >> cmdfilecarib  <<- EOF
 					GDFILE  = ${gdfn}
 					LINE    = 21/2/2/0
 					TITLE   = 21/-1/~ ? GFS_6 ${cyc_6}Z (DASHED) |~${name} ${level} DM
@@ -196,24 +196,24 @@ for pres in 200 250 300; do
 					run
 
 					EOF
-				if [ $WrottenZERO -eq 0 ]; then            
-					cat >> cmdfilecarib  <<- EOF
+        if [ $WrottenZERO -eq 0 ]; then
+          cat >> cmdfilecarib  <<- EOF
 						MAP     = 0
 						LATLON  = 0
 						CLEAR   = no
 
 						EOF
 				
-				fi
-				WrottenZERO=1
-			fi
+        fi
+        WrottenZERO=1
+      fi
 
-			grids=${memberlist}
-			for gridl in ${grids}; do
-				# ----- gridl -----
-				gdfn=${gridl}_6
-				if [ -e ${gdfn} ]; then
-					cat >> cmdfilecarib  <<- EOF
+      grids=${memberlist}
+      for gridl in ${grids}; do
+        # ----- gridl -----
+        gdfn=${gridl}_6
+        if [ -e ${gdfn} ]; then
+          cat >> cmdfilecarib  <<- EOF
 						GDFILE  = ${gdfn}
 						LINE    = 25/1/1/0
 						TITLE   = 25/-9/~ ? ${cyc_6}Z ENS MEMBERS|~${name} ${level} DM
@@ -222,34 +222,34 @@ for pres in 200 250 300; do
 
 						EOF
 
-					if [ $WrottenZERO -eq 0 ]; then            
-						cat >> cmdfilecarib  <<- EOF
+          if [ $WrottenZERO -eq 0 ]; then
+            cat >> cmdfilecarib  <<- EOF
 							MAP     = 0
 							LATLON  = 0
 							CLEAR   = no
 
 							EOF
-											
-					fi
-					WrottenZERO=1
-				fi
-			done
 
-			grids=${memberlist}
-			line_count=1
-			color_number=9
-			for gridl in ${grids}; do
-				# ----- gridl -----
-				gdfn=${gridl} 
-				if [ -e ${gdfn} ]; then
-					#if [ ${gdfn} == c00 ]; then
-					#    color_number=6
-					#    line_count=0
-					#else
-					color_number=$(echo $gdfn | cut -c2-)
-					line_count=${color_number}
-					#fi
-					cat >> cmdfilecarib  <<- EOF
+          fi
+          WrottenZERO=1
+        fi
+      done
+
+      grids=${memberlist}
+      line_count=1
+      color_number=9
+      for gridl in ${grids}; do
+        # ----- gridl -----
+        gdfn=${gridl}
+        if [ -e ${gdfn} ]; then
+          #if [ ${gdfn} == c00 ]; then
+          #    color_number=6
+          #    line_count=0
+          #else
+          color_number=$(echo $gdfn | cut -c2-)
+          line_count=${color_number}
+          #fi
+          cat >> cmdfilecarib  <<- EOF
 						!GDFILE  = \$COMIN/$COMPONENT/gempak/ge${gridl}_${PDY}${cyc}f${fcsthr}
 						GDFILE  = ${gdfn}
 						LINE    = ${color_number}/1/1/0
@@ -259,27 +259,27 @@ for pres in 200 250 300; do
 
 						EOF
 
-					if [ $WrottenZERO -eq 0 ]; then            
-						cat >> cmdfilecarib  <<- EOF
+          if [ $WrottenZERO -eq 0 ]; then
+            cat >> cmdfilecarib  <<- EOF
 							MAP     = 0
 							LATLON  = 0
 							CLEAR   = no
 
 							EOF
-											
-					fi
-					WrottenZERO=1
-				fi
+
+          fi
+          WrottenZERO=1
+        fi
 
 
-				#let line_count=$line_count+1
-				#let color_number=$color_number+1
-			done    # For grids loop
+        #let line_count=$line_count+1
+        #let color_number=$color_number+1
+      done    # For grids loop
 
-			# ----- ukmet -----
-			gdfn=ukmet
-			if [ -e ${gdfn} ]; then
-				cat >> cmdfilecarib  <<- EOF
+      # ----- ukmet -----
+      gdfn=ukmet
+      if [ -e ${gdfn} ]; then
+        cat >> cmdfilecarib  <<- EOF
 					GDFILE  = ${gdfn}
 					LINE    = 7/2/2/0
 					GDATTIM = F${fcsthr_ecm}
@@ -288,22 +288,22 @@ for pres in 200 250 300; do
 
 					EOF
 
-				if [ $WrottenZERO -eq 0 ]; then            
-					cat >> cmdfilecarib  <<- EOF
+        if [ $WrottenZERO -eq 0 ]; then
+          cat >> cmdfilecarib  <<- EOF
 						MAP     = 0
 						LATLON  = 0
 						CLEAR   = no
 
 						EOF
 					
-				fi
-				WrottenZERO=1
-			fi
+        fi
+        WrottenZERO=1
+      fi
 
-			# ----- ecmwf -----
-			gdfn=ecmwf
-			if [ -e ${gdfn} ]; then
-				cat >> cmdfilecarib  <<- EOF
+      # ----- ecmwf -----
+      gdfn=ecmwf
+      if [ -e ${gdfn} ]; then
+        cat >> cmdfilecarib  <<- EOF
 					GDFILE  = ${gdfn}
 					LINE    = 6/2/2/0
 					GDATTIM = F${fcsthr_ecm}
@@ -312,22 +312,22 @@ for pres in 200 250 300; do
 
 					EOF
 
-				if [ $WrottenZERO -eq 0 ]; then            
-					cat >> cmdfilecarib  <<- EOF
+        if [ $WrottenZERO -eq 0 ]; then
+          cat >> cmdfilecarib  <<- EOF
 						MAP     = 0
 						LATLON  = 0
 						CLEAR   = no
 
 						EOF
-					
-				fi
-				WrottenZERO=1
-			fi
 
-			# ----- gefs_avg -----
-			gdfn=gefs_avg
-			if [ -e ${gdfn} ]; then
-				cat >> cmdfilecarib  <<- EOF
+      fi
+        WrottenZERO=1
+      fi
+
+      # ----- gefs_avg -----
+      gdfn=gefs_avg
+      if [ -e ${gdfn} ]; then
+        cat >> cmdfilecarib  <<- EOF
 					GDFILE  = ${gdfn}
 					LINE    = 1/2/2/0
 					TITLE   = 1/-6/~ ? ENSMEAN ${cyc}Z       |~${name} ${level} DM
@@ -336,22 +336,22 @@ for pres in 200 250 300; do
 
 					EOF
 
-				if [ $WrottenZERO -eq 0 ]; then            
-					cat >> cmdfilecarib  <<- EOF
+        if [ $WrottenZERO -eq 0 ]; then
+          cat >> cmdfilecarib  <<- EOF
 						MAP     = 0
 						LATLON  = 0
 						CLEAR   = no
 
 						EOF
-					
-				fi
-				WrottenZERO=1
-			fi
 
-			# ----- gefs_avg_6 -----
-			gdfn=gefs_avg_6
-			if [ -e ${gdfn} ]; then
-				cat >> cmdfilecarib  <<- EOF
+      fi
+        WrottenZERO=1
+      fi
+
+      # ----- gefs_avg_6 -----
+      gdfn=gefs_avg_6
+      if [ -e ${gdfn} ]; then
+        cat >> cmdfilecarib  <<- EOF
 					GDFILE  = ${gdfn}
 					LINE    = 31/2/3/0
 					TITLE   = 31/-5/~ ? ENSMEAN6 ${cyc_6}Z (DASHED)|~${name} ${level} DM
@@ -360,22 +360,22 @@ for pres in 200 250 300; do
 
 					EOF
 
-				if [ $WrottenZERO -eq 0 ]; then            
-					cat >> cmdfilecarib  <<- EOF
+        if [ $WrottenZERO -eq 0 ]; then
+          cat >> cmdfilecarib  <<- EOF
 						MAP     = 0
 						LATLON  = 0
 						CLEAR   = no
 
 						EOF
-					
-				fi
-				WrottenZERO=1
-			fi
 
-			# ----- dgex -----
-			gdfn=dgex
-			if [ -e ${gdfn} ]; then
-				cat >> cmdfilecarib  <<- EOF
+      fi
+        WrottenZERO=1
+      fi
+
+      # ----- dgex -----
+      gdfn=dgex
+      if [ -e ${gdfn} ]; then
+        cat >> cmdfilecarib  <<- EOF
 					GDFILE  = dgex 
 					LINE    = 13/2/2/0
 					GDATTIM = F${fcsthr}
@@ -384,20 +384,20 @@ for pres in 200 250 300; do
 
 					EOF
 
-			fi
+      fi
 
-			cat cmdfilecarib
-			gdplot2_nc < cmdfilecarib
-			err=$?
+      cat cmdfilecarib
+      gdplot2_nc < cmdfilecarib
+      err=$?
 
-			if [[ $err != 0 ]]; then
-				echo "FATAL ERROR in $(basename $BASH_SOURCE): gdplot2_nc failed using cmdfilecarib!"
-				err_chk
-				exit $err
-			fi
+      if [[ $err != 0 ]]; then
+        echo "FATAL ERROR in $(basename $BASH_SOURCE): gdplot2_nc failed using cmdfilecarib!"
+        err_chk
+        exit $err
+      fi
 
-		done    # For fcsthr loop
-	done    # For level loop
+    done    # For fcsthr loop
+  done    # For level loop
 done    # For pres loop
 
 #####################################################
@@ -410,16 +410,16 @@ ls -l ${metaname}
 err=$?
 
 if [[ $err != 0 ]]; then
-	echo "FATAL ERROR in $(basename $BASH_SOURCE): metafile ${metaname} not created!"
-	err_chk
-	exit $err
+  echo "FATAL ERROR in $(basename $BASH_SOURCE): metafile ${metaname} not created!"
+  err_chk
+  exit $err
 fi
 
 if [ $SENDCOM = "YES" ] ; then
-	mv ${metaname} ${COMOUT}/$COMPONENT/gempak/meta/$metaname
-	if [ $SENDDBN = "YES" ] ; then
-		$DBNROOT/bin/dbn_alert MODEL ${DBN_ALERT_TYPE} $job ${COMOUT}/$COMPONENT/gempak/meta/$metaname
-	fi
+  mv ${metaname} ${COMOUT}/$COMPONENT/gempak/meta/$metaname
+  if [ $SENDDBN = "YES" ] ; then
+    $DBNROOT/bin/dbn_alert MODEL ${DBN_ALERT_TYPE} $job ${COMOUT}/$COMPONENT/gempak/meta/$metaname
+  fi
 fi
 
 gpend

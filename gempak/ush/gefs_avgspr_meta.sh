@@ -19,8 +19,8 @@ echo "$(date -u) begin $(basename $BASH_SOURCE)"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
-	# Turn on strict bash error checking
-	set -eu
+  # Turn on strict bash error checking
+  set -eu
 fi
 
 # datatypes.tbl uses COMIN, so have to update it locally
@@ -39,22 +39,22 @@ gdattim_8to14=""
 fcsthrs="000 012 024 036 048 060 072 084 096 108 120 132 144 156 168 180 192 204 216 228 240"
 
 for area in natl mpac; do
-	garea=${area}
-	proj=" "
+  garea=${area}
+  proj=" "
 
-	metaname="gefs_avgspr${sGrid}_${PDY}_${cyc}_meta_${area}"
-	device="nc | ${metaname}"
+  metaname="gefs_avgspr${sGrid}_${PDY}_${cyc}_meta_${area}"
+  device="nc | ${metaname}"
 
-	for fcsthr in ${fcsthrs}; do
+  for fcsthr in ${fcsthrs}; do
 
-		for fn in avg spr; do
-			rm -rf $fn
-			if [ -r $COMIN/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr} ]; then
-				ln -s $COMIN/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr} $fn
-			fi
-		done
+    for fn in avg spr; do
+      rm -rf $fn
+      if [ -r $COMIN/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr} ]; then
+        ln -s $COMIN/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr} $fn
+      fi
+    done
 
-		cat > cmdfile_meta <<- EOF
+    cat > cmdfile_meta <<- EOF
 			GDATTIM  = F${fcsthr}
 			GAREA    = ${garea}
 			PROJ     = ${proj}
@@ -126,39 +126,39 @@ for area in natl mpac; do
 			exit
 			EOF
 
-		cat cmdfile_meta
+    cat cmdfile_meta
 
-		gdplot2_nc < cmdfile_meta
-		err=$?
+    gdplot2_nc < cmdfile_meta
+    err=$?
 
-		if [[ $err != 0 ]]; then
-			echo "FATAL ERROR in $(basename $BASH_SOURCE): gdplot2_nc failed using cmdfile_meta!"
-			err_chk
-			exit $err
-		fi
-	done
+    if [[ $err != 0 ]]; then
+      echo "FATAL ERROR in $(basename $BASH_SOURCE): gdplot2_nc failed using cmdfile_meta!"
+      err_chk
+      exit $err
+    fi
+  done
 
-	#####################################################
-	# GEMPAK DOES NOT ALWAYS HAVE A NON ZERO RETURN CODE
-	# WHEN IT CAN NOT PRODUCE THE DESIRED GRID.  CHECK
-	# FOR THIS CASE HERE.
-	#####################################################
+  #####################################################
+  # GEMPAK DOES NOT ALWAYS HAVE A NON ZERO RETURN CODE
+  # WHEN IT CAN NOT PRODUCE THE DESIRED GRID.  CHECK
+  # FOR THIS CASE HERE.
+  #####################################################
 
-	ls -l ${metaname}
+  ls -l ${metaname}
 
-	export err=$?;
-	if [[ $err != 0 ]]; then
-		echo "FATAL ERROR in $(basename $BASH_SOURCE): metafile ${metaname} not created!"
-		err_chk
-		exit $err
-	fi
+  export err=$?;
+  if [[ $err != 0 ]]; then
+    echo "FATAL ERROR in $(basename $BASH_SOURCE): metafile ${metaname} not created!"
+    err_chk
+    exit $err
+  fi
 
-	if [ $SENDCOM = "YES" ] ; then
-		mv ${metaname} ${COMOUT}/$COMPONENT/gempak/meta/
-		if [ $SENDDBN = "YES" ] ; then
-			$DBNROOT/bin/dbn_alert MODEL ${DBN_ALERT_TYPE} $job ${COMOUT}/$COMPONENT/gempak/meta/${metaname}
-		fi
-	fi
+  if [ $SENDCOM = "YES" ] ; then
+    mv ${metaname} ${COMOUT}/$COMPONENT/gempak/meta/
+    if [ $SENDDBN = "YES" ] ; then
+      $DBNROOT/bin/dbn_alert MODEL ${DBN_ALERT_TYPE} $job ${COMOUT}/$COMPONENT/gempak/meta/${metaname}
+    fi
+  fi
 done
 
 
@@ -166,83 +166,83 @@ done
 ln -s $COMIN/geavg${sGrid}_${PDY}${cyc}f* ./
 
 for area in nam sam ak; do
-	if [ ${area} = "nam" ] ; then
-		garea="17.529;-129.296;53.771;-22.374"
-		proj="str/90;-105;0"
-		garea2="us"
-		proj2=""
-		fint=".01;.1;.25;.5;.75;1;1.5;2;2.5;3;4;5;6;7;8;9;10"
-		fline="0;21-30;14-20;5"
-		hilo="31;0/x#2/.25-10///y"
-		parm="i"
-		run="run"
-		run2="run"
-		run3=""
-		run6to10="run"
-		run8to14="run"
-		if [ ${cyc} = "00" ] ; then
-			gdattim_6to10="${PDY2}/${cyc}00F264"
-			gdattim_8to14="${PDY2}/${cyc}00F360"
-		elif [ ${cyc} = "06" ] ; then
-			gdattim_6to10="${PDY2}/${cyc}00F258"
-			gdattim_8to14="${PDY2}/${cyc}00F354"
-		elif [ ${cyc} = "12" ] ; then
-			gdattim_6to10="${PDY2}/${cyc}00F276"
-			gdattim_8to14="${PDY2}/${cyc}00F372"
-		elif [ ${cyc} = "18" ] ; then
-			gdattim_6to10="${PDY2}/${cyc}00F270"
-			gdattim_8to14="${PDY2}/${cyc}00F366"
-		fi
-		f216="f384"
-		F240="F384"
-		fcsthrs="000 006 012 018 024 030 036 042 048 054 060 066 072 078 084 090 096 102 108 114 120 126 132 138 144 150 156 162 168 174 180 186 192 198 204 210 216 222 228 234 240 246 252 258 264 270 276 282 288 294 300 306 312 318 324 330 336 342 348 354 360 366 372 378 384"
-	elif [ ${area} = "sam" ] ; then
-		garea="-66;-127;14.5;-19"
-		proj="mer"
-		garea2="-66;-127;14.5;-19"
-		proj2="mer"
-		fint="1;5;10;15;20;25;30;35;40;45;50;55;60;65;70;75;80;85"
-		fline="0;21-30;14-20;5"
-		hilo="31;0/x#/10-400///y"
-		parm="m"
-		run="run"
-		run2=""
-		run3=""
-		run6to10=""
-		run8to14=""
-		f216="f216"
-		#F240="F240"
-		fcsthrs="000 006 012 018 024 030 036 042 048 054 060 066 072 078 084 090 096 102 108 114 120 126 132 138 144 150 156 162 168 174 180 186 192 198 204 210 216 222 228 234 240"
-	else
-		garea="35.0;178.0;78.0;-94.0"
-		proj="NPS"
-		garea2="10.0;155.0;59.0;-72.0"
-		proj2="STR/90;-160;0"
-		fint=""
-		fline=""
-		hilo=""
-		parm="i"
-		run=""
-		run2=""
-		run3="run"
-		run6to10=""
-		run8to14=""
-		f216="f216"
-		#F240="F240"
-		fcsthrs="000 006 012 018 024 030 036 042 048 054 060 066 072 078 084 090 096 102 108 114 120 126 132 138 144 150 156 162 168 174 180 186 192 198 204 210 216 222 228 234 240"
-	fi
-	metaname="gefs_avgspr${sGrid}_${PDY}_${cyc}_meta_${area}"
-	device="nc | ${metaname}"
+  if [ ${area} = "nam" ] ; then
+    garea="17.529;-129.296;53.771;-22.374"
+    proj="str/90;-105;0"
+    garea2="us"
+    proj2=""
+    fint=".01;.1;.25;.5;.75;1;1.5;2;2.5;3;4;5;6;7;8;9;10"
+    fline="0;21-30;14-20;5"
+    hilo="31;0/x#2/.25-10///y"
+    parm="i"
+    run="run"
+    run2="run"
+    run3=""
+    run6to10="run"
+    run8to14="run"
+    if [ ${cyc} = "00" ] ; then
+      gdattim_6to10="${PDY2}/${cyc}00F264"
+      gdattim_8to14="${PDY2}/${cyc}00F360"
+    elif [ ${cyc} = "06" ] ; then
+      gdattim_6to10="${PDY2}/${cyc}00F258"
+      gdattim_8to14="${PDY2}/${cyc}00F354"
+    elif [ ${cyc} = "12" ] ; then
+      gdattim_6to10="${PDY2}/${cyc}00F276"
+      gdattim_8to14="${PDY2}/${cyc}00F372"
+    elif [ ${cyc} = "18" ] ; then
+      gdattim_6to10="${PDY2}/${cyc}00F270"
+      gdattim_8to14="${PDY2}/${cyc}00F366"
+    fi
+    f216="f384"
+    F240="F384"
+    fcsthrs="000 006 012 018 024 030 036 042 048 054 060 066 072 078 084 090 096 102 108 114 120 126 132 138 144 150 156 162 168 174 180 186 192 198 204 210 216 222 228 234 240 246 252 258 264 270 276 282 288 294 300 306 312 318 324 330 336 342 348 354 360 366 372 378 384"
+  elif [ ${area} = "sam" ] ; then
+    garea="-66;-127;14.5;-19"
+    proj="mer"
+    garea2="-66;-127;14.5;-19"
+    proj2="mer"
+    fint="1;5;10;15;20;25;30;35;40;45;50;55;60;65;70;75;80;85"
+    fline="0;21-30;14-20;5"
+    hilo="31;0/x#/10-400///y"
+    parm="m"
+    run="run"
+    run2=""
+    run3=""
+    run6to10=""
+    run8to14=""
+    f216="f216"
+    #F240="F240"
+    fcsthrs="000 006 012 018 024 030 036 042 048 054 060 066 072 078 084 090 096 102 108 114 120 126 132 138 144 150 156 162 168 174 180 186 192 198 204 210 216 222 228 234 240"
+  else
+    garea="35.0;178.0;78.0;-94.0"
+    proj="NPS"
+    garea2="10.0;155.0;59.0;-72.0"
+    proj2="STR/90;-160;0"
+    fint=""
+    fline=""
+    hilo=""
+    parm="i"
+    run=""
+    run2=""
+    run3="run"
+    run6to10=""
+    run8to14=""
+    f216="f216"
+    #F240="F240"
+    fcsthrs="000 006 012 018 024 030 036 042 048 054 060 066 072 078 084 090 096 102 108 114 120 126 132 138 144 150 156 162 168 174 180 186 192 198 204 210 216 222 228 234 240"
+  fi
+  metaname="gefs_avgspr${sGrid}_${PDY}_${cyc}_meta_${area}"
+  device="nc | ${metaname}"
 
-	for fcsthr in ${fcsthrs}; do
-		for fn in avg spr; do
-			rm -rf $fn
-			if [ -r $COMIN/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr} ]; then
-				ln -s $COMIN/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr} $fn
-			fi
-		done
+  for fcsthr in ${fcsthrs}; do
+    for fn in avg spr; do
+      rm -rf $fn
+      if [ -r $COMIN/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr} ]; then
+        ln -s $COMIN/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr} $fn
+      fi
+    done
 
-		cat > cmdfile_meta <<- EOF
+    cat > cmdfile_meta <<- EOF
 			GAREA    = ${garea}
 			PROJ     = ${proj}
 			gdfile   = avg
@@ -326,25 +326,25 @@ for area in nam sam ak; do
 
 			EOF
 
-		cat cmdfile_meta
+    cat cmdfile_meta
 
-		gdplot2_nc < cmdfile_meta
-		err=$?
+    gdplot2_nc < cmdfile_meta
+    err=$?
 
-		if [[ $err != 0 ]]; then
-			echo "FATAL ERROR in $(basename $BASH_SOURCE): gdplot2_nc failed using cmdfile_meta!"
-			err_chk
-			exit $err
-		fi
-	done
+    if [[ $err != 0 ]]; then
+      echo "FATAL ERROR in $(basename $BASH_SOURCE): gdplot2_nc failed using cmdfile_meta!"
+      err_chk
+      exit $err
+    fi
+  done
 
-	
-	# =====
-	COMINtemp=$COMIN
-	export COMIN=./
+
+  # =====
+  COMINtemp=$COMIN
+  export COMIN=./
    
-	cp $FIXgempak/datatype${sGrid}.tbl datatype.tbl
-	cat > cmdfile_meta <<- EOF
+  cp $FIXgempak/datatype${sGrid}.tbl datatype.tbl
+  cat > cmdfile_meta <<- EOF
 		device   = ${device}
 		gdfile   = F-GEFSAVG | ${PDY2}/${cyc}00
 		garea    = ${garea2}
@@ -406,39 +406,39 @@ for area in nam sam ak; do
 		exit
 		EOF
 
-	cat cmdfile_meta
-	gdplot2_nc < cmdfile_meta
-	err=$?
+  cat cmdfile_meta
+  gdplot2_nc < cmdfile_meta
+  err=$?
 
-	if [[ $err != 0 ]]; then
-		echo "FATAL ERROR in $(basename $BASH_SOURCE): gdplot2_nc failed using cmdfile_meta!"
-		err_chk
-		exit $err
-	fi
+  if [[ $err != 0 ]]; then
+    echo "FATAL ERROR in $(basename $BASH_SOURCE): gdplot2_nc failed using cmdfile_meta!"
+    err_chk
+    exit $err
+  fi
 
-	export COMIN=$COMINtemp
+  export COMIN=$COMINtemp
 
-	#####################################################
-	# GEMPAK DOES NOT ALWAYS HAVE A NON ZERO RETURN CODE
-	# WHEN IT CAN NOT PRODUCE THE DESIRED GRID.  CHECK
-	# FOR THIS CASE HERE.
-	#####################################################
+  #####################################################
+  # GEMPAK DOES NOT ALWAYS HAVE A NON ZERO RETURN CODE
+  # WHEN IT CAN NOT PRODUCE THE DESIRED GRID.  CHECK
+  # FOR THIS CASE HERE.
+  #####################################################
 
-	ls -l ${metaname}
-	err=$?
+  ls -l ${metaname}
+  err=$?
 
-	if [[ $err != 0 ]]; then
-		echo "FATAL ERROR in $(basename $BASH_SOURCE): metafile ${metaname} not created!"
-		err_chk
-		exit $err
-	fi
+  if [[ $err != 0 ]]; then
+    echo "FATAL ERROR in $(basename $BASH_SOURCE): metafile ${metaname} not created!"
+    err_chk
+    exit $err
+  fi
 
-	if [ $SENDCOM = "YES" ] ; then
-		mv ${metaname} ${COMOUT}/$COMPONENT/gempak/meta/
-		if [ $SENDDBN = "YES" ] ; then
-			$DBNROOT/bin/dbn_alert MODEL ${DBN_ALERT_TYPE} $job ${COMOUT}/$COMPONENT/gempak/meta/${metaname}
-		fi
-	fi
+  if [ $SENDCOM = "YES" ] ; then
+    mv ${metaname} ${COMOUT}/$COMPONENT/gempak/meta/
+    if [ $SENDDBN = "YES" ] ; then
+      $DBNROOT/bin/dbn_alert MODEL ${DBN_ALERT_TYPE} $job ${COMOUT}/$COMPONENT/gempak/meta/${metaname}
+    fi
+  fi
 done
 
 exit
