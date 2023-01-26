@@ -9,12 +9,12 @@ export RERUN=${RERUN:-"NO"}
 export CDATE_RST=${CDATE_RST:-""}
 
 case "$case_in" in
-    "C48") export OCNRES=500;;
-    "C96") export OCNRES=100;;
-    "C192") export OCNRES=050;;
-    "C384") export OCNRES=025;;
-    "C768") export OCNRES=025;;
-    *) export OCNRES=025;;
+  "C48") export OCNRES=500;;
+  "C96") export OCNRES=100;;
+  "C192") export OCNRES=050;;
+  "C384") export OCNRES=025;;
+  "C768") export OCNRES=025;;
+  *) export OCNRES=025;;
 esac
 export ICERES=$OCNRES
 
@@ -169,41 +169,41 @@ export gwd_opt=2
 # do_ugwp=T: use unified CGWD and OGWD, and turbulent orographic form drag (TOFD)
 # do_ugwp=F: use unified CGWD but old OGWD, TOFD is not uded.
 if [[ "$gwd_opt" -eq 1 ]]; then
-    export knob_ugwp_version=0
-    export do_ugwp=".false."
-    export do_tofd=".false."
-    export launch_level=$(echo "$LEVS/2.35" |bc)
+  export knob_ugwp_version=0
+  export do_ugwp=".false."
+  export do_tofd=".false."
+  export launch_level=$(echo "$LEVS/2.35" |bc)
 fi
 
 # -- uGWD.v1, for suite FV3_GFS_v17 and FV3_GFS_v17p8b etc
 if [[ "$gwd_opt" -eq 2 ]]; then
 
-    #--used for UFS p7 and p8a
-    #export  knob_ugwp_version=1
-    #export  do_ugwp=".false."
-    #export  do_tofd=".false."
-    #export  do_ugwp_v0=".false."
-    #export  do_ugwp_v1=".true."
-    #export  do_ugwp_v0_orog_only=".false."
-    #export  do_ugwp_v0_nst_only=".false."
-    #export  do_gsl_drag_ls_bl=".true."
-    #export  do_gsl_drag_ss=".true."
-    #export  do_gsl_drag_tofd=".true."
-    #export  do_ugwp_v1_orog_only=".false."
+  #--used for UFS p7 and p8a
+  #export  knob_ugwp_version=1
+  #export  do_ugwp=".false."
+  #export  do_tofd=".false."
+  #export  do_ugwp_v0=".false."
+  #export  do_ugwp_v1=".true."
+  #export  do_ugwp_v0_orog_only=".false."
+  #export  do_ugwp_v0_nst_only=".false."
+  #export  do_gsl_drag_ls_bl=".true."
+  #export  do_gsl_drag_ss=".true."
+  #export  do_gsl_drag_tofd=".true."
+  #export  do_ugwp_v1_orog_only=".false."
 
-    #--used for UFS p8
-    export knob_ugwp_version=0
-    export do_ugwp=".false."
-    export do_tofd=".false."
-    export do_ugwp_v0=".true."
-    export do_ugwp_v1=".false."
-    export do_ugwp_v0_orog_only=".false."
-    export do_ugwp_v0_nst_only=".false."
-    export do_gsl_drag_ls_bl=".false."
-    export do_gsl_drag_ss=".true."
-    export do_gsl_drag_tofd=".false."
-    export do_ugwp_v1_orog_only=".false."
-    export launch_level=$(echo "$LEVS/2.35" |bc)
+  #--used for UFS p8
+  export knob_ugwp_version=0
+  export do_ugwp=".false."
+  export do_tofd=".false."
+  export do_ugwp_v0=".true."
+  export do_ugwp_v1=".false."
+  export do_ugwp_v0_orog_only=".false."
+  export do_ugwp_v0_nst_only=".false."
+  export do_gsl_drag_ls_bl=".false."
+  export do_gsl_drag_ss=".true."
+  export do_gsl_drag_tofd=".false."
+  export do_ugwp_v1_orog_only=".false."
+  export launch_level=$(echo "$LEVS/2.35" |bc)
 fi
 
 # Sponge layer settings
@@ -560,7 +560,7 @@ else
 fi
 
 if [[ "$DO_COUPLED" = "YES" ]] ; then # coupled model
-    export DIAG_TABLE="$HOMEgfs/parm/parm_fv3diag/diag_table_cpl"
+  export DIAG_TABLE="$HOMEgfs/parm/parm_fv3diag/diag_table_cpl"
 fi
 
 if [[ "$DO_AERO" = "YES" ]]; then # temporary settings for aerosol coupling

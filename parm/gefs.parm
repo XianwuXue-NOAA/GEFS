@@ -30,15 +30,15 @@ export fhrp=${fhrp:-06}
 export gefs_cych=${gefs_cych:-6}
 
 case $cyc in
-  (00)
-    fhmax=$fhmax00 ;;
-  (06)
-    fhmax=$fhmax06 ;;
-  (12)
-    fhmax=$fhmax12 ;;
-  (18)
-    fhmax=$fhmax18 ;;
-  (*)
+  00)
+    fhmax=$fhmax00;;
+  06)
+    fhmax=$fhmax06;;
+  12)
+    fhmax=$fhmax12;;
+  18)
+    fhmax=$fhmax18;;
+  *)
     echo
     echo UNDEFINED CYCLE cyc=$cyc
     echo
@@ -51,10 +51,9 @@ esac
 memberlist="c00"
 
 imem=1
-while [[ imem -le $npert ]];
-do
-    memberlist="$memberlist p$(printf %02i $imem)"
-    (( imem++ ))
+while [[ imem -le $npert ]]; do
+  memberlist="$memberlist p$(printf %02i $imem)"
+  ((imem++))
 done
 export memberlist
 
@@ -73,8 +72,8 @@ if [[ $cplchm = ".true." ]]; then
 fi
 
 export fhmax
-if (( fhmax <= fhmaxh )); then export fhmaxh=$fhmax; fi
-if (( FHMAXHF > fhmaxh )); then export FHMAXHF=$fhmaxh; fi
+if ((fhmax <= fhmaxh)); then export fhmaxh=$fhmax; fi
+if ((FHMAXHF > fhmaxh)); then export FHMAXHF=$fhmaxh; fi
 
 export restart_interval_gfs=${fhrestart:-12}
 export restart_interval_aer=${restart_interval_aer:-12}
@@ -130,7 +129,7 @@ export DO_OCN="NO"
 export DO_ICE="NO"
 export DO_AERO="NO"
 export CCPP_SUITE=${CCPP_SUITE:-"FV3_GFS_v16"} #FV3_GFS_v17_coupled_p8"}
-export WAVE_CDUMP="" # When to include wave suite: gdas, gfs, or both
+export WAVE_CDUMP=""                           # When to include wave suite: gdas, gfs, or both
 export DOBNDPNT_WAVE="NO"
 export cplwav2atm=".false."
 export FRAC_GRID=".true."
@@ -162,15 +161,15 @@ case "${APP}" in
     export confignamevarfornems="cpld"
 
     if [[ "$APP" =~ A$ ]]; then
-        export DO_AERO="YES"
-        export confignamevarfornems="${confignamevarfornems}_aero"
+      export DO_AERO="YES"
+      export confignamevarfornems="${confignamevarfornems}_aero"
     fi
 
     if [[ "$APP" =~ ^S2SW ]]; then
-        export DO_WAVE="YES"
-        export WAVE_CDUMP="both"
-        export cplwav2atm=".true."
-        export confignamevarfornems="${confignamevarfornems}_wave"
+      export DO_WAVE="YES"
+      export WAVE_CDUMP="both"
+      export cplwav2atm=".true."
+      export confignamevarfornems="${confignamevarfornems}_wave"
     fi
 
     #source $EXPDIR/config.defaults.s2sw
@@ -183,7 +182,7 @@ case "${APP}" in
 esac
 
 # IAU related parameters
-export DOIAU=${DOIAU:-"NO"}        # Enable 4DIAU for control with 3 increments
+export DOIAU=${DOIAU:-"NO"} # Enable 4DIAU for control with 3 increments
 if [[ $DOIAU == "NO" ]]; then
   export IAU_OFFSET=0
   export IAU_DELTHRS=0
@@ -211,13 +210,13 @@ export imp_physics=${imp_physics:-"11"}
 ########################################
 export FV3OUT_GRID="gaussian_grid"
 export GRIBVERSION=grib2
-export REMAP_GRID=${REMAP_GRID:-latlon}  #gaussian or latlon for using regrid or regrid_nemsio for remapping
+export REMAP_GRID=${REMAP_GRID:-latlon} #gaussian or latlon for using regrid or regrid_nemsio for remapping
 
 export gfsfhmaxh=240
 export gfsfhoroglist=252
 
 # The following options are fore re-forecast
-export save_pgrb2_p5=${save_pgrb2_p5:-NO} 
+export save_pgrb2_p5=${save_pgrb2_p5:-NO}
 export save_pgrb2_p25=${save_pgrb2_p25:-NO}
 
 # List of contacts to mail when there is mail sent by mail.py for product degredation
