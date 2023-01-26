@@ -37,28 +37,35 @@ echo "#########################################"
 echo " "
 set -x
 
-mem=$1
-var=$2
-nvar=$3
-type=$4
-fntype=$5
-gdtype=$6
-bhr=$7
-ehr=$8
-ihr=$9
-cutgrid=${10}
+mem=${1}
+var=${2}
+prdgen_dir=${3}
+prdgen_prefix=${4}
+bhr=${5}
+ehr=${6}
+ihr=${7}
+cutgrid=${8}
+
+nvar=$(echo $var|tr '[a-z]' '[A-Z]')
 
 mkdir $DATA/$var
 cd $DATA/$var
 # Selecting requested variable
+
 file=grib2.gefs.t${cyc}z.${var}.f${bhr}_${ehr}
 hr=$bhr
 while (( hr <= $ehr )); do
   hr3=`printf %03d $hr`
   export pgm="postcheck"
   set -x
-  file_temp=ge${mem}.t${cyc}z.${type}f${hr3}
-  ln -s ${COMIN}/atmos/${type}/ge${mem}.t${cyc}z.${fntype}.f${hr3} ${file_temp}
+  file_temp=ge${mem}.t${cyc}z.${prdgen_prefix}f${hr3}
+  if [[ ${NewCOM} == "YES" ]]; then
+    CDUMP_ENS="gefs"
+  else
+    CDUMP_ENS="ge${mem}"
+  fi
+  file_prdgen=${CDUMP_ENS}.t${cyc}z.${prdgen_prefix}.f${hr3}
+  ln -s ${COMIN}/${prdgen_dir}/${file_prdgen} ${file_temp}
   $WGRIB2 ${file_temp} | grep "$nvar" | $WGRIB2 -i ${file_temp} -grib ${file_temp}_$var
   cat  ${file_temp}_$var >> $file
   rm  ${file_temp}*
@@ -72,16 +79,16 @@ $WGRIB2 $file $option1 $option21 $option22 $option23 $option24 \
   ${file}.conus_notoc
 
 ############################################
-# Processing GRIB2 GEFS grid 3 for MMEFS
+# Processing GRIB2 GEFS grid
 ############################################
 export pgm=${TOCGRIB2}
 . prep_step
 startmsg
 
-# Processing GEFS (MMEFS) GRIB2 
+# Processing GEFS GRIB2
 export FORT11=${file}.conus_notoc
 export FORT51=${file}.conus
-$TOCGRIB2 < $PARMgefs/wmo/grib2_awips_gefs_f${bhr}_${ehr}_${var}_conus >> $pgmout 2>errfile
+$TOCGRIB2 < ${PARMgefs}/wmo/grib2_awips_gefs_f${bhr}_${ehr}_${var}_conus >> ${pgmout} 2>errfile
 export err=$?; err_chk
 echo " error from tocgrib2=",$err
 

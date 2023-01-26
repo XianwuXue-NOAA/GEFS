@@ -76,18 +76,23 @@ export COMPONENT=${COMPONENT:-atmos}
 ver=${ver:-$(echo ${gefs_ver}|cut -c1-5)}
 export COMIN=${COMIN:-$(compath.py $envir/com/$NET/${ver})/${RUN}.${PDY}/$cyc}
 export COMOUT=${COMOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDY}/$cyc}
+if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+  export mem_ens="avg"
+  export COMIN=${COMIN}/${mem_ens}/${COMPONENT}
+  export COMOUT=${COMOUT}/${mem_ens}
+fi
 export COMOUTwmo=${COMOUTwmo:-${COMOUT}/${COMPONENT}/wmo}
 
 #############################
 # Source relevant config files
 #############################
 configs="gefs gefs_awips"
-config_path=$PARMgefs
-for config in $configs; do
-  . $config_path/$config.parm
+config_path=${PARMgefs}
+for config in ${configs}; do
+  . ${config_path}/${config}.parm
   export err=$?
   if [[ $err != 0 ]]; then
-    echo "FATAL ERROR in ${.sh.file}: Error while loading parm file $config_path/$config.parm"
+    echo "FATAL ERROR in ${.sh.file}: Error while loading parm file ${config_path}/${config}.parm"
     exit $err
   fi
 done
