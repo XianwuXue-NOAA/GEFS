@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /usr/bin/env bash
 #
 # Metafile Script : gefs_meta_mar_00Z.sh
 #

@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /usr/bin/env bash
 
 echo "$(date -u) begin $(basename $BASH_SOURCE)"
 
