@@ -161,7 +161,6 @@ else
   WAV_MEMBER=$MEMBER
 fi
 export MEMBER=$MEMBER
-memchar=mem$(printf %03i $MEMBER)
 
 export SET_STP_SEED=${SET_STP_SEED:-"YES"}
 
