@@ -84,7 +84,7 @@ while [[ $fhr -le $FHOUR ]]; do
   nfile=$npert
   for mem in $memberlist; do
     mem2=$(echo $mem | cut -c2-)
-    mem3=$(printf %03i $mem2) #$(printf "%03.i" $mem2)
+    mem3=$(printf %03i ${mem2#0})
     if [[ ${NewCOM} == "YES" ]]; then
       CDUMP="gefs"
       INDIR=${COMIN}/${mem}/${COMPONENT}
