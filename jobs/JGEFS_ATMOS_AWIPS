@@ -80,6 +80,8 @@ if [[ ${NewCOM:-"YES"} == "YES" ]]; then
   export mem_ens="avg"
   export COMIN=${COMIN}/${mem_ens}/${COMPONENT}
   export COMOUT=${COMOUT}/${mem_ens}
+else
+  export COMIN=${COMIN}/${COMPONENT}
 fi
 export COMOUTwmo=${COMOUTwmo:-${COMOUT}/${COMPONENT}/wmo}
 
