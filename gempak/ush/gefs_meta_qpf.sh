@@ -52,22 +52,25 @@ fcsthrs="036 048 060 072 084 096 108 120 132 144 156 168 180 192 204" # shorten 
 for fcsthr in ${fcsthrs}; do
   for fn in $(echo $memberlist); do
     rm -rf $fn
-    if [ -r $COMIN/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr} ]; then
-      ln -s $COMIN/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr} $fn
+    INFILE=${COMIN}/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr}
+    if [ -r ${INFILE} ]; then
+      ln -s ${INFILE} $fn
     fi
   done
 
   fn=gfs
   rm -rf ${fn}
-  if [ -r $COMINsgfs/gfs.${PDY}/${cyc}/gempak/gfs${sGrid}_${PDY}${cyc}f${fcsthr} ]; then
-    ln -s $COMINsgfs/gfs.${PDY}/${cyc}/gempak/gfs${sGrid}_${PDY}${cyc}f${fcsthr} ${fn}
+  INFILE=${COMINsgfs}/gfs.${PDY}/${cyc}/gempak/gfs${sGrid}_${PDY}${cyc}f${fcsthr}
+  if [ -r ${INFILE} ]; then
+    ln -s ${INFILE} ${fn}
   fi
 
   if [ ${cyc} = "00" ]; then
     fn=ecmwf
     rm -rf ${fn}
-    if [ -r $COMINecmwf.${PDYm1}/gempak/ecmwf_hr_${PDYm1}${cycm12}f${fcsthr} ]; then
-      ln -s $COMINecmwf.${PDYm1}/gempak/ecmwf_hr_${PDYm1}${cycm12}f${fcsthr} ${fn}
+    INFILE=${COMINecmwf}.${PDYm1}/gempak/ecmwf_hr_${PDYm1}${cycm12}f${fcsthr}
+    if [ -r ${INFILE} ]; then
+      ln -s ${INFILE} ${fn}
     fi
   fi
 

@@ -49,8 +49,9 @@ for area in natl mpac; do
 
     for fn in avg spr; do
       rm -rf $fn
-      if [ -r $COMIN/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr} ]; then
-        ln -s $COMIN/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr} $fn
+      INFILE=${COMIN}/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr}
+      if [ -r ${INFILE} ]; then
+        ln -s ${INFILE} $fn
       fi
     done
 

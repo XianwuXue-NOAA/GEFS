@@ -78,55 +78,64 @@ for pres in 200 250 300; do
       for fn in $(echo $grids); do
         rm -rf $fn ${fn}_6
 
-        if [ -r $COMIN/$COMPONENT/gempak/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr} ]; then
-          ln -s $COMIN/$COMPONENT/gempak/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr} $fn
+        INFILE=${COMIN}/${COMPONENT}/gempak/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr}
+        if [ -r ${INFILE} ]; then
+          ln -s ${INFILE} $fn
         fi
 
-        if [ -r $COMINs/gefs.${PDY_6}/${cyc_6}/atmos/gempak/ge${fn}${sGrid}_${PDY_6}${cyc_6}f${fcsthr_6} ]; then
-          ln -s $COMINs/gefs.${PDY_6}/${cyc_6}/atmos/gempak/ge${fn}${sGrid}_${PDY_6}${cyc_6}f${fcsthr_6} ${fn}_6
+        INFILE=${COMINs}/gefs.${PDY_6}/${cyc_6}/atmos/gempak/ge${fn}${sGrid}_${PDY_6}${cyc_6}f${fcsthr_6}
+        if [ -r ${INFILE} ]; then
+          ln -s ${INFILE} ${fn}_6
         fi
       done
 
       fn=gefs_avg
       rm -rf ${fn}
-      if [ -r $COMIN/$COMPONENT/gempak/geavg${sGrid}_${PDY}${cyc}f${fcsthr} ]; then
-        ln -s $COMIN/$COMPONENT/gempak/geavg${sGrid}_${PDY}${cyc}f${fcsthr} ${fn}
+      INFILE=${COMIN}/${COMPONENT}/gempak/geavg${sGrid}_${PDY}${cyc}f${fcsthr}
+      if [ -r ${INFILE} ]; then
+        ln -s ${INFILE} ${fn}
       fi
 
       fn=gefs_avg_6
       rm -rf ${fn}
-      if [ -r $COMINs/gefs.${PDY_6}/${cyc_6}/atmos/gempak/geavg${sGrid}_${PDY_6}${cyc_6}f${fcsthr_6} ]; then
-        ln -s $COMINs/gefs.${PDY_6}/${cyc_6}/atmos/gempak/geavg${sGrid}_${PDY_6}${cyc_6}f${fcsthr_6} ${fn}
+      INFILE=${COMINs}/gefs.${PDY_6}/${cyc_6}/atmos/gempak/geavg${sGrid}_${PDY_6}${cyc_6}f${fcsthr_6}
+      if [ -r ${INFILE} ]; then
+        ln -s ${INFILE} ${fn}
       fi
 
       fn=gfs
       rm -rf ${fn}
-      if [ -r $COMINsgfs/gfs.${PDY}/${cyc}/gempak/gfs${sGrid}_${PDY}${cyc}f${fcsthr} ]; then
-        ln -s $COMINsgfs/gfs.${PDY}/${cyc}/gempak/gfs${sGrid}_${PDY}${cyc}f${fcsthr} ${fn}
+      INFILE=${COMINsgfs}/gfs.${PDY}/${cyc}/gempak/gfs${sGrid}_${PDY}${cyc}f${fcsthr}
+      if [ -r ${INFILE} ]; then
+        ln -s ${INFILE} ${fn}
       fi
 
       fn=gfs_6
       rm -rf ${fn}
-      if [ -r $COMINsgfs/gfs.${PDY_6}/${cyc_6}/gempak/gfs${sGrid}_${PDY_6}${cyc_6}f${fcsthr_6} ]; then
-        ln -s $COMINsgfs/gfs.${PDY_6}/${cyc_6}/gempak/gfs${sGrid}_${PDY_6}${cyc_6}f${fcsthr_6} ${fn}
+      INFILE=${COMINsgfs}/gfs.${PDY_6}/${cyc_6}/gempak/gfs${sGrid}_${PDY_6}${cyc_6}f${fcsthr_6}
+      if [ -r ${INFILE} ]; then
+        ln -s ${INFILE} ${fn}
       fi
 
       fn=ecmwf
       rm -rf ${fn}
-      if [ -r ${COMINecmwf}.${ECM_PDY}/gempak/ecmwf_hr_${ECM_PDY}${ECM_cyc}f${fcsthr} ]; then
-        ln -s ${COMINecmwf}.${ECM_PDY}/gempak/ecmwf_hr_${ECM_PDY}${ECM_cyc}f${fcsthr} ${fn}
+      INFILE=${COMINecmwf}.${ECM_PDY}/gempak/ecmwf_hr_${ECM_PDY}${ECM_cyc}f${fcsthr}
+      if [ -r ${INFILE} ]; then
+        ln -s ${INFILE} ${fn}
       fi
 
       fn=ukmet
       rm -rf ${fn}
-      if [ -r ${COMINukmet}.${ECM_PDY}/gempak/ukmet_hr_${ECM_PDY}${ECM_cyc}f${fcsthr_ecm} ]; then
-        ln -s ${COMINukmet}.${ECM_PDY}/gempak/ukmet_hr_${ECM_PDY}${ECM_cyc}f${fcsthr_ecm} ${fn}
+      INFILE=${COMINukmet}.${ECM_PDY}/gempak/ukmet_hr_${ECM_PDY}${ECM_cyc}f${fcsthr_ecm}
+      if [ -r ${INFILE} ]; then
+        ln -s ${INFILE} ${fn}
       fi
 
       fn=dgex
       rm -rf ${fn}
-      if [ -r $COMINnawips/dgex.${PDY}/dgex_${PDY}${cyc}f${fcsthr} ]; then
-        ln -s $COMINnawips/dgex.${PDY}/dgex_${PDY}${cyc}f${fcsthr} ${fn}
+      INFILE=${COMINnawips}/dgex.${PDY}/dgex_${PDY}${cyc}f${fcsthr}
+      if [ -r ${INFILE} ]; then
+        ln -s ${INFILE} ${fn}
       fi
 
 
