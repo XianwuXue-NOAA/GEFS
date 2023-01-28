@@ -48,7 +48,7 @@ do
       prdgen_prefix="0p25s.grb2"
     else
       prdgen_dir="pgrb2sp25"
-      prdgen_prefix="pgrb2s.0p25"
+      prdgen_prefix="pgrb2s.0p25."
     fi
     ${USHgefs}/gefs_atmos_getsbn.sh avg ${var} ${prdgen_dir} ${prdgen_prefix} 006 240 6 "${gridp25}"
     export err=$?; if [[ $err != 0 ]]; then exit $err; fi
@@ -58,7 +58,7 @@ do
       prdgen_prefix="0p50a.grb2"
     else
       prdgen_dir="pgrb2ap5"
-      prdgen_prefix="pgrb2a.0p50"
+      prdgen_prefix="pgrb2a.0p50."
     fi
     ${USHgefs}/gefs_atmos_getsbn.sh avg ${var} ${prdgen_dir} ${prdgen_prefix} 246 384 6 "${gridp5}"
     export err=$?; if [[ $err != 0 ]]; then exit $err; fi
@@ -69,7 +69,7 @@ do
       prdgen_prefix="0p50a.grb2"
     else
       prdgen_dir="pgrb2ap5"
-      prdgen_prefix="pgrb2a.0p50"
+      prdgen_prefix="pgrb2a.0p50."
     fi
     ${USHgefs}/gefs_atmos_getsbn.sh avg ${var} ${prdgen_dir} ${prdgen_prefix} 390 840 6 "${gridp5}"
     export err=$?; if [[ $err != 0 ]]; then exit $err; fi

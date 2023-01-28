@@ -60,11 +60,10 @@ while (( hr <= $ehr )); do
   set -x
   file_temp=ge${mem}.t${cyc}z.${prdgen_prefix}f${hr3}
   if [[ ${NewCOM} == "YES" ]]; then
-    CDUMP_ENS="gefs"
+    file_prdgen=gefs.t${cyc}z.${prdgen_prefix}f${hr3}
   else
-    CDUMP_ENS="ge${mem}"
+    file_prdgen=ge${mem}.t${cyc}z.${prdgen_prefix}f${hr3}
   fi
-  file_prdgen=${CDUMP_ENS}.t${cyc}z.${prdgen_prefix}.f${hr3}
   ln -s ${COMIN}/${prdgen_dir}/${file_prdgen} ${file_temp}
   $WGRIB2 ${file_temp} | grep "$nvar" | $WGRIB2 -i ${file_temp} -grib ${file_temp}_$var
   cat  ${file_temp}_$var >> $file
