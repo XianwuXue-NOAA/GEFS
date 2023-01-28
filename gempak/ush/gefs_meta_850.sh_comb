@@ -285,7 +285,7 @@ for area in us sam; do
 					run
 
 					EOF
- [ $WrottenZERO -eq 0 ]; then
+        if [ $WrottenZERO -eq 0 ]; then
           cat >> cmdfile850  <<- EOF
 						MAP     = 0
 						LATLON  = 0
@@ -330,7 +330,7 @@ for area in us sam; do
 					run
 
 					EOF
- [ $WrottenZERO -eq 0 ]; then
+        if [ $WrottenZERO -eq 0 ]; then
           cat >> cmdfile850  <<- EOF
 						MAP     = 0
 						LATLON  = 0
