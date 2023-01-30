@@ -183,7 +183,17 @@ done
 
 
 # Make metafiles for North and South America...as well as Alaska.
-#ln -s $COMIN/geavg${sGrid}_${PDY}${cyc}f* ./
+if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+  for f in `ls ${COMINavg}/gefs${sGrid}_${PDY}${cyc}f*`
+  do
+    echo ${f}
+    f_base=$(basename ${f})
+    f_base=${f_base/gefs/geavg}
+    ln -s ${f} ./${f_base}
+  done
+else
+  ln -s $COMIN/geavg${sGrid}_${PDY}${cyc}f* ./
+fi
 
 for area in nam sam ak; do
   if [ ${area} = "nam" ] ; then
