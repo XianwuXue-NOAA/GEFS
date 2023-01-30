@@ -24,7 +24,13 @@ if [[ ${STRICT:-NO} == "YES" ]]; then
 fi
 
 # datatypes.tbl uses COMIN, so have to update it locally
-COMIN="$COMIN/$COMPONENT/gempak"
+if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+  COMINavg="${COMIN}/avg/${COMPONENT}/products/gempak"
+  COMINspr="${COMIN}/spr/${COMPONENT}/products/gempak"
+else
+  COMINavg="${COMIN}/$COMPONENT/gempak"
+  COMINspr=${COMINavg}
+fi
 
 mkdir $DATA/gefs_avgspr
 cd $DATA/gefs_avgspr
@@ -48,12 +54,38 @@ for area in natl mpac; do
   for fcsthr in ${fcsthrs}; do
 
     for fn in avg spr; do
-      rm -rf $fn
-      INFILE=${COMIN}/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr}
+      if [ -e ${fn} ]; then rm -rf ${fn}; fi
+      if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+        INFILE=$[COMIN${fn}]/gefs${sGrid}_${PDY}${cyc}f${fcsthr}
+      else
+        INFILE=$[COMIN${avg}]/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr}
+      fi
       if [ -r ${INFILE} ]; then
         ln -s ${INFILE} $fn
       fi
     done
+
+#    fn=avg
+#    rm -rf $fn
+#    if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+#      INFILE=${COMINavg}/gefs${sGrid}_${PDY}${cyc}f${fcsthr}
+#    else
+#      INFILE=${COMINavg}/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr}
+#    fi
+#    if [ -r ${INFILE} ]; then
+#      ln -s ${INFILE} $fn
+#    fi
+#
+#    fn=spr
+#    rm -rf $fn
+#    if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+#      INFILE=${COMINspr}/gefs${sGrid}_${PDY}${cyc}f${fcsthr}
+#    else
+#      INFILE=${COMINspr}/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr}
+#    fi
+#    if [ -r ${INFILE} ]; then
+#      ln -s ${INFILE} $fn
+#    fi
 
     cat > cmdfile_meta <<- EOF
 			GDATTIM  = F${fcsthr}
@@ -155,16 +187,16 @@ for area in natl mpac; do
   fi
 
   if [ $SENDCOM = "YES" ] ; then
-    mv ${metaname} ${COMOUT}/$COMPONENT/gempak/meta/
+    mv ${metaname} ${COMOUT}/
     if [ $SENDDBN = "YES" ] ; then
-      $DBNROOT/bin/dbn_alert MODEL ${DBN_ALERT_TYPE} $job ${COMOUT}/$COMPONENT/gempak/meta/${metaname}
+      $DBNROOT/bin/dbn_alert MODEL ${DBN_ALERT_TYPE} $job ${COMOUT}/${metaname}
     fi
   fi
 done
 
 
 # Make metafiles for North and South America...as well as Alaska.
-ln -s $COMIN/geavg${sGrid}_${PDY}${cyc}f* ./
+#ln -s $COMIN/geavg${sGrid}_${PDY}${cyc}f* ./
 
 for area in nam sam ak; do
   if [ ${area} = "nam" ] ; then
@@ -237,11 +269,38 @@ for area in nam sam ak; do
 
   for fcsthr in ${fcsthrs}; do
     for fn in avg spr; do
-      rm -rf $fn
-      if [ -r $COMIN/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr} ]; then
-        ln -s $COMIN/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr} $fn
+      if [ -e ${fn} ]; then rm -rf ${fn}; fi
+      if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+        INFILE=$[COMIN${fn}]/gefs${sGrid}_${PDY}${cyc}f${fcsthr}
+      else
+        INFILE=$[COMIN${avg}]/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr}
+      fi
+      if [ -r ${INFILE} ]; then
+        ln -s ${INFILE} $fn
       fi
     done
+
+#    fn=avg
+#    if [ -e ${fn} ]; then rm -rf ${fn}; fi
+#    if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+#      INFILE=${COMINavg}/gefs${sGrid}_${PDY}${cyc}f${fcsthr}
+#    else
+#      INFILE=${COMINavg}/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr}
+#    fi
+#    if [ -r ${INFILE} ]; then
+#      ln -s ${INFILE} $fn
+#    fi
+#
+#    fn=spr
+#    if [ -e ${fn} ]; then rm -rf ${fn}; fi
+#    if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+#      INFILE=${COMINspr}/gefs${sGrid}_${PDY}${cyc}f${fcsthr}
+#    else
+#      INFILE=${COMINspr}/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr}
+#    fi
+#    if [ -r ${INFILE} ]; then
+#      ln -s ${INFILE} $fn
+#    fi
 
     cat > cmdfile_meta <<- EOF
 			GAREA    = ${garea}
@@ -341,7 +400,7 @@ for area in nam sam ak; do
 
 
   # =====
-  COMINtemp=$COMIN
+#  COMINtemp=$COMIN
   export COMIN=./
    
   cp $FIXgempak/datatype${sGrid}.tbl datatype.tbl
@@ -417,7 +476,7 @@ for area in nam sam ak; do
     exit $err
   fi
 
-  export COMIN=$COMINtemp
+#  export COMIN=$COMINtemp
 
   #####################################################
   # GEMPAK DOES NOT ALWAYS HAVE A NON ZERO RETURN CODE
@@ -435,9 +494,9 @@ for area in nam sam ak; do
   fi
 
   if [ $SENDCOM = "YES" ] ; then
-    mv ${metaname} ${COMOUT}/$COMPONENT/gempak/meta/
+    mv ${metaname} ${COMOUT}/
     if [ $SENDDBN = "YES" ] ; then
-      $DBNROOT/bin/dbn_alert MODEL ${DBN_ALERT_TYPE} $job ${COMOUT}/$COMPONENT/gempak/meta/${metaname}
+      $DBNROOT/bin/dbn_alert MODEL ${DBN_ALERT_TYPE} $job ${COMOUT}/${metaname}
     fi
   fi
 done

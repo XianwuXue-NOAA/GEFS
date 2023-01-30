@@ -69,7 +69,11 @@ export FIXgempak=${FIXgempak:-$GEMPAKgefs/fix}
 # gefs_avgspr_meta.sh overrides COMIN locally to work with datatype.tbl
 ver=${ver:-$(echo ${gefs_ver}|cut -c1-5)}
 export COMIN=${COMIN:-$(compath.py $envir/com/$NET/${ver})/${RUN}.${PDY}/$cyc}
-export COMOUT=${COMOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDY}/$cyc}
+if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+  export COMOUT=${COMOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDY}/${cyc}/avg/$COMPONENT/products/gempak/meta}
+else
+  export COMOUT=${COMOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDY}/${cyc}/$COMPONENT/gempak/meta}
+fi
 
 #############################
 # Source relevant config files
@@ -86,7 +90,7 @@ for config in $configs; do
 done
 
 export COMPONENT=${COMPONENT:-atmos}
-if [[ $SENDCOM == "YES" && ! -d $COMOUT/$COMPONENT/gempak/meta ]]; then mkdir -p -m 755 $COMOUT/$COMPONENT/gempak/meta; fi
+if [[ $SENDCOM == "YES" && ! -d $COMOUT ]]; then mkdir -p -m 755 $COMOUT; fi
 
 echo "Environment before calling script"
 env | sort
