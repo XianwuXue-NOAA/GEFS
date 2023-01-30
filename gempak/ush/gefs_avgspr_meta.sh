@@ -52,40 +52,27 @@ for area in natl mpac; do
   device="nc | ${metaname}"
 
   for fcsthr in ${fcsthrs}; do
+    fn=avg
+    rm -rf $fn
+    if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+      INFILE=${COMINavg}/gefs${sGrid}_${PDY}${cyc}f${fcsthr}
+    else
+      INFILE=${COMINavg}/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr}
+    fi
+    if [ -r ${INFILE} ]; then
+      ln -s ${INFILE} $fn
+    fi
 
-    for fn in avg spr; do
-      if [ -e ${fn} ]; then rm -rf ${fn}; fi
-      if [[ ${NewCOM:-"YES"} == "YES" ]]; then
-        INFILE=$[COMIN${fn}]/gefs${sGrid}_${PDY}${cyc}f${fcsthr}
-      else
-        INFILE=$[COMIN${avg}]/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr}
-      fi
-      if [ -r ${INFILE} ]; then
-        ln -s ${INFILE} $fn
-      fi
-    done
-
-#    fn=avg
-#    rm -rf $fn
-#    if [[ ${NewCOM:-"YES"} == "YES" ]]; then
-#      INFILE=${COMINavg}/gefs${sGrid}_${PDY}${cyc}f${fcsthr}
-#    else
-#      INFILE=${COMINavg}/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr}
-#    fi
-#    if [ -r ${INFILE} ]; then
-#      ln -s ${INFILE} $fn
-#    fi
-#
-#    fn=spr
-#    rm -rf $fn
-#    if [[ ${NewCOM:-"YES"} == "YES" ]]; then
-#      INFILE=${COMINspr}/gefs${sGrid}_${PDY}${cyc}f${fcsthr}
-#    else
-#      INFILE=${COMINspr}/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr}
-#    fi
-#    if [ -r ${INFILE} ]; then
-#      ln -s ${INFILE} $fn
-#    fi
+    fn=spr
+    rm -rf $fn
+    if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+      INFILE=${COMINspr}/gefs${sGrid}_${PDY}${cyc}f${fcsthr}
+    else
+      INFILE=${COMINspr}/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr}
+    fi
+    if [ -r ${INFILE} ]; then
+      ln -s ${INFILE} $fn
+    fi
 
     cat > cmdfile_meta <<- EOF
 			GDATTIM  = F${fcsthr}
@@ -268,39 +255,27 @@ for area in nam sam ak; do
   device="nc | ${metaname}"
 
   for fcsthr in ${fcsthrs}; do
-    for fn in avg spr; do
-      if [ -e ${fn} ]; then rm -rf ${fn}; fi
-      if [[ ${NewCOM:-"YES"} == "YES" ]]; then
-        INFILE=$[COMIN${fn}]/gefs${sGrid}_${PDY}${cyc}f${fcsthr}
-      else
-        INFILE=$[COMIN${avg}]/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr}
-      fi
-      if [ -r ${INFILE} ]; then
-        ln -s ${INFILE} $fn
-      fi
-    done
+    fn=avg
+    if [ -e ${fn} ]; then rm -rf ${fn}; fi
+    if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+      INFILE=${COMINavg}/gefs${sGrid}_${PDY}${cyc}f${fcsthr}
+    else
+      INFILE=${COMINavg}/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr}
+    fi
+    if [ -r ${INFILE} ]; then
+      ln -s ${INFILE} $fn
+    fi
 
-#    fn=avg
-#    if [ -e ${fn} ]; then rm -rf ${fn}; fi
-#    if [[ ${NewCOM:-"YES"} == "YES" ]]; then
-#      INFILE=${COMINavg}/gefs${sGrid}_${PDY}${cyc}f${fcsthr}
-#    else
-#      INFILE=${COMINavg}/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr}
-#    fi
-#    if [ -r ${INFILE} ]; then
-#      ln -s ${INFILE} $fn
-#    fi
-#
-#    fn=spr
-#    if [ -e ${fn} ]; then rm -rf ${fn}; fi
-#    if [[ ${NewCOM:-"YES"} == "YES" ]]; then
-#      INFILE=${COMINspr}/gefs${sGrid}_${PDY}${cyc}f${fcsthr}
-#    else
-#      INFILE=${COMINspr}/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr}
-#    fi
-#    if [ -r ${INFILE} ]; then
-#      ln -s ${INFILE} $fn
-#    fi
+    fn=spr
+    if [ -e ${fn} ]; then rm -rf ${fn}; fi
+    if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+      INFILE=${COMINspr}/gefs${sGrid}_${PDY}${cyc}f${fcsthr}
+    else
+      INFILE=${COMINspr}/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr}
+    fi
+    if [ -r ${INFILE} ]; then
+      ln -s ${INFILE} $fn
+    fi
 
     cat > cmdfile_meta <<- EOF
 			GAREA    = ${garea}
