@@ -191,10 +191,10 @@ if [ $RunRocoto = "yes" ]; then
     module purge
     module load envvar/1.0
 
-    module load PrgEnv-intel/8.1.0
-    module load craype/2.7.10
+    module load PrgEnv-intel/8.3.3
+    module load craype/2.7.17
     module load intel/19.1.3.304
-    module load cray-mpich/8.1.9
+    module load cray-mpich/8.1.19
 
     module load python/3.8.6
 
