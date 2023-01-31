@@ -212,21 +212,24 @@ for metaarea in pac atl; do
     grids=${memberlist}
     for fn in $(echo $grids); do
       rm -rf $fn
-      if [ -r $COMIN/$COMPONENT/gempak/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr} ]; then
-        ln -s $COMIN/$COMPONENT/gempak/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr} $fn
+      INFILE=${COMIN}/${COMPONENT}/gempak/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr}
+      if [ -r ${INFILE} ]; then
+        ln -s ${INFILE} $fn
       fi
     done
 
     fn=gfs
     rm -rf ${fn}
-    if [ -r $COMINsgfs/gfs.${PDY}/${cyc}/gempak/gfs${sGrid}_${PDY}${cyc}f${fcsthr} ]; then
-      ln -s $COMINsgfs/gfs.${PDY}/${cyc}/gempak/gfs${sGrid}_${PDY}${cyc}f${fcsthr} ${fn}
+    INFILE=${COMINsgfs}/gfs.${PDY}/${cyc}/gempak/gfs${sGrid}_${PDY}${cyc}f${fcsthr}
+    if [ -r ${INFILE} ]; then
+      ln -s ${INFILE} ${fn}
     fi
 
     fn=nam
     rm -rf ${fn}
-    if [ -r $COMINnam/nam.${PDY}/gempak/nam_${PDY}${cyc}f${fcsthr} ]; then
-      ln -s $COMINnam/nam.${PDY}/gempak/nam_${PDY}${cyc}f${fcsthr} ${fn}
+    INFILE=${COMINnam}/nam.${PDY}/gempak/nam_${PDY}${cyc}f${fcsthr}
+    if [ -r ${INFILE} ]; then
+      ln -s ${INFILE} ${fn}
     fi
 
     #export pgm=gdplot2_nc;. prep_step; startmsg

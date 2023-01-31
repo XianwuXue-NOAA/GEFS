@@ -263,27 +263,31 @@ for metaarea in pac atl; do
     grids=${memberlist}
     for fn in $(echo $grids); do
       rm -rf $fn
-      if [ -r $COMIN/$COMPONENT/gempak/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr} ]; then
-        ln -s $COMIN/$COMPONENT/gempak/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr} $fn
+      INFILE=${COMIN}/$COMPONENT/gempak/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr}
+      if [ -r ${INFILE} ]; then
+        ln -s ${INFILE} $fn
       fi
     done
 
     fn=gfs
     rm -rf ${fn}
-    if [ -r $COMINsgfs/gfs.${yesterday}/${gfscyc}/gempak/gfs${sGrid}_${yesterday}${gfscyc}f${fcsthrsgfs} ]; then
-      ln -s $COMINsgfs/gfs.${yesterday}/${gfscyc}/gempak/gfs${sGrid}_${yesterday}${gfscyc}f${fcsthrsgfs} ${fn}
+    INFILE=${COMINsgfs}/gfs.${yesterday}/${gfscyc}/gempak/gfs${sGrid}_${yesterday}${gfscyc}f${fcsthrsgfs}
+    if [ -r ${INFILE} ]; then
+      ln -s ${INFILE} ${fn}
     fi
 
     fn=ecmwf
     rm -rf ${fn}
-    if [ -r $COMINecmwf.${ecmwfdate}/gempak/ecmwf_hr_${ecmwfdate}${ecmwfcyc}f${fcsthr} ]; then
-      ln -s $COMINecmwf.${ecmwfdate}/gempak/ecmwf_hr_${ecmwfdate}${ecmwfcyc}f${fcsthr} ${fn}
+    INFILE=${COMINecmwf}.${ecmwfdate}/gempak/ecmwf_hr_${ecmwfdate}${ecmwfcyc}f${fcsthr}
+    if [ -r ${INFILE} ]; then
+      ln -s ${INFILE} ${fn}
     fi
 
     fn=ukmet
     rm -rf ${fn}
-    if [ -r $COMINukmet.${PDY}/gempak/ukmet_hr_${PDY}${cyc}f${fcsthr} ]; then
-      ln -s $COMINukmet.${PDY}/gempak/ukmet_hr_${PDY}${cyc}f${fcsthr} ${fn}
+    INFILE=${COMINukmet}.${PDY}/gempak/ukmet_hr_${PDY}${cyc}f${fcsthr}
+    if [ -r ${INFILE} ]; then
+      ln -s ${INFILE} ${fn}
     fi
 
     export pgm=gdplot2_nc;. prep_step; startmsg
