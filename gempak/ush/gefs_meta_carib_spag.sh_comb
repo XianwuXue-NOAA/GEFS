@@ -78,12 +78,20 @@ for pres in 200 250 300; do
       for fn in $(echo $grids); do
         rm -rf $fn ${fn}_6
 
-        INFILE=${COMIN}/${COMPONENT}/gempak/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr}
+        if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+          INFILE=${COMIN}/${fn}/${COMPONENT}/products/gempak/gefs${sGrid}_${PDY}${cyc}f${fcsthr}
+        else
+          INFILE=${COMIN}/${COMPONENT}/gempak/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr}
+        fi
         if [ -r ${INFILE} ]; then
           ln -s ${INFILE} $fn
         fi
 
-        INFILE=${COMINs}/gefs.${PDY_6}/${cyc_6}/atmos/gempak/ge${fn}${sGrid}_${PDY_6}${cyc_6}f${fcsthr_6}
+        if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+          INFILE=${COMINs}/gefs.${PDY_6}/${cyc_6}/${fn}/atmos/products/gempak/gefs${sGrid}_${PDY_6}${cyc_6}f${fcsthr_6}
+        else
+          INFILE=${COMINs}/gefs.${PDY_6}/${cyc_6}/atmos/gempak/ge${fn}${sGrid}_${PDY_6}${cyc_6}f${fcsthr_6}
+        fi
         if [ -r ${INFILE} ]; then
           ln -s ${INFILE} ${fn}_6
         fi
@@ -91,14 +99,22 @@ for pres in 200 250 300; do
 
       fn=gefs_avg
       rm -rf ${fn}
-      INFILE=${COMIN}/${COMPONENT}/gempak/geavg${sGrid}_${PDY}${cyc}f${fcsthr}
+      if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+        INFILE=${COMIN}/avg/${COMPONENT}/products/gempak/gefs${sGrid}_${PDY}${cyc}f${fcsthr}
+      else
+        INFILE=${COMIN}/${COMPONENT}/gempak/geavg${sGrid}_${PDY}${cyc}f${fcsthr}
+      fi
       if [ -r ${INFILE} ]; then
         ln -s ${INFILE} ${fn}
       fi
 
       fn=gefs_avg_6
       rm -rf ${fn}
-      INFILE=${COMINs}/gefs.${PDY_6}/${cyc_6}/atmos/gempak/geavg${sGrid}_${PDY_6}${cyc_6}f${fcsthr_6}
+      if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+        INFILE=${COMINs}/gefs.${PDY_6}/${cyc_6}/avg/atmos/products/gempak/gefs${sGrid}_${PDY_6}${cyc_6}f${fcsthr_6}
+      else
+        INFILE=${COMINs}/gefs.${PDY_6}/${cyc_6}/atmos/gempak/geavg${sGrid}_${PDY_6}${cyc_6}f${fcsthr_6}
+      fi
       if [ -r ${INFILE} ]; then
         ln -s ${INFILE} ${fn}
       fi
@@ -425,9 +441,9 @@ if [[ $err != 0 ]]; then
 fi
 
 if [ $SENDCOM = "YES" ] ; then
-  mv ${metaname} ${COMOUT}/$COMPONENT/gempak/meta/$metaname
+  mv ${metaname} ${COMOUT}/${metaname}
   if [ $SENDDBN = "YES" ] ; then
-    $DBNROOT/bin/dbn_alert MODEL ${DBN_ALERT_TYPE} $job ${COMOUT}/$COMPONENT/gempak/meta/$metaname
+    $DBNROOT/bin/dbn_alert MODEL ${DBN_ALERT_TYPE} $job ${COMOUT}/${metaname}
   fi
 fi
 

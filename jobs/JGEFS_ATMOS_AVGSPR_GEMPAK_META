@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /usr/bin/env bash
 
 echo "$(date -u) begin $(basename $BASH_SOURCE)"
 
@@ -101,7 +101,7 @@ export err=$?
 if [[ $err == 0 ]]; then
   echo "$job completed normally!"
 else
-  echo "FATAL ERROR: $job failed!"
+  echo "FATAL ERROR in $(basename $BASH_SOURCE): $job failed!"
 fi
 #############################################################
 

@@ -22,7 +22,7 @@ fi
 echo "memberlist=$memberlist"
 
 # datatypes.tbl uses COMIN, so have to update it locally
-COMIN="$COMIN/$COMPONENT/gempak"
+COMINgefs=${COMIN}
 
 sGrid=${sGrid} #:-"_0p50"}
 
@@ -52,7 +52,11 @@ fcsthrs="036 048 060 072 084 096 108 120 132 144 156 168 180 192 204" # shorten 
 for fcsthr in ${fcsthrs}; do
   for fn in $(echo $memberlist); do
     rm -rf $fn
-    INFILE=${COMIN}/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr}
+    if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+      INFILE=${COMINgefs}/${fn}/${COMPONENT}/products/gempak/gefs${sGrid}_${PDY}${cyc}f${fcsthr}
+    else
+      INFILE=${COMINgefs}/${COMPONENT}/gempak/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr}
+    fi
     if [ -r ${INFILE} ]; then
       ln -s ${INFILE} $fn
     fi
@@ -144,9 +148,9 @@ if [[ $err != 0 ]]; then
 fi
 
 if [ $SENDCOM = "YES" ] ; then
-  mv ${metaname} ${COMOUT}/$COMPONENT/gempak/meta/ #$metaname
+  mv ${metaname} ${COMOUT}/
   if [ $SENDDBN = "YES" ] ; then
-    $DBNROOT/bin/dbn_alert MODEL ${DBN_ALERT_TYPE} $job ${COMOUT}/$COMPONENT/gempak/meta/$metaname
+    $DBNROOT/bin/dbn_alert MODEL ${DBN_ALERT_TYPE} $job ${COMOUT}/${metaname}
   fi
 fi
 
@@ -286,7 +290,19 @@ for area in us sam us12 us24; do
     fcmdfile=cmdfile_meta_samqpf
   fi
 
-  ln -s $COMIN/ge*${sGrid}_${PDY}${cyc}f* ./
+  if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+    for fn in $(echo $memberlist); do
+      for f in `ls ${COMINgefs}/${fn}/${COMPONENT}/products/gempak/gefs${sGrid}_${PDY}${cyc}f*`
+      do
+        echo ${f}
+        f_base=$(basename ${f})
+        f_base=${f_base/gefs/ge${fn}}
+        ln -s ${f} ./${f_base}
+      done
+    done
+  else
+    ln -s ${COMINgefs}/${COMPONENT}/gempak/ge*${sGrid}_${PDY}${cyc}f* ./
+  fi
   ln -s $COMINsgfs/gfs.${PDY}/${cyc}/gempak/gfs${sGrid}_${PDY}${cyc}f* ./
   #ln -s $COMINecmwf.${PDYm1}/gempak/ecmwf_hr_${PDYm1}${cycm12}f* ./
   #ln -s $COMINecmwf.${PDY}/gempak/ecmwf_hr_${PDY}${cycm12}f* ./
@@ -297,19 +313,16 @@ for area in us sam us12 us24; do
     #grid=$(echo $grid | tr [a-z] [A-Z])
     if [ ${grid} = "GFS" ]; then
       GDFILE="F-GFS | ${ddate}/${cyc}00"
-      COMINtmp=$COMIN
+#      COMINtmp=$COMIN
       # #export COMIN=$COMINsgfs/gfs.${PDY}/${cyc}/gempak
-      export COMIN=./
     elif [ ${grid} = "ECMWF" ]; then
       if [ $cyc = "12" ]; then
-        COMINtmp=$COMIN
+#        COMINtmp=$COMIN
         # #export COMIN=$COMINecmwf.${PDY}/gempak
-        export COMIN=./
         GDFILE="F-ECMWF | ${ddate}/${cycm12}00"
       else
-        COMINtmp=$COMIN
+#        COMINtmp=$COMIN
         # #export COMIN=$COMINecmwf.${PDYm1}/gempak
-        export COMIN=./
         GDFILE="F-ECMWF | ${ddatem1}/${cycm12}00"
       fi
       if [ ${area} = "us" ]; then
@@ -317,9 +330,9 @@ for area in us sam us12 us24; do
       fi
     else
       GDFILE="F-GEFS$grid | ${ddate}/${cyc}00"
-      COMINtmp=$COMIN
-      export COMIN=./
+#      COMINtmp=$COMIN
     fi
+    export COMIN=./
 
     cat > $fcmdfile  <<- EOF
 			DEVICE  = ${device}
@@ -367,7 +380,7 @@ for area in us sam us12 us24; do
       exit $err
     fi
 
-    export COMIN=$COMINtmp
+#    export COMIN=$COMINtmp
   done
 
   #####################################################
@@ -387,9 +400,9 @@ for area in us sam us12 us24; do
 
 
   if [ $SENDCOM = "YES" ] ; then
-    mv ${metaname} ${COMOUT}/$COMPONENT/gempak/meta/$metaname
+    mv ${metaname} ${COMOUT}/
     if [ $SENDDBN = "YES" ] ; then
-      $DBNROOT/bin/dbn_alert MODEL ${DBN_ALERT_TYPE} $job ${COMOUT}/$COMPONENT/gempak/meta/$metaname
+      $DBNROOT/bin/dbn_alert MODEL ${DBN_ALERT_TYPE} $job ${COMOUT}/${metaname}
     fi
   fi
 

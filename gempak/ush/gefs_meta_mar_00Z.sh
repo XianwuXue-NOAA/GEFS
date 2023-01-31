@@ -72,7 +72,11 @@ for metaarea in pac atl; do
       grids=${memberlist}
       for fn in $(echo $grids); do
         rm -rf $fn
-        INFILE=${COMIN}/${COMPONENT}/gempak/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr}
+        if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+          INFILE=${COMIN}/${fn}/${COMPONENT}/products/gempak/gefs${sGrid}_${PDY}${cyc}f${fcsthr}
+        else
+          INFILE=${COMIN}/${COMPONENT}/gempak/ge${fn}${sGrid}_${PDY}${cyc}f${fcsthr}
+        fi
         if [ -r ${INFILE} ]; then
           ln -s ${INFILE} $fn
         fi
@@ -454,9 +458,9 @@ for metaarea in pac atl; do
   fi
 
   if [ $SENDCOM = "YES" ] ; then
-    mv ${metaname} ${COMOUT}/$COMPONENT/gempak/meta/
+    mv ${metaname} ${COMOUT}/
     if [ $SENDDBN = "YES" ] ; then
-      $DBNROOT/bin/dbn_alert MODEL ${DBN_ALERT_TYPE} $job ${COMOUT}/$COMPONENT/gempak/meta/${metaname}
+      $DBNROOT/bin/dbn_alert MODEL ${DBN_ALERT_TYPE} $job ${COMOUT}/${metaname}
     fi
   fi
 done
