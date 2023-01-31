@@ -69,13 +69,6 @@ export USHgefs=${USHgefs:-$HOMEgefs/ush}
 export FIXgefs=${FIXgefs:-$HOMEgefs/fix/fix_gefs}
 export PARMgefs=${PARMgefs:-$HOMEgefs/parm}
 
-##############################################
-# Define COM directories
-##############################################
-ver=${ver:-$(echo ${gefs_ver}|cut -c1-5)}
-export COMIN=${COMIN:-$(compath.py $envir/com/$NET/${ver})/${RUN}.${PDY}/$cyc}
-export COMOUT=${COMOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDY}/$cyc}
-
 #############################
 # Source relevant config files
 #############################
@@ -94,7 +87,17 @@ if [[ $cplchm = ".true." ]]; then
   COMPONENT="chem"
 fi
 export COMPONENT=${COMPONENT:-atmos}
-mkdir -m 775 -p $COMOUT/${COMPONENT}/ensstat
+##############################################
+# Define COM directories
+##############################################
+ver=${ver:-$(echo ${gefs_ver}|cut -c1-5)}
+export COMIN=${COMIN:-$(compath.py $envir/com/$NET/${ver})/${RUN}.${PDY}/$cyc}
+if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+  export COMOUT=${COMOUT:-$(compath.py -o ${NET}/${ver})/${RUN}.${PDY}/${cyc}/avg/${COMPONENT}/products/ensstat}
+else
+  export COMOUT=${COMOUT:-$(compath.py -o ${NET}/${ver})/${RUN}.${PDY}/${cyc}/${COMPONENT}/ensstat}
+fi
+if [[ ! -d $COMOUT ]]; then mkdir -p -m 775 -p $COMOUT; fi
 
 echo "Environment before calling script"
 env | sort
