@@ -125,8 +125,13 @@ while [[ $fh -le $FHOUR ]]; do
   for res in lr; do
     if [[ $res = lr ]]; then
       EXT=
-      FXT=.2p50.
-      lr=2p5
+      if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+        FXT=2p50.grb2
+        lr=products/2p50
+      else
+        FXT=pgrb2.2p50.
+        lr=pgrb22p5
+      fi
       ext_h=$ext_h
       nenspost=$nenspostlr
       lfm=$lfmlr
@@ -175,9 +180,9 @@ while [[ $fh -le $FHOUR ]]; do
       for mem in $memberlist; do
         (( nmem = nmem + 1 ))
         if [[ ${NewCOM:-"YES"} == "YES" ]]; then
-          testfile=${COMIN}/${mem}/${COMPONENT}/products/pgrb2${lr}/gefs.${cycle}.pgrb2${FXT}f$fh${EXT}.idx
+          testfile=${COMIN}/${mem}/${COMPONENT}/${lr}/gefs.${cycle}.${FXT}f$fh${EXT}.idx
         else
-          testfile=${COMIN}/${COMPONENT}/pgrb2${lr}/ge${mem}.${cycle}.pgrb2${FXT}f$fh${EXT}.idx
+          testfile=${COMIN}/${COMPONENT}/${lr}/ge${mem}.${cycle}.${FXT}f$fh${EXT}.idx
         fi
         if [ -f $testfile ]; then
           echo testfile=$testfile found
@@ -285,9 +290,9 @@ while [[ $fh -le $FHOUR ]]; do
       #DHOU, 20141028, select required variables from pgrb2a files
       if [[ "$mem" != "gfs" || $fh -le $gfsfhmaxh || $(($fh % 12)) -eq 0 ]]; then
         if [[ ${NewCOM:-"YES"} == "YES" ]]; then
-          pgtem=${COMIN}/${mem}/${COMPONENT}/products/pgrb2$lr/gefs.${cycle}.pgrb2${FXT}f$fh$EXT
+          pgtem=${COMIN}/${mem}/${COMPONENT}/${lr}/gefs.${cycle}.${FXT}f$fh$EXT
         else
-          pgtem=${COMIN}/${COMPONENT}/pgrb2$lr/ge${mem}.${cycle}.pgrb2${FXT}f$fh$EXT
+          pgtem=${COMIN}/${COMPONENT}/${lr}/ge${mem}.${cycle}.${FXT}f$fh$EXT
         fi
         if [[ -s $pgtem ]]; then
           $WGRIB2 -s $pgtem | grep -F -f $parmlist | $WGRIB2 $pgtem -s -i -grib pgrb2a_$mem

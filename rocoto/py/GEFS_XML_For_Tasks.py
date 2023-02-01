@@ -1306,8 +1306,8 @@ def get_param_of_task(dicBase, taskname):
                         for i in range(npert):
                             sDep += '\n\t<datadep><cyclestr>&DATA_DIR;/gefs.@Y@m@d/@H/p{0:02}/atmos/misc/prd0p5/gefs.t@Hz.prdgen.control.f000</cyclestr></datadep>'.format(i + 1)
                         sDep += '\n\t<datadep><cyclestr>&DATA_DIR;/gefs.@Y@m@d/@H/c00/atmos/misc/prd0p5/gefs.t@Hz.prdgen.control.f000</cyclestr></datadep>'
-                        sDep += '\n\t<datadep><cyclestr>&DATA_DIR;/gefs.@Y@m@d/@H/avg/atmos/pgrb2ap5/gefs.t@Hz.pgrb2a.0p50.f000</cyclestr></datadep>'
-                        sDep += '\n\t<datadep><cyclestr>&DATA_DIR;/gefs.@Y@m@d/@H/spr/atmos/pgrb2ap5/gefs.t@Hz.pgrb2a.0p50.f000</cyclestr></datadep>'
+                        sDep += '\n\t<datadep><cyclestr>&DATA_DIR;/gefs.@Y@m@d/@H/avg/atmos/products/0p50a/gefs.t@Hz.0p50a.grb2f000</cyclestr></datadep>'
+                        sDep += '\n\t<datadep><cyclestr>&DATA_DIR;/gefs.@Y@m@d/@H/spr/atmos/products/0p50a/gefs.t@Hz.0p50a.grb2f000</cyclestr></datadep>'
                     else:
                         for i in range(npert):
                             sDep += '\n\t<datadep><cyclestr>&DATA_DIR;/gefs.@Y@m@d/@H/atmos/misc/prd0p5/gep{0:02}.t@Hz.prdgen.control.f000</cyclestr></datadep>'.format(i + 1)
