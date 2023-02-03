@@ -38,4 +38,4 @@ export wrf_io_ver=1.2.0
 # -- For ufs_utils
 export landsfcutil_ver=2.4.1
 export libjpeg_ver=9c
-export wgrib2_ver=2.0.7
+export wgrib2_ver=2.0.8
