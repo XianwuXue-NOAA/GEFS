@@ -192,7 +192,7 @@ if [[ ${NewCOM:-"YES"} == "YES" ]]; then
     ln -s ${f} ./${f_base}
   done
 else
-  ln -s $COMIN/geavg${sGrid}_${PDY}${cyc}f* ./
+  ln -s ${COMINavg}/geavg${sGrid}_${PDY}${cyc}f* ./
 fi
 
 for area in nam sam ak; do
