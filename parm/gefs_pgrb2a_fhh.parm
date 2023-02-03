@@ -39,6 +39,9 @@
 :SNOD:surface:
 :SOILW:0-0.1 m below ground:
 :TCDC:entire atmosphere:
+:HCDC:high cloud layer:
+:LCDC:low cloud layer:
+:MCDC:middle cloud layer:
 :TMAX:2 m above ground:
 :TMIN:2 m above ground:
 :TMP:10 mb:
