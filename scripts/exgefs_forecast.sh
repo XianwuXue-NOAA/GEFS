@@ -127,6 +127,38 @@ fi
 
 export ENS_NUM=1
 
+R2=$(echo $RUNMEM|cut -c4-5)
+case $RUNMEM in
+  (gec00 | geaer)
+    ens_pert_type='unpert_lo_res_ctrl_fcst'
+    e1=1
+    ;;
+  (gep[0-9][0-9])
+    ens_pert_type='pos_pert_fcst'
+    e1=3
+    ;;
+  (*)
+    echo "FATAL: Unrecognized RUNMEM $RUNMEM, unable to determine pert type"
+    export err=200
+    err_chk; exit $err
+    ;;
+esac # $RUNMEM
+export ens_pert_type
+# e1,e2,e3 are used to set the grib ensemble information
+export e1=$e1
+export e2=$R2
+export e3=$npert
+
+fn=$(basename ${FLTFILEGFS})
+sed < ${FLTFILEGFS} -e "s#negatively_pert_fcst#${ens_pert_type}#" > ${DATA}/${fn}
+export FLTFILEGFS=${DATA}/${fn}
+
+fn_f00=$(basename ${FLTFILEGFSF00})
+sed <${FLTFILEGFSF00} -e "s#negatively_pert_fcst#${ens_pert_type}#" > ${DATA}/${fn_f00}
+export FLTFILEGFSF00=${DATA}/${fn_f00}
+
+
+
 #
 # Forecast Input Variables
 #
