@@ -20,6 +20,8 @@ module load prod_envir/$prod_envir_ver
 module load cray-pals/$cray_pals_ver
 module load cray-mpich/$cray_mpich_ver
 module load gempak/$gempak_ver
+
+module load netcdf/$netcdf_ver
 #module load lsf/$lsf_ver
 module load cfp/$cfp_ver
 

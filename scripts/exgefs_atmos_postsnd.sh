@@ -57,13 +57,16 @@ export NZERO=6
 export INCREMENT=${INCREMENT:-12}
 export OUTFILE=meteomrf
 export MAKEBUFR=NO
-export MODEL_OUT_FORM=binarynemsiompiio
+export fformat=netcdf
+export atmfm="nc"
+export logfm="txt"
+#export MODEL_OUT_FORM=netcdfpara #binarynemsiompiio
 
 export mem=$(echo $RUNMEM|cut -c3-5)
 
 if [[ $SENDCOM == "YES" ]]; then
   mkdir -p $COMOUT/$COMPONENT
-  mkdir -p $COMOUT/$COMPONENT/wmo
+  #mkdir -p $COMOUT/$COMPONENT/wmo
   mkdir -p $COMOUT/$COMPONENT/gempak
 
   mkdir -m 775 -p $COMOUT/$COMPONENT/bufr/$mem
@@ -90,7 +93,7 @@ while [ $FSTART -lt $ENDHOUR ]; do
 
   ic=0
   while [ $ic -lt $SLEEP_LOOP_MAX ]; do
-    fcstchk=$COMIN/$COMPONENT/sfcsig/${RUNMEM}.${cycle}.logf$FEND.nemsio
+    fcstchk=$COMIN/$COMPONENT/sfcsig/${RUNMEM}.${cycle}.logf$FEND.${logfm}
     if [ ! -f $fcstchk ]; then
       ic=$(($ic + 1))
       sleep $SLEEP_INT

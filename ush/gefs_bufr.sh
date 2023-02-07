@@ -30,7 +30,7 @@ else
   f00flag=".false."
 fi
 
-export pgm=gfs_bufr
+export pgm=gfs_bufr.x
 #. prep_step
 
 if [ "$MAKEBUFR" = "YES" ]; then
@@ -39,13 +39,13 @@ else
   bufrflag=".false."
 fi
 
-if [ -s ${COMIN}/$COMPONENT/sfcsig/${RUNMEM}.${cycle}.sfcf000.nemsio ]; then
-  SFCF="sfc"
-  CLASS="class1fv3"
-else
-  SFCF="flx"
-  CLASS="class1"
-fi
+#if [ -s ${COMIN}/$COMPONENT/sfcsig/${RUNMEM}.${cycle}.sfcf000.${logfm} ]; then
+#  SFCF="sfc"
+CLASS="class1fv3"
+#else
+#  SFCF="flx"
+#  CLASS="class1"
+#fi
 
 if [[ $SENDCOM == "YES" ]]; then
   dird="$COMOUT/$COMPONENT/bufr/$mem/bufr"
@@ -55,11 +55,11 @@ fi
 
 cat <<- EOF > gfsparm
 	&NAMMET
-		iromb=0,maxwv=$JCAP,levs=$LEVS,makebufr=$bufrflag,
+		levs=$LEVS,makebufr=$bufrflag,
 		dird="$dird",
 		nstart=$FSTART,nend=$FEND,nint=$FINT,
 		nend1=$NEND1,nint1=$NINT1,nint3=$NINT3,
-		nsfc=80,f00=$f00flag,
+		nsfc=80,f00=$f00flag,fformat=${fformat},np1=0
 	/
 	EOF
 
@@ -79,7 +79,7 @@ while [ $hh -le $FEND ]; do
   # Make sure all files are available:
   ic=0
   while [ $ic -lt $SLEEP_LOOP_MAX ]; do
-    fcstchk=$COMIN/$COMPONENT/sfcsig/${RUNMEM}.${cycle}.logf${hh3}.nemsio
+    fcstchk=$COMIN/$COMPONENT/sfcsig/${RUNMEM}.${cycle}.logf${hh3}.${logfm}
     if [ ! -f $fcstchk ]; then
       sleep $SLEEP_INT
       ic=$(($ic + 1))
@@ -97,8 +97,8 @@ while [ $hh -le $FEND ]; do
     fi
   done
   #------------------------------------------------------------------
-  ln -sf $COMIN/$COMPONENT/sfcsig/${RUNMEM}.${cycle}.atmf${hh3}.nemsio sigf${hh}
-  ln -sf $COMIN/$COMPONENT/sfcsig/${RUNMEM}.${cycle}.${SFCF}f${hh3}.nemsio flxf${hh}
+  ln -sf $COMIN/$COMPONENT/sfcsig/${RUNMEM}.${cycle}.atmf${hh3}.nc sigf${hh}
+  ln -sf $COMIN/$COMPONENT/sfcsig/${RUNMEM}.${cycle}.sfcf${hh3}.nc flxf${hh}
 
   hh=$(printf %02i $((10#$hh + $FINT)))
 done
@@ -107,8 +107,9 @@ done
 # prep_step
 ln -sf $PARMbufrsnd/bufr_gfs_${CLASS}.tbl fort.1
 ln -sf ${STNLIST:-$PARMbufrsnd/bufr_stalist.meteo.gfs} fort.8
+ln -sf "${PARMbufrsnd}/bufr_ij13km.txt" fort.7
 
-$APRUN $EXECbufrsnd/gfs_bufr < gfsparm > out_gfs_bufr_$FEND
+$APRUN ${EXECbufrsnd}/gfs_bufr.x < gfsparm > out_gfs_bufr_${FEND}
 export err=$?
 
 if [[ $err != 0 ]]; then
