@@ -1,4 +1,4 @@
-#!/bin/ksh
+#! /usr/bin/env bash
 #########################################################################
 #                                           #
 # Script:  gefs_bfr2gpk form gfs_bfr2gpk.sh #
@@ -9,7 +9,7 @@
 # Log:                                      #
 # K. Brill/HPC      04/12/05                #
 #########################################################################  
-echo "$(date -u) begin ${.sh.file}"
+echo "$(date -u) begin ${BASH_SOURCE}"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
@@ -56,7 +56,7 @@ namsnd <<- EOF > /dev/null
 export err=$?
 if [[ $err != 0 ]]; then
   echo <<- EOF
-		FATAL ERROR in ${.sh.file}: namsnd failed with the following settings:
+		FATAL ERROR in ${BASH_SOURCE}: namsnd failed with the following settings:
 			SNBUFR   = bufr.combined
 			SNOUTF   = ${outfilbase}.snd
 			SFOUTF   = ${outfilbase}.sfc

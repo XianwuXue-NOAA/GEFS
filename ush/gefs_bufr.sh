@@ -1,4 +1,4 @@
-#!/bin/ksh
+#! /usr/bin/env bash
 #
 #  UTILITY SCRIPT NAME :  gefsbufr.sh from gfs_bufr.sh
 #               AUTHOR :  Hua-Lu Pan
@@ -15,8 +15,9 @@
 # 2018-03-22 Guang Ping Lou: Making it works for either 1 hourly or 3 hourly output
 # 2018-05-22 Guang Ping Lou: Making it work for both GFS and FV3GFS 
 # 2018-05-30  Guang Ping Lou: Make sure all files are available.
+# 2023-02-06  Xianwu Xue: Read in NetCDF files and Change ksh to bash
 
-echo "$(date -u) begin ${.sh.file}"
+echo "$(date -u) begin ${BASH_SOURCE}"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
@@ -39,13 +40,7 @@ else
   bufrflag=".false."
 fi
 
-#if [ -s ${COMIN}/$COMPONENT/sfcsig/${RUNMEM}.${cycle}.sfcf000.${logfm} ]; then
-#  SFCF="sfc"
 CLASS="class1fv3"
-#else
-#  SFCF="flx"
-#  CLASS="class1"
-#fi
 
 if [[ $SENDCOM == "YES" ]]; then
   dird="$COMOUT/$COMPONENT/bufr/$mem/bufr"
@@ -63,17 +58,11 @@ cat <<- EOF > gfsparm
 	/
 	EOF
 
-hh=$(printf %02i $FSTART)
-# hh=$FSTART
-# if [ $hh -lt 100 ]; then
-#     hh1=$(echo "${hh#"${hh%??}"}")
-#     hh=$hh1
-# fi
-
 SLEEP_LOOP_MAX=$(($SLEEP_TIME / $SLEEP_INT))
 
-while [ $hh -le $FEND ]; do
-  hh3=$(printf %03i $hh)
+for (( hr = 10#${FSTART}; hr <= 10#${FEND}; hr = hr + 10#${FINT} )); do
+  hh2=$(printf %02i "${hr}")
+  hh3=$(printf %03i $hr)
 
   #---------------------------------------------------------
   # Make sure all files are available:
@@ -87,9 +76,9 @@ while [ $hh -le $FEND ]; do
       break
     fi
 
-    if [ $ic -ge SLEEP_LOOP_MAX ]; then
+    if [ ${ic} -ge ${SLEEP_LOOP_MAX} ]; then
       echo <<- EOF
-				FATAL ERROR in ${.sh.file}: Unable to find forecast output $fcstchk at $(date -u) after waiting ${SLEEP_TIME}s!
+				FATAL ERROR in ${BASH_SOURCE}: Unable to find forecast output $fcstchk at $(date -u) after waiting ${SLEEP_TIME}s!
 				EOF
 			export err=6
       err_chk
@@ -97,10 +86,8 @@ while [ $hh -le $FEND ]; do
     fi
   done
   #------------------------------------------------------------------
-  ln -sf $COMIN/$COMPONENT/sfcsig/${RUNMEM}.${cycle}.atmf${hh3}.nc sigf${hh}
-  ln -sf $COMIN/$COMPONENT/sfcsig/${RUNMEM}.${cycle}.sfcf${hh3}.nc flxf${hh}
-
-  hh=$(printf %02i $((10#$hh + $FINT)))
+  ln -sf $COMIN/$COMPONENT/sfcsig/${RUNMEM}.${cycle}.atmf${hh3}.nc sigf${hh2}
+  ln -sf $COMIN/$COMPONENT/sfcsig/${RUNMEM}.${cycle}.sfcf${hh3}.nc flxf${hh2}
 done
 
 #  define input BUFR table file.
@@ -113,7 +100,7 @@ $APRUN ${EXECbufrsnd}/gfs_bufr.x < gfsparm > out_gfs_bufr_${FEND}
 export err=$?
 
 if [[ $err != 0 ]]; then
-  echo "FATAL ERROR in ${.sh.file}: gfs_bufr failed!"
+  echo "FATAL ERROR in ${BASH_SOURCE}: gfs_bufr failed!"
   err_chk
   exit $err
 fi

@@ -1,4 +1,4 @@
-#!/bin/ksh
+#! /usr/bin/env bash
 ################################################################
 # Script Name:      exgfs_postsnd.sh.sms
 # Script Description:   Generate GFS BUFR sounding files
@@ -16,9 +16,10 @@
 #                          both FV3GFS and GFS
 #   7) 2018-07-18       Guang Ping Lou Generalize this version to other platforms
 #   8) 2019-05-27       Bo Cui modify to generate GEFS BUFR sounding files
-#   9) 2019-06-05       Xianwu Xue reformatted it and add checked the errors        
+#   9) 2019-06-05       Xianwu Xue reformatted it and add checked the errors
+#  10) 2023-02-06       Xianwu Xue Read in NetCDF files and Change from ksh to bash 
 ################################################################
-echo "$(date -u) begin ${.sh.file}"
+echo "$(date -u) begin ${BASH_SOURCE}"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
@@ -103,7 +104,7 @@ while [ $FSTART -lt $ENDHOUR ]; do
 
     if [ $ic -ge $SLEEP_LOOP_MAX ]; then
       echo <<- EOF
-				FATAL ERROR in ${.sh.file}: Unable to find forecast output $fcstchk at $(date -u) after waiting ${SLEEP_TIME}s!
+				FATAL ERROR in ${BASH_SOURCE}: Unable to find forecast output $fcstchk at $(date -u) after waiting ${SLEEP_TIME}s!
 				EOF
 			export err=5
       err_chk
@@ -118,7 +119,7 @@ while [ $FSTART -lt $ENDHOUR ]; do
   $USHgefs/gefs_bufr.sh
   export err=$?
   if [[ $err != 0 ]]; then
-    echo "FATAL ERROR in ${.sh.file}: gefs_bufr failed for f$FSTART!"
+    echo "FATAL ERROR in ${BASH_SOURCE}: gefs_bufr failed for f$FSTART!"
     err_chk
     exit $err
   fi
@@ -169,12 +170,12 @@ $APRUN_MPMD
 export err=$?
 
 if [[ $err != 0 ]]; then
-  echo "FATAL ERROR in ${.sh.file}: One or more BUFR regions in $MP_CMDFILE failed!"
+  echo "FATAL ERROR in ${BASH_SOURCE}: One or more BUFR regions in $MP_CMDFILE failed!"
   exit $err
 fi
 #############################################################
 
-echo "$(date -u) end ${.sh.file}"
+echo "$(date -u) end ${BASH_SOURCE}"
 
 exit $err
 
