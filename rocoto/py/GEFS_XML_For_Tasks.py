@@ -832,6 +832,11 @@ def get_param_of_task(dicBase, taskname):
     sQueue = ""
     sPartition = ""
 
+    if "NEWCOM" in dicBase:
+        NewCOM = dicBase["NewCOM".upper()].upper()
+    else:
+        NewCOM = "NO"
+
     taskname_org = taskname
     if taskname.startswith("post_hr_"):
         taskname = "post_hr"
@@ -1051,11 +1056,15 @@ def get_param_of_task(dicBase, taskname):
             if taskname.lower() == "ensavg_netcdf":
                 npert = int(dicBase["NPERT"])
                 sDep = '<and>'
-                for i in range(npert):
-                    sDep += '\n\t<datadep><cyclestr>&DATA_DIR;/gefs.@Y@m@d/@H/p{0:02}/atmos/gefs.t@Hz.logf000.txt</cyclestr></datadep>'.format(i + 1)
-                    #sDep += '\n\t<datadep><cyclestr>&DATA_DIR;/gefs.@Y@m@d/@H/atmos/sfcsig/gep{0:02}.t@Hz.logf000.nemsio</cyclestr></datadep>'.format(i + 1)
-                sDep += '\n\t<datadep><cyclestr>&DATA_DIR;/gefs.@Y@m@d/@H/c00/atmos/gefs.t@Hz.logf000.txt</cyclestr></datadep>'
-                #sDep += '\n\t<datadep><cyclestr>&DATA_DIR;/gefs.@Y@m@d/@H/atmos/sfcsig/gec00.t@Hz.logf000.nemsio</cyclestr></datadep>'
+
+                if NewCOM == "YES":
+                    for i in range(npert):
+                        sDep += '\n\t<datadep><cyclestr>&DATA_DIR;/gefs.@Y@m@d/@H/p{0:02}/atmos/gefs.t@Hz.logf000.txt</cyclestr></datadep>'.format(i + 1)
+                    sDep += '\n\t<datadep><cyclestr>&DATA_DIR;/gefs.@Y@m@d/@H/c00/atmos/gefs.t@Hz.logf000.txt</cyclestr></datadep>'
+                else:
+                    for i in range(npert):
+                        sDep += '\n\t<datadep><cyclestr>&DATA_DIR;/gefs.@Y@m@d/@H/atmos/sfcsig/gep{0:02}.t@Hz.logf000.txt</cyclestr></datadep>'.format(i + 1)
+                    sDep += '\n\t<datadep><cyclestr>&DATA_DIR;/gefs.@Y@m@d/@H/atmos/sfcsig/gec00.t@Hz.logf000.txt</cyclestr></datadep>'
                 sDep += '\n</and>'
 
             # For ensstat_hr
@@ -1063,8 +1072,7 @@ def get_param_of_task(dicBase, taskname):
                 npert = int(dicBase["NPERT"])
                 sDep = '<and>'
 
-                NewCOM=True
-                if NewCOM:
+                if NewCOM == "YES":
                     for i in range(npert):
                         sDep += '\n\t<datadep><cyclestr>&DATA_DIR;/gefs.@Y@m@d/@H/p{0:02}/atmos/misc/prd0p5/gefs.t@Hz.prdgen.control.f000</cyclestr></datadep>'.format(i + 1)
                     sDep += '\n\t<datadep><cyclestr>&DATA_DIR;/gefs.@Y@m@d/@H/c00/atmos/misc/prd0p5/gefs.t@Hz.prdgen.control.f000</cyclestr></datadep>'
@@ -1083,8 +1091,7 @@ def get_param_of_task(dicBase, taskname):
 
                 iStartHourLF = ifhmaxh + iFHOUTLF
 
-                NewCOM=True
-                if NewCOM:
+                if NewCOM == "YES":
                     for i in range(npert):
                         sDep += '\n\t<datadep><cyclestr>&DATA_DIR;/gefs.@Y@m@d/@H/p{0:02}/atmos/misc/prd0p5/gefs.t@Hz.prdgen.control.f{1:03}</cyclestr></datadep>'.format(i + 1, iStartHourLF)
                     sDep += '\n\t<datadep><cyclestr>&DATA_DIR;/gefs.@Y@m@d/@H/c00/atmos/misc/prd0p5/gefs.t@Hz.prdgen.control.f{0:03}</cyclestr></datadep>'.format(iStartHourLF)
@@ -1301,8 +1308,7 @@ def get_param_of_task(dicBase, taskname):
 
                     npert = int(dicBase["NPERT"])
 
-                    NewCOM=True
-                    if NewCOM:
+                    if NewCOM == "YES":
                         for i in range(npert):
                             sDep += '\n\t<datadep><cyclestr>&DATA_DIR;/gefs.@Y@m@d/@H/p{0:02}/atmos/misc/prd0p5/gefs.t@Hz.prdgen.control.f000</cyclestr></datadep>'.format(i + 1)
                         sDep += '\n\t<datadep><cyclestr>&DATA_DIR;/gefs.@Y@m@d/@H/c00/atmos/misc/prd0p5/gefs.t@Hz.prdgen.control.f000</cyclestr></datadep>'
