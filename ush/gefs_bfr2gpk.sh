@@ -28,7 +28,11 @@ cd $DATA
 #  Set input directory name.
 
 if [[ $SENDCOM == "YES" ]]; then
-  export BPATH=$COMOUT/$COMPONENT/bufr/${mem}
+  if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+    export BPATH=$COMOUT/$COMPONENT/bufr/
+  else
+    export BPATH=$COMOUT/$COMPONENT/bufr/${mem}
+  fi
   OUTDIR=$COMOUT/$COMPONENT/gempak
 else
   export BPATH=$DATA/${mem}

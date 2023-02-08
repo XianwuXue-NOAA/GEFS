@@ -43,7 +43,11 @@ fi
 CLASS="class1fv3"
 
 if [[ $SENDCOM == "YES" ]]; then
-  dird="$COMOUT/$COMPONENT/bufr/$mem/bufr"
+  if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+    dird="$COMOUT/$COMPONENT/bufr"
+  else
+    dird="$COMOUT/$COMPONENT/bufr/$mem/bufr"
+  fi
 else
   dird="$DATA/$mem/bufr"
 fi
@@ -60,6 +64,12 @@ cat <<- EOF > gfsparm
 
 SLEEP_LOOP_MAX=$(($SLEEP_TIME / $SLEEP_INT))
 
+if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+  CDUMP=gefs
+else
+  CDUMP=${RUNMEM}
+fi
+
 for (( hr = 10#${FSTART}; hr <= 10#${FEND}; hr = hr + 10#${FINT} )); do
   hh2=$(printf %02i "${hr}")
   hh3=$(printf %03i $hr)
@@ -68,7 +78,7 @@ for (( hr = 10#${FSTART}; hr <= 10#${FEND}; hr = hr + 10#${FINT} )); do
   # Make sure all files are available:
   ic=0
   while [ $ic -lt $SLEEP_LOOP_MAX ]; do
-    fcstchk=$COMIN/$COMPONENT/sfcsig/${RUNMEM}.${cycle}.logf${hh3}.${logfm}
+    fcstchk=$COMIN/$COMPONENT/sfcsig/${CDUMP}.${cycle}.logf${hh3}.${logfm}
     if [ ! -f $fcstchk ]; then
       sleep $SLEEP_INT
       ic=$(($ic + 1))
@@ -86,8 +96,8 @@ for (( hr = 10#${FSTART}; hr <= 10#${FEND}; hr = hr + 10#${FINT} )); do
     fi
   done
   #------------------------------------------------------------------
-  ln -sf $COMIN/$COMPONENT/sfcsig/${RUNMEM}.${cycle}.atmf${hh3}.nc sigf${hh2}
-  ln -sf $COMIN/$COMPONENT/sfcsig/${RUNMEM}.${cycle}.sfcf${hh3}.nc flxf${hh2}
+  ln -sf $COMIN/$COMPONENT/sfcsig/${CDUMP}.${cycle}.atmf${hh3}.nc sigf${hh2}
+  ln -sf $COMIN/$COMPONENT/sfcsig/${CDUMP}.${cycle}.sfcf${hh3}.nc flxf${hh2}
 done
 
 #  define input BUFR table file.

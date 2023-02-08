@@ -67,10 +67,13 @@ export mem=$(echo $RUNMEM|cut -c3-5)
 
 if [[ $SENDCOM == "YES" ]]; then
   mkdir -p $COMOUT/$COMPONENT
-  #mkdir -p $COMOUT/$COMPONENT/wmo
   mkdir -p $COMOUT/$COMPONENT/gempak
 
-  mkdir -m 775 -p $COMOUT/$COMPONENT/bufr/$mem
+  if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+    mkdir -m 775 -p $COMOUT/$COMPONENT/bufr
+  else
+    mkdir -m 775 -p $COMOUT/$COMPONENT/bufr/$mem
+  fi
 fi # [[ $SENDCOM == "YES" ]]
 
 ### Loop for the hour and wait for the sigma and surface flux file:
@@ -130,9 +133,16 @@ done
 ##############################################################
 # Tar and gzip the individual bufr files and send them to /com
 ##############################################################
+
+tar_file=
 if [[ $SENDCOM == "YES" ]]; then
-  cd ${COMOUT}/$COMPONENT/bufr/${mem}
-  tar -cf - bufr.* | /usr/bin/gzip > ../${RUNMEM}.${cycle}.bufrsnd.tar.gz
+  if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+    cd ${COMOUT}/$COMPONENT/bufr
+    tar -cf - bufr.* | /usr/bin/gzip > ../gefs.${cycle}.bufrsnd.tar.gz
+  else
+    cd ${COMOUT}/$COMPONENT/bufr/${mem}
+    tar -cf - bufr.* | /usr/bin/gzip > ../${RUNMEM}.${cycle}.bufrsnd.tar.gz
+  fi
 fi
 cd $DATA
 
@@ -142,8 +152,14 @@ cd $DATA
 if [ "$SENDDBN" = 'YES' ]; then
   MODCOM=$(echo ${NET}_${COMPONENT} | tr '[a-z]' '[A-Z]')
   DBNTYP=${MODCOM}_BUFRSND_TAR
-  $DBNROOT/bin/dbn_alert MODEL ${DBNTYP} $job \
-  $COMOUT/$COMPONENT/bufr/${RUNMEM}.${cycle}.bufrsnd.tar.gz
+
+  if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+    $DBNROOT/bin/dbn_alert MODEL ${DBNTYP} $job \
+      $COMOUT/$COMPONENT/gefs.${cycle}.bufrsnd.tar.gz
+  else
+    $DBNROOT/bin/dbn_alert MODEL ${DBNTYP} $job \
+      $COMOUT/$COMPONENT/bufr/${RUNMEM}.${cycle}.bufrsnd.tar.gz
+  fi
 fi
 
 ########################################

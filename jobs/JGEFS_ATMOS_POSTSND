@@ -62,13 +62,6 @@ export HOMEgefs=${HOMEgefs:-${PACKAGEROOT}/gefs.${gefs_ver}}
 export PARMgefs=${PARMgefs:-$HOMEgefs/parm}
 export USHgefs=${USHgefs:-$HOMEgefs/ush}
 
-##############################################
-# Define COM directories
-##############################################
-ver=${ver:-$(echo ${gefs_ver}|cut -c1-5)}
-export COMIN=${COMIN:-$(compath.py $envir/com/$NET/${ver})/${RUN}.${PDY}/$cyc}
-export COMOUT=${COMOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDY}/$cyc}
-
 #############################
 # Source relevant config files
 #############################
@@ -83,8 +76,18 @@ for config in $configs; do
   fi
 done
 
+##############################################
+# Define COM directories
+##############################################
+ver=${ver:-$(echo ${gefs_ver}|cut -c1-5)}
+export COMIN=${COMIN:-$(compath.py $envir/com/$NET/${ver})/${RUN}.${PDY}/$cyc}
+export COMOUT=${COMOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDY}/$cyc}
+if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+  export mem=$(echo $RUNMEM|cut -c3-5)
+  export COMIN=${COMIN}/${mem}
+  export COMOUT=${COMOUT}/${mem}
+fi
 export COMPONENT=${COMPONENT:-atmos}
-
 export COMOUTwmo=${COMOUTwmo:-${COMOUT}/${COMPONENT}/wmo}
 
 echo "Environment before calling script"

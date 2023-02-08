@@ -34,7 +34,11 @@ else
 fi
 
 for stn in $(cat $file_list); do
-   cp ${COMIN}/$COMPONENT/bufr/$mem/bufr.$stn.$PDY$cyc ${DATA}/${m}/bufrin
+  if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+    cp ${COMIN}/$COMPONENT/bufr/bufr.$stn.$PDY$cyc ${DATA}/${m}/bufrin
+  else
+    cp ${COMIN}/$COMPONENT/bufr/$mem/bufr.$stn.$PDY$cyc ${DATA}/${m}/bufrin
+  fi
    export pgm=tocsbufr.x
    #. prep_step
    export FORT11=$DATA/${m}/bufrin
@@ -71,12 +75,21 @@ for stn in $(cat $file_list); do
 done
 
 if [ $SENDCOM = 'YES' ]; then 
-  cp $DATA/${m}/${RUNMEM}_collective$m.fil ${COMOUT}/$COMPONENT/bufr/$mem/.
+  if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+    cp $DATA/${m}/${RUNMEM}_collective$m.fil ${COMOUT}/$COMPONENT/bufr/
+  else
+    cp $DATA/${m}/${RUNMEM}_collective$m.fil ${COMOUT}/$COMPONENT/bufr/$mem/.
+  fi
   if [ $SENDDBN = 'YES' ] ; then
     MODCOM=$(echo ${NET}_${COMPONENT} | tr '[a-z]' '[A-Z]')
     DBNTYP=${MODCOM}_BUFRTAR_COL
-    $DBNROOT/bin/dbn_alert MODEL ${DBNTYP} $job \
-    ${COMOUT}/$COMPONENT/bufr/$mem/${RUNMEM}_collective$m.fil
+    if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+      $DBNROOT/bin/dbn_alert MODEL ${DBNTYP} $job \
+        ${COMOUT}/$COMPONENT/bufr/gefs_collective$m.fil
+    else
+      $DBNROOT/bin/dbn_alert MODEL ${DBNTYP} $job \
+        ${COMOUT}/$COMPONENT/bufr/$mem/${RUNMEM}_collective$m.fil
+    fi
   fi
 # No approval for adding header to SBN yet
 #	if [ $SENDDBN_NTC = 'YES' ] ; then
