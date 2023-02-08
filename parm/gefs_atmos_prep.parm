@@ -1,4 +1,4 @@
-#!/bin/ksh
+#! /usr/bin/env bash
 
 case $cyc in
   00) memshift=0;;

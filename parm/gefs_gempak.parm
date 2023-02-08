@@ -1,4 +1,4 @@
-#!/bin/ksh
+#! /usr/bin/env bash
 
 export fstart=${fstart:-0}
 export fend=${fhmaxh:-384}
