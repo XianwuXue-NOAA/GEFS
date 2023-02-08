@@ -1,4 +1,4 @@
-#!/bin/ksh
+#! /usr/bin/env bash
 #
 #  UTILITY SCRIPT NAME :  exgefs_wafs.sh.ecf
 #               AUTHOR :  Boi Vuong
@@ -16,12 +16,14 @@
 #              and adding WMO headers
 #   07/2022: Xianwu Xue
 #           Improve, optimize and rename exgefs_atmos_awips.sh
+#   02/2023: Xianwu Xue,
+#           Change ksh to bash and also use new/old COM
 #
 ########################################
 
 ### need pass the values of CYC, YMD, DATA, COMIN and COMOUT
 
-echo "$(date -u) begin ${.sh.file}"
+echo "$(date -u) begin ${BASH_SOURCE}"
 
 set -xa
 if [[ ${STRICT:-NO} == "YES" ]]; then
@@ -80,10 +82,10 @@ done
 #####################################################################
 # GOOD RUN
 set +x
-echo "*********JOB ${.sh.file} HAS COMPLETED NORMALLY******"
+echo "*********JOB ${BASH_SOURCE} HAS COMPLETED NORMALLY******"
 set -x
 #####################################################################
 
-echo "$(date -u) end ${.sh.file}"
+echo "$(date -u) end ${BASH_SOURCE}"
 exit 0
 

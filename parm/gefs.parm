@@ -1,4 +1,4 @@
-#!/bin/ksh -l
+#! /usr/bin/env bash
 
 ###################################################################
 # This parm file defines the control variables for the GEFS model
