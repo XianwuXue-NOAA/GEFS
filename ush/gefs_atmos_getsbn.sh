@@ -1,4 +1,4 @@
-#!/bin/ksh
+#! /usr/bin/env bash
 ######################################################################
 #  UTILITY SCRIPT NAME :  gefs_mmefs_awips.sh
 #         DATE WRITTEN :  08/30/2013
@@ -122,7 +122,7 @@ fi
 msg=" $var for $bhr to $ehr hours HAS COMPLETED NORMALLY!"
 echo "$msg"
 
-echo "$(date -u) end ${.sh.file}"
+echo "$(date -u) end ${BASH_SOURCE}"
 
 exit 0
 ############## END OF SCRIPT #######################
