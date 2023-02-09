@@ -29,11 +29,12 @@ cd $DATA
 
 if [[ $SENDCOM == "YES" ]]; then
   if [[ ${NewCOM:-"YES"} == "YES" ]]; then
-    export BPATH=$COMOUT/$COMPONENT/bufr/
+    export BPATH=$COMOUT/$COMPONENT/products/bufr/
+    OUTDIR=$COMOUT/$COMPONENT/products/gempak
   else
     export BPATH=$COMOUT/$COMPONENT/bufr/${mem}
+    OUTDIR=$COMOUT/$COMPONENT/gempak
   fi
-  OUTDIR=$COMOUT/$COMPONENT/gempak
 else
   export BPATH=$DATA/${mem}
   OUTDIR=$DATA/gempak

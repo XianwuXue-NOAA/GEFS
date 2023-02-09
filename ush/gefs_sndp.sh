@@ -35,14 +35,14 @@ fi
 
 for stn in $(cat $file_list); do
   if [[ ${NewCOM:-"YES"} == "YES" ]]; then
-    cp ${COMIN}/$COMPONENT/bufr/bufr.$stn.$PDY$cyc ${DATA}/${m}/bufrin
+    cp ${COMIN}/$COMPONENT/products/bufr/bufr.$stn.$PDY$cyc ${DATA}/${m}/bufrin
   else
     cp ${COMIN}/$COMPONENT/bufr/$mem/bufr.$stn.$PDY$cyc ${DATA}/${m}/bufrin
   fi
-   export pgm=tocsbufr.x
-   #. prep_step
-   export FORT11=$DATA/${m}/bufrin
-   export FORT51=./bufrout
+  export pgm=tocsbufr.x
+  #. prep_step
+  export FORT11=$DATA/${m}/bufrin
+  export FORT51=./bufrout
 
   $EXECbufrsnd/${pgm} <<- EOF
 		&INPUT
@@ -51,11 +51,11 @@ for stn in $(cat $file_list); do
 			SEPARATE=.TRUE.,
 			MAXFILESIZE=600000
 		/
-		EOF
+	EOF
 
-   export err=$?
-   if [ $err -ne 0 ]; then
-      echo <<- EOF
+  export err=$?
+  if [ $err -ne 0 ]; then
+    echo <<- EOF
 				FATAL ERROR in ${BASH_SOURCE}: $EXECbufrsnd/tocsbufr failed using the following namelist:
 					&INPUT
 						BULHED="$WMOHEAD",KWBX="$CCCC",
@@ -63,20 +63,24 @@ for stn in $(cat $file_list); do
 						SEPARATE=.TRUE.,
 						MAXFILESIZE=600000
 					/
-				EOF
+		EOF
 
-      err_chk
-      exit $err
-   fi
+    err_chk
+    exit $err
+  fi
 
-   cat $DATA/${m}/bufrout >> $DATA/${m}/${RUNMEM}_collective$m.fil
-   rm $DATA/${m}/bufrin
-   rm $DATA/${m}/bufrout
+  if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+    cat $DATA/${m}/bufrout >> $DATA/${m}/gefs_collective$m.fil 
+  else
+    cat $DATA/${m}/bufrout >> $DATA/${m}/${RUNMEM}_collective$m.fil
+  fi
+  rm $DATA/${m}/bufrin
+  rm $DATA/${m}/bufrout
 done
 
 if [ $SENDCOM = 'YES' ]; then 
   if [[ ${NewCOM:-"YES"} == "YES" ]]; then
-    cp $DATA/${m}/${RUNMEM}_collective$m.fil ${COMOUT}/$COMPONENT/bufr/
+    cp $DATA/${m}/gefs_collective$m.fil ${COMOUT}/$COMPONENT/products/bufr/
   else
     cp $DATA/${m}/${RUNMEM}_collective$m.fil ${COMOUT}/$COMPONENT/bufr/$mem/.
   fi
@@ -85,7 +89,7 @@ if [ $SENDCOM = 'YES' ]; then
     DBNTYP=${MODCOM}_BUFRTAR_COL
     if [[ ${NewCOM:-"YES"} == "YES" ]]; then
       $DBNROOT/bin/dbn_alert MODEL ${DBNTYP} $job \
-        ${COMOUT}/$COMPONENT/bufr/gefs_collective$m.fil
+        ${COMOUT}/$COMPONENT/products/bufr/gefs_collective$m.fil
     else
       $DBNROOT/bin/dbn_alert MODEL ${DBNTYP} $job \
         ${COMOUT}/$COMPONENT/bufr/$mem/${RUNMEM}_collective$m.fil

@@ -44,7 +44,7 @@ CLASS="class1fv3"
 
 if [[ $SENDCOM == "YES" ]]; then
   if [[ ${NewCOM:-"YES"} == "YES" ]]; then
-    dird="$COMOUT/$COMPONENT/bufr"
+    dird="$COMOUT/$COMPONENT/products/bufr/bufr"
   else
     dird="$COMOUT/$COMPONENT/bufr/$mem/bufr"
   fi
@@ -78,7 +78,11 @@ for (( hr = 10#${FSTART}; hr <= 10#${FEND}; hr = hr + 10#${FINT} )); do
   # Make sure all files are available:
   ic=0
   while [ $ic -lt $SLEEP_LOOP_MAX ]; do
-    fcstchk=$COMIN/$COMPONENT/sfcsig/${CDUMP}.${cycle}.logf${hh3}.${logfm}
+    if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+      fcstchk=$COMIN/$COMPONENT/${CDUMP}.${cycle}.logf${hh3}.${logfm}
+    else
+      fcstchk=$COMIN/$COMPONENT/sfcsig/${CDUMP}.${cycle}.logf${hh3}.${logfm}
+    fi
     if [ ! -f $fcstchk ]; then
       sleep $SLEEP_INT
       ic=$(($ic + 1))
@@ -96,8 +100,13 @@ for (( hr = 10#${FSTART}; hr <= 10#${FEND}; hr = hr + 10#${FINT} )); do
     fi
   done
   #------------------------------------------------------------------
-  ln -sf $COMIN/$COMPONENT/sfcsig/${CDUMP}.${cycle}.atmf${hh3}.nc sigf${hh2}
-  ln -sf $COMIN/$COMPONENT/sfcsig/${CDUMP}.${cycle}.sfcf${hh3}.nc flxf${hh2}
+  if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+    ln -sf $COMIN/$COMPONENT/${CDUMP}.${cycle}.atmf${hh3}.nc sigf${hh2}
+    ln -sf $COMIN/$COMPONENT/${CDUMP}.${cycle}.sfcf${hh3}.nc flxf${hh2}
+  else
+    ln -sf $COMIN/$COMPONENT/sfcsig/${CDUMP}.${cycle}.atmf${hh3}.nc sigf${hh2}
+    ln -sf $COMIN/$COMPONENT/sfcsig/${CDUMP}.${cycle}.sfcf${hh3}.nc flxf${hh2}
+  fi
 done
 
 #  define input BUFR table file.

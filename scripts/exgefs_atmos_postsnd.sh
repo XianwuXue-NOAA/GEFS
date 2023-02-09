@@ -35,7 +35,7 @@ cd $DATA
 export FHOUT=$FHOUTLF
 
 export JCAP=${JCAP:-766}
-export LEVS=${LEVS:-64}
+export LEVS=${LEVS:-${LEVSHR:-64}}
 export LATB=${LATB:-768}
 export LONB=${LONB:-1536}
 export NEND1=${NEND1:-180} #$FHMAXHF ##first period length with time interval = NINT1
@@ -67,11 +67,12 @@ export mem=$(echo $RUNMEM|cut -c3-5)
 
 if [[ $SENDCOM == "YES" ]]; then
   mkdir -p $COMOUT/$COMPONENT
-  mkdir -p $COMOUT/$COMPONENT/gempak
 
   if [[ ${NewCOM:-"YES"} == "YES" ]]; then
-    mkdir -m 775 -p $COMOUT/$COMPONENT/bufr
+    mkdir -p $COMOUT/$COMPONENT/products/gempak
+    mkdir -m 775 -p $COMOUT/$COMPONENT/products/bufr
   else
+    mkdir -p $COMOUT/$COMPONENT/gempak
     mkdir -m 775 -p $COMOUT/$COMPONENT/bufr/$mem
   fi
 fi # [[ $SENDCOM == "YES" ]]
@@ -97,7 +98,11 @@ while [ $FSTART -lt $ENDHOUR ]; do
 
   ic=0
   while [ $ic -lt $SLEEP_LOOP_MAX ]; do
-    fcstchk=$COMIN/$COMPONENT/sfcsig/${RUNMEM}.${cycle}.logf$FEND.${logfm}
+    if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+      fcstchk=$COMIN/$COMPONENT/gefs.${cycle}.logf$FEND.${logfm}
+    else
+      fcstchk=$COMIN/$COMPONENT/sfcsig/${RUNMEM}.${cycle}.logf$FEND.${logfm}
+    fi
     if [ ! -f $fcstchk ]; then
       ic=$(($ic + 1))
       sleep $SLEEP_INT
@@ -137,7 +142,7 @@ done
 tar_file=
 if [[ $SENDCOM == "YES" ]]; then
   if [[ ${NewCOM:-"YES"} == "YES" ]]; then
-    cd ${COMOUT}/$COMPONENT/bufr
+    cd ${COMOUT}/$COMPONENT/products/bufr
     tar -cf - bufr.* | /usr/bin/gzip > ../gefs.${cycle}.bufrsnd.tar.gz
   else
     cd ${COMOUT}/$COMPONENT/bufr/${mem}
@@ -155,7 +160,7 @@ if [ "$SENDDBN" = 'YES' ]; then
 
   if [[ ${NewCOM:-"YES"} == "YES" ]]; then
     $DBNROOT/bin/dbn_alert MODEL ${DBNTYP} $job \
-      $COMOUT/$COMPONENT/gefs.${cycle}.bufrsnd.tar.gz
+      $COMOUT/$COMPONENT/products/gefs.${cycle}.bufrsnd.tar.gz
   else
     $DBNROOT/bin/dbn_alert MODEL ${DBNTYP} $job \
       $COMOUT/$COMPONENT/bufr/${RUNMEM}.${cycle}.bufrsnd.tar.gz
