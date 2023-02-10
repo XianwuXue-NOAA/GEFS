@@ -80,10 +80,11 @@ if [[ ${NewCOM:-"YES"} == "YES" ]]; then
   export mem_ens="avg"
   export COMIN=${COMIN}/${mem_ens}/${COMPONENT}
   export COMOUT=${COMOUT}/${mem_ens}
+  export COMOUTwmo=${COMOUTwmo:-${COMOUT}/${COMPONENT}/products/wmo}
 else
   export COMIN=${COMIN}/${COMPONENT}
+  export COMOUTwmo=${COMOUTwmo:-${COMOUT}/${COMPONENT}/wmo}
 fi
-export COMOUTwmo=${COMOUTwmo:-${COMOUT}/${COMPONENT}/wmo}
 
 #############################
 # Source relevant config files
