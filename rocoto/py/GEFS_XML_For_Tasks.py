@@ -54,9 +54,10 @@ def config_tasknames(dicBase):
             dicBase[sTaskName.upper()] = "atmos_prep"
 
             # ---init_recenter
-            iTaskName_Num += 1
-            sTaskName = "taskname_{0}".format(iTaskName_Num)
-            dicBase[sTaskName.upper()] = "init_recenter"
+            # Since maybe there is no need to use init_recenter, so comment these lines
+            # iTaskName_Num += 1
+            # sTaskName = "taskname_{0}".format(iTaskName_Num)
+            # dicBase[sTaskName.upper()] = "init_recenter"
 
         elif dicBase['RUN_INIT'] == "FV3_WARM":
             # ---init_recenter
@@ -90,7 +91,7 @@ def config_tasknames(dicBase):
             dicBase[sTaskName.upper()] = "forecast_hr"
 
             # ---post_hr
-            iTaskName_Num = Add_Subjobs_to_dicBase(dicBase, iTaskName_Num, taskname="post_hr", sNSubJobs='N_SUBJOBS_POST_HR')
+            # iTaskName_Num = Add_Subjobs_to_dicBase(dicBase, iTaskName_Num, taskname="post_hr", sNSubJobs='N_SUBJOBS_POST_HR')
 
             # ---prdgen_hr
             iTaskName_Num += 1
