@@ -45,7 +45,7 @@ if [[ $RocotoGen == 0 ]]; then
     if [[ $CASEHR == "C48" ]]; then
       export COMPATH=${WORKDIR}/$envir/com/${NET}:/lfs/h2/emc/ens/noscrub/xianwu.xue/GEFS_v13/z_DATA/lfs_C96_C48_NOIAU_anal/h1/ops/prod/com/gfs
     elif [[ $CASEHR == "C384" ]]; then
-      export COMPATH=${WORKDIR}/$envir/com/${NET}:/lfs/h2/emc/ens/noscrub/xianwu.xue/GEFS_v13/z_DATA/lfs_C768_C384_NOIAU_anal/h1/ops/prod/com/gfs
+      export COMPATH=${WORKDIR}/$envir/com/${NET}:/lfs/h2/emc/ens/noscrub/xianwu.xue/GEFS_v13/z_DATA/lfs_C768_C384_NOIAU_anal_20230214/h1/ops/prod/com/gfs
     else
       echo "Wrong CASEHR .."
       exit -1
