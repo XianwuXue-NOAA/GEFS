@@ -140,9 +140,9 @@ def config_tasknames(dicBase):
             dicBase[sTaskName.upper()] = "forecast_lr"
 
             # ---post_lr
-            iTaskName_Num += 1
-            sTaskName = "taskname_{0}".format(iTaskName_Num)
-            dicBase[sTaskName.upper()] = "post_lr"
+            #iTaskName_Num += 1
+            #sTaskName = "taskname_{0}".format(iTaskName_Num)
+            #dicBase[sTaskName.upper()] = "post_lr"
 
             # ---prdgen_lr
             iTaskName_Num += 1
