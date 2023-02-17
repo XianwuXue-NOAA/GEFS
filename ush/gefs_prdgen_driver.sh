@@ -257,8 +257,8 @@ for hour in $hours; do
   else
     if [[ ${NewCOM} == "YES" ]]; then
       export mafile=${COMIN}/$COMPONENT/${CDUMP}.$cycle.master.grb2f$fhr
-      export mifile=${COMIN}/$COMPONENT/${CDUMP}.$cycle.master.grb2if$fhr #${mafile}
-      export mcfile=${COMIN}/$COMPONENT/misc/post/${CDUMP}.$cycle.master.control.f$fhr #${mafile}
+      export mifile=${COMIN}/$COMPONENT/${CDUMP}.$cycle.master.grb2if$fhr
+      export mcfile=${COMIN}/$COMPONENT/${CDUMP}.$cycle.logf${fhr}.txt
     else
       export mafile=${COMIN}/$COMPONENT/sfcsig/${CDUMP}.$cycle.master.grb2f$fhr
       export mifile=${COMIN}/$COMPONENT/sfcsig/${CDUMP}.$cycle.master.grb2if$fhr #${mafile}
@@ -310,15 +310,17 @@ for hour in $hours; do
     else # [[ $RUNMEM = "gegfs" ]]
       # Check if control file has been created, to make sure file is complete before using
       testfhr=-1
-      if [[ -f $mcfile ]]; then
+      if [[ -f ${mafile} ]]; then
+        if [[ ! -f ${mifile} ]]; then
+          ${GRB2INDEX} "${mafile}" "${mifile}"
+        fi
         teststring=$(cat $mcfile|head -1)
         if [[ $teststring != '' ]]; then
           if [[ -f $mifile ]]; then
-            testfhr=$(echo $teststring | cut -c11-13)
+            testfhr=$(echo $teststring | cut -d" " -f 4 | cut -d"." -f 1)
           fi
         fi # [[ $teststring != '' ]]
-      fi # [[ -f $mcfile ]]
-      #testfhr=999
+      fi # [[ -f $mafile ]]
       echo "testfhr=$testfhr fhr=$fhr"
 
       if (( testfhr >= fhr )); then
