@@ -349,51 +349,6 @@ if [[ $err != 0 ]]; then
   exit $err
 fi
 
-if [[ $SENDCOM == "YES" && $WRITE_DOPOST == ".true." ]]; then
-  if [[ ${NewCOM} == "YES" ]]; then
-    mkdir -m 775 -p ${memdir}/misc/post
-  else
-    mkdir -m 775 -p ${memdir}/../misc/post
-  fi
-
-  # Convert output settings into an explicit list
-  OUTPUT_FH=""
-  FHMIN_LF=$FHMIN
-  if (( FHOUT_HF > 0 && FHMAX_HF > 0 )); then
-    for (( fh = FHMIN; fh < FHMAX_HF; fh = fh + FHOUT_HF )); do
-      OUTPUT_FH="$OUTPUT_FH $fh"
-    done
-    FHMIN_LF=$FHMAX_HF
-  fi
-  for (( fh = FHMIN_LF; fh <= FHMAX; fh = fh + FHOUT )); do
-    OUTPUT_FH="$OUTPUT_FH $fh"
-  done
-
-  for fhr in $OUTPUT_FH; do
-    FH3=$(printf %03i $fhr)
-
-    mafile=${memdir}/${CDUMP}.$cycle.master.grb2f${FH3}
-    mifile=${memdir}/${CDUMP}.$cycle.master.grb2if${FH3}
-    if [[ ${NewCOM} == "YES" ]]; then
-      mcfile=${memdir}/misc/post/${CDUMP}.$cycle.master.control.f${FH3}
-    else
-      mcfile=${memdir}/../misc/post/${CDUMP}.$cycle.master.control.f${FH3}
-    fi
-
-    if [[ ! -s $mcfile ]]; then
-      if [[ -s $mafile ]]; then
-        ${GRB2INDEX} "${mafile}" "${mifile}"
-        export err=$?
-        if [[ $err != 0 ]]; then
-          echo "FATAL ERROR in ${BASH_SOURCE}: received a non-zero return code from generating master index files!"
-          exit $err
-        fi
-        echo "${PDY}${cyc}${FH3}" > $mcfile
-      fi
-    fi
-  done
-fi
-
 echo "$(date -u) end ${BASH_SOURCE}"
 
 exit $err
