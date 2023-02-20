@@ -310,7 +310,7 @@ for hour in $hours; do
     else # [[ $RUNMEM = "gegfs" ]]
       # Check if control file has been created, to make sure file is complete before using
       testfhr=-1
-      if [[ -f ${mafile} ]]; then
+      if [[ -f ${mafile} ]] && [[ -f ${mcfile} ]]; then
         if [[ ! -f ${mifile} ]]; then
           ${GRB2INDEX} "${mafile}" "${mifile}"
         fi
