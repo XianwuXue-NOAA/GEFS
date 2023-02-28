@@ -48,7 +48,7 @@ else
     fi
 
     memchar="mem"$(printf %03i $cmem)
-    export ATM_FILES_INPUT="gfs.t${cyc}z.ratmanl.nc"
+    export ATM_FILES_INPUT="enkfgfs.t${cyc}z.ratmanl.nc"
     ATMFILE="${COMINenkfgfs}/$memchar/atmos/${ATM_FILES_INPUT}"  #gfs.t${cycp}z.atmanl.nc"
 
     if [[ -f $ATMFILE ]]; then
