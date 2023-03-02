@@ -148,6 +148,11 @@ if [[ -d global-workflow.fd ]] ; then
                 ush/nems_configure.sh \
                 ush/parsing_model_configure_FV3.sh \
                 ush/parsing_model_configure_DATM.sh \
+                ush/parsing_namelists_FV3.sh \
+                ush/parsing_namelists_DATM.sh \
+                ush/parsing_namelists_WW3.sh \
+                ush/parsing_namelists_MOM6.sh \
+                ush/parsing_namelists_CICE.sh \
                 sorc/ufs_model.fd
   do
     if [[ -e ../$sFile ]]; then

@@ -43,7 +43,7 @@ export HOMEpost=${HOMEpost:-$HOMEgfs}
 if [[ ! -d $SOURCEDIR/sorc/global-workflow.fd ]] ; then
   export EXECwave=${HOMEgefs}/exec
 
-  export FCSTEXECDIR=${FCSTEXECDIR:-$HOMEgfs/sorc/fv3gfs.fd/NEMS/exe}
+  #export FCSTEXECDIR=${FCSTEXECDIR:-$HOMEgfs/sorc/fv3gfs.fd/NEMS/exe}
   export HOMEchem=${HOMEchem:-$HOMEgfs/sorc/gsd_prep_chem.fd/workflow/emc-global}
 fi
 
