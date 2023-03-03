@@ -7,20 +7,19 @@ cwd=`pwd`
 progname=gefs_anom2_fcst
 
 if [ -f ../rocoto/dev/versions/build_$target.ver ]; then
-    source ../rocoto/dev/versions/build_$target.ver
+  source ../rocoto/dev/versions/build_$target.ver
 else
-    if [ -f ../versions/build.ver ]; then
-        source ../versions/build.ver
-    fi
+  if [ -f ../versions/build.ver ]; then
+    source ../versions/build.ver
+  fi
 fi
 
 module use ${cwd}/../modulefiles/gefs
 module load ${progname}.${target}
 
-
 # Check final exec folder exists
 if [ ! -d "../exec" ]; then
-    mkdir ../exec
+  mkdir ../exec
 fi
 
 #
