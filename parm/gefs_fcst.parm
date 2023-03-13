@@ -25,7 +25,7 @@ else
 fi
 
 # Source model specific information that is resolution dependent
-source $HOMEgefs/parm/gefs_fv3.parm
+source $HOMEgefs/parm/gefs_ufs.parm
 
 echo "BEGIN: config.fcst"
 # Turn off waves if not used for this CDUMP
