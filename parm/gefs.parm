@@ -169,10 +169,10 @@ case "${APP}" in
       export DO_WAVE="YES"
       export WAVE_CDUMP="both"
       export cplwav2atm=".true."
-      export confignamevarfornems="${confignamevarfornems}_wave"
+      export confignamevarfornems="${confignamevarfornems}_outerwave"
     fi
 
-    #source $EXPDIR/config.defaults.s2sw
+    source $EXPDIR/config.defaults.s2sw
 
     ;;
   *)
@@ -196,14 +196,14 @@ fi
 
 # turned on nsst in anal and/or fcst steps, and turn off rtgsst
 export DONST="YES"
-if [ $DONST = "YES" ]; then export FNTSFA="        "; fi
+if [[ ${DONST} = "YES" ]]; then export FNTSFA="        "; fi
 
 # The switch to apply SST elevation correction or not
 export nst_anl=.true.
 #-----
 
 # Microphysics Options: 99-ZhaoCarr, 8-Thompson; 6-WSM6, 10-MG, 11-GFDL
-export imp_physics=${imp_physics:-"11"}
+export imp_physics=${imp_physics:-"8"}
 
 ########################################
 # This section defines the output flags for ncep_post + prdgen

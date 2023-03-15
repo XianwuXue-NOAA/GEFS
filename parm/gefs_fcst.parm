@@ -8,6 +8,12 @@ export HOMEgfs=${HOMEgfs:-$HOMEgefs}
 export RERUN=${RERUN:-"NO"}
 export CDATE_RST=${CDATE_RST:-""}
 
+if [[ ${FORECAST_SEGMENT} == "hr" ]]; then
+  export LEVS=$((LEVSHR + 1))
+else
+  export LEVS=$((LEVSLR + 1))
+fi
+
 case "$case_in" in
   "C48") export OCNRES=500;;
   "C96") export OCNRES=100;;
@@ -17,22 +23,30 @@ case "$case_in" in
   *) export OCNRES=025;;
 esac
 export ICERES=$OCNRES
+export waveGRD='gnh_10m aoc_9km gsh_15m'
 
-if [[ ${FORECAST_SEGMENT} == "hr" ]]; then
-  export LEVS=$((LEVSHR + 1))
-else
-  export LEVS=$((LEVSLR + 1))
+CASE=$CASEHR
+if [[ $FORECAST_SEGMENT == "lr" ]]; then
+  CASE=$CASELR
 fi
 
-# Source model specific information that is resolution dependent
-source $HOMEgefs/parm/gefs_ufs.parm
+########## config.fcst ##########
+# Forecast specific
 
-echo "BEGIN: config.fcst"
+echo "BEGIN: gefs_fcst.parm"
+
 # Turn off waves if not used for this CDUMP
-#case $WAVE_CDUMP in
-#  both | $CDUMP ) ;; # Don't change
-#  *) DO_WAVE="NO" ;; # Turn waves off
-#esac
+case $WAVE_CDUMP in
+  both | ${CDUMP/enkf} ) ;; # Don't change
+  *) DO_WAVE="NO" ;; # Turn waves off
+esac
+
+# Source model specific information that is resolution dependent
+string="--fv3 $CASE"
+[[ ${DO_OCN} == "YES" ]] && string="$string --mom6 $OCNRES"
+[[ ${DO_ICE} == "YES" ]] && string="$string --cice6 $ICERES"
+[[ ${DO_WAVE} == "YES" ]] && string="$string --ww3 ${waveGRD// /;}"
+source $HOMEgefs/parm/gefs_ufs.parm ${string}
 
 # Source component configs if necessary
 for component in WAVE OCN ICE AERO; do
@@ -74,6 +88,7 @@ export NETCDF_IN=".true."
 source $HOMEgefs/parm/gefs_fcst_resources.parm
 export domains_stack_size="16000000"
 
+
 if [[ "$DONST" = "YES" ]]; then
   source $HOMEgefs/parm/gefs_nsst.parm
 fi
@@ -101,13 +116,12 @@ export esmf_logkind="ESMF_LOGKIND_MULTI_ON_ERROR" #Options: ESMF_LOGKIND_MULTI_O
 
 #######################################################################
 # COUPLING COMPONENTS
-export OCN_model="mom6"
-export ICE_model="cice6"
-export WAV_model="ww3"
-export CHM_model="gocart"
+#export OCN_model="mom6"
+#export ICE_model="cice6"
+#export WAV_model="ww3"
+#export CHM_model="gocart"
 
 # cpl defaults
-
 export cpl=".false."
 export cplflx=".false."
 export cplice=".false."
@@ -134,16 +148,10 @@ if [[ "$DO_WAVE" = "YES" ]]; then
 fi
 
 #######################################################################
-# COUPLING COMPONENTS
-export use_coldstart=".false."
-
-
-#######################################################################
 
 # add two tiered SST options
 export sst2tier=${sst2tier:-NO}
 
-export FCSTEXEC=${FCSTEXEC:-ufs_model.x}
 export APRUN=${APRUN:-""}
 
 # OTHER FV# FCST related environment
@@ -151,6 +159,10 @@ export warm_start=${warm_start:-".false."}
 export read_increment=${read_increment:-".false."}
 REMAP_GRID=none     # temporay setting, to void the latlon default
 export REMAP_GRID=${REMAP_GRID:-latlon}
+
+#######################################################################
+
+export FCSTEXEC=${FCSTEXEC:-ufs_model.x}
 
 #######################################################################
 # Model configuration
@@ -169,42 +181,46 @@ export gwd_opt=2
 # do_ugwp=T: use unified CGWD and OGWD, and turbulent orographic form drag (TOFD)
 # do_ugwp=F: use unified CGWD but old OGWD, TOFD is not uded.
 if [[ "$gwd_opt" -eq 1 ]]; then
-  export knob_ugwp_version=0
-  export do_ugwp=".false."
-  export do_tofd=".false."
-  export launch_level=$(echo "$LEVS/2.35" |bc)
+    export knob_ugwp_version=0
+    export do_ugwp=".false."
+    export do_tofd=".false."
+    export launch_level=$(echo "$LEVS/2.35" |bc)
 fi
+
 
 # -- uGWD.v1, for suite FV3_GFS_v17 and FV3_GFS_v17p8b etc
 if [[ "$gwd_opt" -eq 2 ]]; then
 
-  #--used for UFS p7 and p8a
-  #export  knob_ugwp_version=1
-  #export  do_ugwp=".false."
-  #export  do_tofd=".false."
-  #export  do_ugwp_v0=".false."
-  #export  do_ugwp_v1=".true."
-  #export  do_ugwp_v0_orog_only=".false."
-  #export  do_ugwp_v0_nst_only=".false."
-  #export  do_gsl_drag_ls_bl=".true."
-  #export  do_gsl_drag_ss=".true."
-  #export  do_gsl_drag_tofd=".true."
-  #export  do_ugwp_v1_orog_only=".false."
+    #--used for UFS p7 and p8a
+    #export  knob_ugwp_version=1
+    #export  do_ugwp=".false."
+    #export  do_tofd=".false."
+    #export  do_ugwp_v0=".false."
+    #export  do_ugwp_v1=".true."
+    #export  do_ugwp_v0_orog_only=".false."
+    #export  do_ugwp_v0_nst_only=".false."
+    #export  do_gsl_drag_ls_bl=".true."
+    #export  do_gsl_drag_ss=".true."
+    #export  do_gsl_drag_tofd=".true."
+    #export  do_ugwp_v1_orog_only=".false."
 
-  #--used for UFS p8
-  export knob_ugwp_version=0
-  export do_ugwp=".false."
-  export do_tofd=".false."
-  export do_ugwp_v0=".true."
-  export do_ugwp_v1=".false."
-  export do_ugwp_v0_orog_only=".false."
-  export do_ugwp_v0_nst_only=".false."
-  export do_gsl_drag_ls_bl=".false."
-  export do_gsl_drag_ss=".true."
-  export do_gsl_drag_tofd=".false."
-  export do_ugwp_v1_orog_only=".false."
-  export launch_level=$(echo "$LEVS/2.35" |bc)
+    #--used for UFS p8
+    export knob_ugwp_version=0
+    export do_ugwp=".false."
+    export do_tofd=".false."
+    export do_ugwp_v0=".true."
+    export do_ugwp_v1=".false."
+    export do_ugwp_v0_orog_only=".false."
+    export do_ugwp_v0_nst_only=".false."
+    export do_gsl_drag_ls_bl=".false."
+    export do_gsl_drag_ss=".true."
+    export do_gsl_drag_tofd=".false."
+    export do_ugwp_v1_orog_only=".false."
+    export launch_level=$(echo "$LEVS/2.35" |bc)
 fi
+
+
+
 
 # Sponge layer settings
 export tau=10.0
@@ -220,6 +236,11 @@ export satmedmf=".true."
 export isatmedmf=1
 tbf=""
 if [[ "$satmedmf" = ".true." ]]; then tbf="_satmedmf" ; fi
+
+#Convection schemes
+export progsigma=".true."
+tbp=""
+if [ "$progsigma" = ".true." ]; then tbp="_progsigma" ; fi
 
 # Radiation options
 export IAER=1011    ; #spectral band mapping method for aerosol optical properties
@@ -333,42 +354,39 @@ export FHCYC=${FHCYC:-24}
 
 #-----------------------For GEFS ----------/\/\-------------
 
-export cnvcld=".true."
-
 # imp_physics is set in gefs.parm because it is needed in other jobs
 if [[ "$imp_physics" -eq 99 ]]; then # ZhaoCarr
-  export ncld=1
-  export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/field_table_zhaocarr${tbf}"
-  export nwat=2
+    export ncld=1
+    export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/field_table_zhaocarr${tbf}${tbp}"
+    export nwat=2
 
 elif [[ "$imp_physics" -eq 6 ]]; then # WSM6
-  export ncld=2
-  export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/field_table_wsm6${tbf}"
-  export nwat=6
+    export ncld=2
+    export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/field_table_wsm6${tbf}${tbp}"
+    export nwat=6
 
 elif [[ "$imp_physics" -eq 8 ]]; then # Thompson
-  export ncld=2
-  export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/field_table_thompson_noaero_tke"
-  export nwat=6
+    export ncld=2
+    export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/field_table_thompson_noaero_tke${tbp}"
+    export nwat=6
 
-  export cal_pre=".false."
-  export random_clds=".false."
-  export effr_in=".true."
-  export ltaerosol=".false."
-  export lradar=".false."
-  export ttendlim="-999"
-  export dt_inner=$((DELTIM/2))
-  export sedi_semi=.true.
-  if [[ "$sedi_semi" = .true. ]]; then export dt_inner=$DELTIM ; fi
-  export decfl=10
+    export cal_pre=".false."
+    export random_clds=".false."
+    export effr_in=".true."
+    export ltaerosol=".false."
+    export lradar=".false."
+    export ttendlim="-999"
+    export dt_inner=$((DELTIM/2))
+    export sedi_semi=.true.
+    if [[ "$sedi_semi" = .true. ]]; then export dt_inner=$DELTIM ; fi
+    export decfl=10
 
-  export hord_mt_nh_nonmono=5
-  export hord_xx_nh_nonmono=5
-  export vtdm4_nh_nonmono=0.02
-  export nord=2
-  export dddmp=0.1
-  export d4_bg=0.12
-
+    export hord_mt_nh_nonmono=5
+    export hord_xx_nh_nonmono=5
+    export vtdm4_nh_nonmono=0.02
+    export nord=2
+    export dddmp=0.1
+    export d4_bg=0.12
 elif [[ "$imp_physics" -eq 11 ]]; then # GFDL
   export ncld=5
   if [[ $cplchm = ".true." ]]; then
@@ -397,15 +415,108 @@ else
 
 fi
 
-#Use STTP or SPPT
-export ENS_SPS=${ENS_SPS:-.false.}
-
-# Stochastic physics parameters
+# Stochastic physics
 export DO_SPPT=${DO_SPPT:-"YES"}
 export DO_SKEB=${DO_SKEB:-"YES"}
 export DO_SHUM=${DO_SHUM:-"NO"}
 export DO_LAND_PERT=${DO_LAND_PERT:-"NO"}
 export DO_CA=${DO_CA:-"YES"}
+
+#coupling settings
+export cplmode="nems_frac"
+if [[ "${FRAC_GRID:-".true."}" = ".false." ]]; then
+  export cplmode="nems_orig"
+fi
+export psm_bc="1"
+
+export min_lakeice="0.15"
+export min_seaice=${min_seaice:-"0.15"}
+export use_cice_alb=${use_cice_alb:-".false."}
+
+export FSICL="0"
+export FSICS="0"
+
+#---------------------------------------------------------------------
+
+# ideflate: netcdf zlib lossless compression (0-9): 0 no compression
+# nbits: netcdf lossy compression level (0-32): 0 lossless
+export ideflate=1
+export nbits=14
+export ishuffle=0
+# compression for RESTART files written by FMS
+export shuffle=1
+export deflate_level=1
+
+#---------------------------------------------------------------------
+# Disable the use of coupler.res; get model start time from model_configure
+export USE_COUPLER_RES="NO"
+
+    # Write more variables to output
+    export DIAG_TABLE="$HOMEgfs/parm/parm_fv3diag/diag_table"
+
+    # Write gfs restart files to rerun fcst from any break point
+    export restart_interval_gfs=${restart_interval_gfs:-0}
+    if [[ "$restart_interval_gfs" -le 0 ]]; then
+        export restart_interval="$FHMAX_GFS"
+    else
+      rst_list=""
+      IAU_OFFSET=${IAU_OFFSET:-0}
+      [[ $DOIAU = "NO" ]] && export IAU_OFFSET=0; export IAU_DELTHRS=0; export IAU_FHROT=0
+      xfh=$((restart_interval_gfs+(IAU_OFFSET/2)))
+      while [ $xfh -le ${FHMAX:-$fhmax} ]; do
+        if [[ $FORECAST_SEGMENT = lr ]]; then
+          if [[ $xfh > $fhmaxh ]]; then
+            rst_list="$rst_list $xfh"
+          fi
+        else
+          rst_list="$rst_list $xfh"
+        fi
+        xfh=$((xfh+restart_interval_gfs))
+      done
+      export restart_interval="$rst_list"
+    fi
+
+    if [[ "$DO_AERO" = "YES" ]]; then
+        # Make sure a restart file is written at the cadence time
+        if [[ ! "${restart_interval[*]}" =~ "$STEP_GFS"  ]]; then
+            export restart_interval="$STEP_GFS $restart_interval"
+        fi
+    fi
+
+    # Choose coupling with wave
+    if [[ "$DO_WAVE" = "YES" && "$WAVE_CDUMP" != "gdas" ]]; then
+        export cplwav=".true."
+    fi
+
+    # Turn off dry mass adjustment in GFS
+    export adjust_dry_mass=".false."
+
+    # Write each restart file in 16 small files to save time
+    if [[ "$CASE" = C768 ]]; then
+      export io_layout="4,4"
+    else
+      export io_layout="1,1"
+    fi
+
+
+
+if [[ "$DO_AERO" = "YES" ]]; then # temporary settings for aerosol coupling
+    export AERO_DIAG_TABLE="${AERO_DIAG_TABLE:-$HOMEgfs/parm/parm_fv3diag/diag_table.aero}"
+    export AERO_FIELD_TABLE="${AERO_FIELD_TABLE:-$HOMEgfs/parm/parm_fv3diag/field_table.aero}"
+    export AERO_EMIS_FIRE=$( echo "${AERO_EMIS_FIRE:-none}" | awk '{ print tolower($1) }' )
+    export AERO_CONFIG_DIR="${AERO_CONFIG_DIR:-$HOMEgfs/parm/chem}"
+    export AERO_INPUTS_DIR="${AERO_INPUTS_DIR:-}"
+    export fscav_aero="${aero_conv_scav_factors:-${fscav_aero}}"
+    export dnats_aero="${aero_diag_tracers:-0}"
+fi
+
+# Remember config.efcs will over-ride these values for ensemble forecasts
+# if these variables are re-defined there.
+# Otherwise, the ensemble forecast will inherit from config.fcst
+
+echo "END: config.fcst"
+
+
 export DO_OCN_SPPT=${DO_OCN_SPPT:-"NO"}
 export DO_OCN_PERT_EPBL=${DO_OCN_PERT_EPBL:-"NO"}
 
@@ -474,106 +585,4 @@ fi
 
 ########################################
 # End stochastic physics parameters
-########################################
-
-
-########################################
-# Start coupling settings
-########################################
-export cplmode="nems_frac"
-if [[ "${FRAC_GRID:-".true."}" = ".false." ]]; then
-  export cplmode="nems_orig"
-fi
-export psm_bc="1"
-
-export min_lakeice="0.15"
-export min_seaice=${min_seaice:-"0.15"}
-export use_cice_alb=${use_cice_alb:-".false."}
-
-export FSICL="0"
-export FSICS="0"
-
-#---------------------------------------------------------------------
-
-# ideflate: netcdf zlib lossless compression (0-9): 0 no compression
-# nbits: netcdf lossy compression level (0-32): 0 lossless
-export ideflate=1
-export nbits=14
-export ishuffle=0
-# compression for RESTART files written by FMS
-export shuffle=1
-export deflate_level=1
-
-#---------------------------------------------------------------------
-# Disable the use of coupler.res; get model start time from model_configure
-export USE_COUPLER_RES="NO"
-
-# Write more variables to output
-if [[ "$QUILTING" = ".true." && $OUTPUT_GRID = "gaussian_grid" ]]; then
-  export DIAG_TABLE="$HOMEgfs/parm/parm_fv3diag/diag_table"
-else
-  export DIAG_TABLE="$HOMEgfs/parm/parm_fv3diag/diag_table_orig"
-fi
-
-# Write gfs restart files to rerun fcst from any break point
-export restart_interval_gfs=${restart_interval_gfs:-0}
-if [[ "$restart_interval_gfs" -le 0 ]]; then
-  export restart_interval="$FHMAX"
-else
-  rst_list=""
-  IAU_OFFSET=${IAU_OFFSET:-0}
-  [[ $DOIAU = "NO" ]] && export IAU_OFFSET=0; export IAU_DELTHRS=0; export IAU_FHROT=0
-  xfh=$((restart_interval_gfs+(IAU_OFFSET/2)))
-  while [ $xfh -le ${FHMAX:-$fhmax} ]; do
-    if [[ $FORECAST_SEGMENT = lr ]]; then
-      if [[ $xfh > $fhmaxh ]]; then
-        rst_list="$rst_list $xfh"
-      fi
-    else
-      rst_list="$rst_list $xfh"
-    fi
-    xfh=$((xfh+restart_interval_gfs))
-  done
-  export restart_interval="$rst_list"
-fi
-
-if [[ "$DO_AERO" = "YES" ]]; then
-  # Make sure a restart file is written at the cadence time
-  if [[ ! "${restart_interval[*]}" =~ "$STEP_GFS"  ]]; then
-    export restart_interval="$STEP_GFS $restart_interval"
-  fi
-fi
-
-# Choose coupling with wave
-if [[ "$DO_WAVE" = "YES" && "$WAVE_CDUMP" != "gdas" ]]; then
-  export cplwav=".true."
-fi
-
-# Turn off dry mass adjustment in GFS
-export adjust_dry_mass=".false."
-
-# Write each restart file in 16 small files to save time
-if [[ "$case_in" = C768 ]]; then
-  export io_layout="4,4"
-else
-  export io_layout="1,1"
-fi
-
-if [[ "$DO_COUPLED" = "YES" ]] ; then # coupled model
-  export DIAG_TABLE="$HOMEgfs/parm/parm_fv3diag/diag_table_cpl"
-fi
-
-if [[ "$DO_AERO" = "YES" ]]; then # temporary settings for aerosol coupling
-  export AERO_DIAG_TABLE="${AERO_DIAG_TABLE:-$HOMEgfs/parm/parm_fv3diag/diag_table.aero}"
-  export AERO_FIELD_TABLE="${AERO_FIELD_TABLE:-$HOMEgfs/parm/parm_fv3diag/field_table.aero}"
-  export AERO_EMIS_FIRE=$( echo "${AERO_EMIS_FIRE:-none}" | awk '{ print tolower($1) }' )
-  export AERO_CONFIG_DIR="${AERO_CONFIG_DIR:-$HOMEgfs/parm/chem}"
-  export AERO_INPUTS_DIR="${AERO_INPUTS_DIR:-}"
-  export fscav_aero="${aero_conv_scav_factors:-${fscav_aero}}"
-  export dnats_aero="${aero_diag_tracers:-0}"
-fi
-
-
-########################################
-# End coupling settings
 ########################################
