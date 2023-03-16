@@ -31,81 +31,88 @@ fi
 # fcst
 export is_exclusive=True
 
-# During workflow creation, we need resources for all CDUMPs and CDUMP is undefined
-((ATMPETS = layout_x * layout_y * 6))
+export layout_x=${layout_x}
+export layout_y=${layout_y}
+export WRITE_GROUP=${WRITE_GROUP}
+export WRTTASK_PER_GROUP=${WRTTASK_PER_GROUP}
+ntasks_fv3=${ntasks_fv3}
+ntasks_quilt=${ntasks_quilt}
+nthreads_fv3=${nthreads_fv3}
 
-# Mediator only uses the atm model PETS or less
-export MEDPETS=${MEDPETS:-ATMPETS}
+# PETS for the atmosphere dycore
+(( FV3PETS = ntasks_fv3 * nthreads_fv3 ))
+echo "FV3 using (nthreads, PETS) = (${nthreads_fv3}, ${FV3PETS})"
 
-if [[ ${DO_AERO} == "YES" ]]; then
-  # Aerosol model only uses the atm model PETS
-  export CHMPETS=${ATMPETS}
-  # Aerosol model runs on same PETs as ATM, so don't add to $NTASKS_TOT
-
-  if [[ ${machine} == "HERA" ]]; then
-    # Need more memory on Hera for aerosols, so increase threads to spread it out
-    nth_fv3_gfs=${nth_fv3_gfs:-4}
-  fi
+# PETS for quilting
+if [[ "${QUILTING:-}" = ".true." ]]; then
+  (( QUILTPETS = ntasks_quilt * nthreads_fv3 ))
+  (( WRTTASK_PER_GROUP = WRTTASK_PER_GROUP * nthreads_fv3 ))  # when threads are used, WRTTASKS_PER_GROUP = INCOMING_WRTTASKS_PER_GROUP * threads
+  # model_configure should be updated to reflect the number of threads used by calling this variable write_pets_per_group
+  export WRTTASK_PER_GROUP
+else
+  QUILTPETS=0
 fi
+echo "QUILT using (nthreads, PETS) = (${nthreads_fv3}, ${QUILTPETS})"
 
-# If using in-line post, add the write tasks to the ATMPETS
-if [[ ${QUILTING} == ".true." ]]; then
-  ((ATMPETS = ATMPETS + WRITE_GROUP * WRTTASK_PER_GROUP))
-fi
-export ATMPETS
+# Total PETS for the atmosphere component
+ATMTHREADS=${nthreads_fv3}
+(( ATMPETS = FV3PETS + QUILTPETS ))
+export ATMPETS ATMTHREADS
+echo "FV3ATM using (nthreads, PETS) = (${ATMTHREADS}, ${ATMPETS})"
+
+# Total PETS for the coupled model (starting w/ the atmosphere)
 NTASKS_TOT=${ATMPETS}
 
-export nth_fcst=${nth_fv3:-2}
-#export nth_fcst_gfs=${nth_fv3_gfs:-2}
+# The mediator PETS can overlap with other components, usually it lands on the atmosphere tasks.
+# However, it is suggested limiting mediator PETS to 300, as it may cause the slow performance.
+# See https://docs.google.com/document/d/1bKpi-52t5jIfv2tuNHmQkYUe3hkKsiG_DG_s6Mnukog/edit
+# TODO: Update reference when moved to ufs-weather-model RTD
+MEDTHREADS=${nthreads_mediator:-1}
+MEDPETS=${MEDPETS:-ATMPETS}
+[[ "${MEDPETS}" -gt 300 ]] && MEDPETS=300
+export MEDPETS MEDTHREADS
+echo "MEDIATOR using (threads, PETS) = (${MEDTHREADS}, ${MEDPETS})"
 
-export npe_node_fcst=$(echo "${npe_node_max} / ${nth_fcst}" | bc)
-#export npe_node_fcst_gfs=$(echo "${npe_node_max} / ${nth_fcst_gfs}" | bc)
-
-if [[ ${DO_WAVE} == "YES" ]]; then
-  case ${waveGRD} in
-    'gnh_10m aoc_9km gsh_15m') export WAVPETS=140 ;;
-    'gwes_30m') export WAVPETS=100 ;;
-    'mx050') export WAVPETS=240 ;;
-    'mx025') export WAVPETS=80 ;;
-    *)
-      echo "FATAL: Number of PEs not defined for wave grid '${waveGRD}'"
-      echo "  Please add an entry to config.resources within fcst for this grid"
-      exit 3
-      ;;
-  esac
-  ((NTASKS_TOT = NTASKS_TOT + WAVPETS))
+if [[ "${DO_AERO}" = "YES" ]]; then
+  # GOCART shares the same grid and forecast tasks as FV3 (do not add write grid component tasks).
+  (( CHMTHREADS = ATMTHREADS ))
+  (( CHMPETS = FV3PETS ))
+  # Do not add to NTASKS_TOT
+  export CHMPETS CHMTHREADS
+  echo "GOCART using (threads, PETS) = (${CHMTHREADS}, ${CHMPETS})"
 fi
 
-if [[ ${DO_OCN} == "YES" ]]; then
-  case ${OCNRES} in
-    # Except for 025, these are guesses for now
-    100) export OCNPETS=20 ;;
-    050) export OCNPETS=60 ;;
-    025) export OCNPETS=220 ;;
-    *)
-      echo "FATAL: Number of PEs not defined for ocean resolution ${OCNRES}"
-      echo "  Please add an entry to config.resources within fcst for this resolution"
-      exit 3
-      ;;
-  esac
-  ((NTASKS_TOT = NTASKS_TOT + OCNPETS))
+if [[ "${DO_WAVE}" = "YES" ]]; then
+  (( WAVPETS = ntasks_ww3 * nthreads_ww3 ))
+  (( WAVTHREADS = nthreads_ww3 ))
+  export WAVPETS WAVTHREADS
+  echo "WW3 using (threads, PETS) = (${WAVTHREADS}, ${WAVPETS})"
+  (( NTASKS_TOT = NTASKS_TOT + WAVPETS ))
 fi
 
-if [[ ${DO_ICE} == "YES" ]]; then
-  case ${ICERES} in
-    # Except for 025, these are guesses for now
-    100) export ICEPETS=10 ;;
-    050) export ICEPETS=30 ;;
-    025) export ICEPETS=120 ;;
-    *)
-      echo "FATAL: Number of PEs not defined for ice resolution ${ICERES}"
-      echo "  Please add an entry to config.resources within fcst for this resolution"
-      exit 3
-      ;;
-  esac
-  ((NTASKS_TOT = NTASKS_TOT + ICEPETS))
+if [[ "${DO_OCN}" = "YES" ]]; then
+  (( OCNPETS = ntasks_mom6 * nthreads_mom6 ))
+  (( OCNTHREADS = nthreads_mom6 ))
+  export OCNPETS OCNTHREADS
+  echo "MOM6 using (threads, PETS) = (${OCNTHREADS}, ${OCNPETS})"
+  (( NTASKS_TOT = NTASKS_TOT + OCNPETS ))
 fi
 
-export npe_fcst=${NTASKS_TOT}
+if [[ "${DO_ICE}" = "YES" ]]; then
+  (( ICEPETS = ntasks_cice6 * nthreads_cice6 ))
+  (( ICETHREADS = nthreads_cice6 ))
+  export ICEPETS ICETHREADS
+  echo "CICE6 using (threads, PETS) = (${ICETHREADS}, ${ICEPETS})"
+  (( NTASKS_TOT = NTASKS_TOT + ICEPETS ))
+fi
+
+echo "Total PETS for ${NTASKS_TOT}"
+
+declare -x npe_fcst="${NTASKS_TOT}"
+declare -x nth_fcst=1  # ESMF handles threading for the UFS-weather-model
+declare -x npe_node_fcst="${npe_node_max}"
+
+unset NTASKS_TOT
+
 
 echo "END: config.resources"

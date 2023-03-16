@@ -14,7 +14,12 @@ else
   export LEVS=$((LEVSLR + 1))
 fi
 
-case "$case_in" in
+CASE=$CASEHR
+if [[ $FORECAST_SEGMENT == "lr" ]]; then
+  CASE=$CASELR
+fi
+
+case "$CASE" in
   "C48") export OCNRES=500;;
   "C96") export OCNRES=100;;
   "C192") export OCNRES=050;;
@@ -25,21 +30,16 @@ esac
 export ICERES=$OCNRES
 export waveGRD='gnh_10m aoc_9km gsh_15m'
 
-CASE=$CASEHR
-if [[ $FORECAST_SEGMENT == "lr" ]]; then
-  CASE=$CASELR
-fi
-
 ########## config.fcst ##########
 # Forecast specific
 
 echo "BEGIN: gefs_fcst.parm"
 
 # Turn off waves if not used for this CDUMP
-case $WAVE_CDUMP in
-  both | ${CDUMP/enkf} ) ;; # Don't change
-  *) DO_WAVE="NO" ;; # Turn waves off
-esac
+#case $WAVE_CDUMP in
+#  both | ${CDUMP/enkf} ) ;; # Don't change
+#  *) DO_WAVE="NO" ;; # Turn waves off
+#esac
 
 # Source model specific information that is resolution dependent
 string="--fv3 $CASE"

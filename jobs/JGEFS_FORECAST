@@ -82,7 +82,8 @@ export ROTDIR=${ROTDIR:-$(compath.py $envir/com/$NET/${ver})}
 #############################
 # Source relevant config files
 #############################
-configs="gefs gefs_fv3 gefs_wave gefs_fcst"
+export CDATE=$PDY$cyc
+configs="gefs gefs_fcst" #gefs_ufs gefs_wave gefs_fcst"
 config_path=$PARMgefs
 for config in $configs; do
   . $config_path/$config.parm
@@ -93,7 +94,7 @@ for config in $configs; do
   fi
 done
 
-export APRUN_FV3=${APRUN_FV3:-"${launcher:-'mpiexec -l'} -n ${npe_fcst} -ppn ${npe_node_fcst} --cpu-bind depth --depth ${NTHREADS_FV3}"}
+export APRUN_UFS=${APRUN_UFS:-"${launcher:-'mpiexec -l'} -n ${npe_fcst} -ppn ${npe_node_fcst} --cpu-bind depth --depth ${NTHREADS_FV3}"}
 
 if [[ $cplchm = ".true." ]]; then
   COMPONENT="chem"
