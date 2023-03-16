@@ -112,20 +112,18 @@ fi
 # Copy/Link parm files
 cd $pwd
 if [[ -d global-workflow.fd ]] ; then
-  if [[ -d ../parm/parm_fv3diag ]]; then
-    rm -rf ../parm/parm_fv3diag
-  fi
-  $LINK ../sorc/global-workflow.fd/parm/parm_fv3diag ../parm/
-
   if [[ -d ../parm/post ]]; then
     rm -rf ../parm/post
   fi
   $LINK ../sorc/global-workflow.fd/sorc/ufs_model.fd/FV3/upp/parm ../parm/post
 
-  if [[ -d ../parm/product ]]; then
-    rm -rf ../parm/product
-  fi
-  $LINK ../sorc/global-workflow.fd/parm/product ../parm/
+  for fn in parm_fv3diag product config; do
+    echo ${fn}
+    if [[ -d ../parm/${fn} ]]; then
+      rm -rf ../parm/${fn}
+    fi
+    ${LINK} ../sorc/global-workflow.fd/parm/${fn} ../parm/
+  done
 fi
 
 
@@ -149,7 +147,6 @@ if [[ -d global-workflow.fd ]] ; then
                 ush/parsing_model_configure_FV3.sh \
                 ush/parsing_model_configure_DATM.sh \
                 ush/parsing_namelists_FV3.sh \
-                ush/parsing_namelists_DATM.sh \
                 ush/parsing_namelists_WW3.sh \
                 ush/parsing_namelists_MOM6.sh \
                 ush/parsing_namelists_CICE.sh \
