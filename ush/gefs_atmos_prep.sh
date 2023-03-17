@@ -23,6 +23,202 @@ fi
 mkdir -p $OUTDIR
 cd $DATA
 
+USE_RESTART="NO"
+if [[ $USE_RESTART == YES ]]; then
+
+  export NLN="/bin/ln -sf"
+
+  export COMINenkf=${COMINenkf:-$(compath.py ${envir}/com/gfs/${gfs_ver})/enkfgdas.${pdyp}/${cycp}}
+  export COMINgdas=${COMINgdas:-$(compath.py ${envir}/com/gfs/${gfs_ver})/gdas.${pdyp}/${cycp}}
+
+  export INPUT_TYPE="gaussian_netcdf"
+
+  export FIXgfs=${FIXgfs:-$HOMEgfs/fix}
+
+  export CRES=$(echo $CASE |cut -c2-5)
+  CRES_H=$((CRES+CRES))
+  export FIXfv3=$FIXgfs/orog/C$CRES
+  export FIXfv3_H=$FIXgfs/orog/C$CRES_H
+  export FIXsfc=$FIXfv3/fix_sfc
+  export FIXam=${FIXam:-$FIXgfs/am}
+  export VCOORD_FILE=${VCOORD_FILE:-$FIXam/global_hyblev.l${LEVS}.txt}
+
+  if [[ $mem = c00 ]]; then
+    echo "Working on c00"
+    gmemdir=${COMINgdas}/atmos
+    memdir=${COMINgfs}/atmos
+  else
+    echo "Working on ${mem}"
+
+    (( cmem = nmem + memshift ))
+    if (( cmem > 80 )); then
+      (( cmem = cmem - 80 ))
+    fi
+    memchar="mem"$(printf %03i $cmem)
+
+    gmemdir=${COMINenkf}/${memchar}/atmos
+    memdir=${COMINenkfgfs}/${memchar}/atmos
+  fi
+
+  export INIDIR=$DATA
+  cd $INIDIR
+
+  mkdir -p $INIDIR/RESTART
+  if [[ -e $OUTDIR ]]; then
+    rm -rf $OUTDIR
+  fi
+  mkdir -p $OUTDIR
+
+  CDATE=${PDY}${cyc}
+
+  if [[ "$DOIAU" = "YES" ]]; then
+    sCDATE=$($NDATE -3 $CDATE)
+    sPDY=$(echo $sCDATE | cut -c1-8)
+    scyc=$(echo $sCDATE | cut -c9-10)
+  else
+    sCDATE=$CDATE
+    sPDY=$PDY
+    scyc=$cyc
+  fi
+
+  gPDY=${pdyp}
+  gcyc=${cycp}
+
+  # Link all (except sfc_data) restart files from $gmemdir
+  for file in $(ls $gmemdir/RESTART/${sPDY}.${scyc}0000.*.nc); do
+    file2=$(echo $(basename $file))
+    file2=$(echo $file2 | cut -d. -f3-) # remove the date from file
+    fsuf=$(echo $file2 | cut -d. -f1)
+    if [ $fsuf != "sfc_data" ]; then
+      $NLN $file $INIDIR/RESTART/
+    fi
+  done
+
+  # Link sfcanl_data restart files from $memdir
+  for file in $(ls $memdir/RESTART/${sPDY}.${scyc}0000.*.nc); do
+    file2=$(echo $(basename $file))
+    file2=$(echo $file2 | cut -d. -f3-) # remove the date from file
+    fsufanl=$(echo $file2 | cut -d. -f1)
+    if [ $fsufanl = "sfcanl_data" ]; then
+      file2=$(echo $file2 | sed -e "s/sfcanl_data/sfc_data/g")
+      $NLN $file $INIDIR/RESTART/
+    fi
+  done
+
+  # Need a coupler.res when doing IAU
+  if [ $DOIAU = "YES" ]; then
+    rm -f $INIDIR/RESTART/${sPDY}.${scyc}0000.coupler.res
+    cat >> $INIDIR/RESTART/${sPDY}.${scyc}0000.coupler.res <<- EOF
+			2        (Calendar: no_calendar=0, thirty_day_months=1, julian=2, gregorian=3, noleap=4)
+			${gPDY:0:4}  ${gPDY:4:2}  ${gPDY:6:2}  ${gcyc}     0     0        Model start time:   year, month, day, hour, minute, second
+			${sPDY:0:4}  ${sPDY:4:2}  ${sPDY:6:2}  ${scyc}     0     0        Current model time: year, month, day, hour, minute, second
+		EOF
+  else
+    $NLN $gmemdir/RESTART/${sPDY}.${scyc}0000.coupler.res $INIDIR/RESTART/
+  fi
+
+  # Link increments
+  if [ $DOIAU = "YES" ]; then
+    for i in $(echo $IAUFHRS | sed "s/,/ /g" | rev); do
+      incfhr=$(printf %03i $i)
+      if [ $incfhr = "006" ]; then
+        increment_file=t${cyc}z.${PREFIX_ATMINC:-""}atminc.nc
+      else
+        increment_file=t${cyc}z.${PREFIX_ATMINC:-""}atmi${incfhr}.nc
+      fi
+      if [ ! -f $memdir/gfs.$increment_file ]; then
+        echo "ERROR: DOIAU = $DOIAU, but missing increment file for fhr $incfhr at $memdir/gfs.$increment_file"
+        echo "Abort!"
+        exit 1
+      fi
+      $NLN $memdir/gfs.$increment_file $INIDIR/gefs.$increment_file
+    done
+  else
+    increment_file=t${cyc}z.${PREFIX_ATMINC:-""}atminc.nc
+    if [ -f $memdir/gfs.$increment_file ]; then
+      $NLN $memdir/gfs.$increment_file $INIDIR/gefs.$increment_file
+    fi
+  fi
+
+  if [[ $mem = c00 ]]; then
+    CRES_INPUT=$CRES_H
+    FIXfv3_INPUT=$FIXfv3_H
+  else
+    CRES_INPUT=$CRES
+    FIXfv3_INPUT=$FIXfv3
+  fi
+
+  #if [[ $mem = c00 ]]; then
+    export CONVERT_NST=".true."
+    export INPUT_TYPE='restart'
+    export MOSAIC_FILE_INPUT_GRID="${FIXfv3_INPUT}/C${CRES_INPUT}_mosaic.nc"
+    export MOSAIC_FILE_TARGET_GRID="${FIXfv3}/C${CRES}_mosaic.nc"
+    export OROG_DIR_INPUT_GRID="${FIXfv3_INPUT}"
+
+    OROG_FILES_INPUT_GRID=""
+    ATM_CORE_FILES_INPUT=""
+    ATM_TRACER_FILES_INPUT=""
+    SFC_FILES_INPUT=""
+    for tile in {1..6}
+    do
+      OROG_FILES_INPUT_GRID=${OROG_FILES_INPUT_GRID}"C${CRES_INPUT}_oro_data.tile${tile}.nc"
+      ATM_CORE_FILES_INPUT=${ATM_CORE_FILES_INPUT}"${sPDY}.${scyc}0000.fv_core.res.tile${tile}.nc"
+      ATM_TRACER_FILES_INPUT=${ATM_TRACER_FILES_INPUT}"${sPDY}.${scyc}0000.fv_tracer.res.tile${tile}.nc"
+      SFC_FILES_INPUT=${SFC_FILES_INPUT}"${sPDY}.${scyc}0000.sfcanl_data.tile${tile}.nc"
+      if [[ $tile != 6 ]]; then
+        OROG_FILES_INPUT_GRID=${OROG_FILES_INPUT_GRID}'","'
+        ATM_CORE_FILES_INPUT=${ATM_CORE_FILES_INPUT}'","'
+        ATM_TRACER_FILES_INPUT=${ATM_TRACER_FILES_INPUT}'","'
+        SFC_FILES_INPUT=${SFC_FILES_INPUT}'","'
+      fi
+    done
+
+    export OROG_FILES_INPUT_GRID
+    ATM_CORE_FILES_INPUT=${ATM_CORE_FILES_INPUT}'","'
+    export ATM_CORE_FILES_INPUT=${ATM_CORE_FILES_INPUT}"${sPDY}.${scyc}0000.fv_core.res.nc"
+    export ATM_TRACER_FILES_INPUT
+    export SFC_FILES_INPUT
+
+    export TRACERS_TARGET='"sphum","liq_wat","o3mr","ice_wat","rainwat","snowwat","graupel"'
+    export TRACERS_INPUT='"sphum","liq_wat","o3mr","ice_wat","rainwat","snowwat","graupel"'
+
+    export COMIN=$INIDIR/RESTART
+
+    # Execute the script
+    $USHgfs/chgres_cube.sh
+    export err=$?
+    if [[ $err != 0 ]]; then
+      echo "FATAL ERROR in $(basename $BASH_SOURCE): chgres_cube failed!"
+      exit $err
+    fi
+  #fi
+
+  if [[ $SENDCOM == "YES" ]]; then
+    #if [[ $mem = c00 ]]; then
+      echo "Copying $mem to COM Directory!"
+      if [[ -e $OUTDIR ]]; then
+        rm -rf $OUTDIR
+      fi
+      mkdir -p $OUTDIR
+
+      for tile in {1..6}
+      do
+        mv $INIDIR/out.sfc.tile${tile}.nc $OUTDIR/sfc_data.tile${tile}.nc
+        mv $INIDIR/out.atm.tile${tile}.nc $OUTDIR/gfs_data.tile${tile}.nc
+      done
+      mv $INIDIR/gfs_ctrl.nc $OUTDIR/
+    #else
+    #  echo "Copying $mem to COM Directory!"
+    #  $NCP $INIDIR/*.nc $COMOUT/
+    #  $NCP $INIDIR/RESTART $COMOUT/
+    #fi
+  fi
+
+  echo "$(date -u) end $(basename $BASH_SOURCE)"
+  exit 0
+fi
+#---------------------------------------------------------
+
 if [[ $mem = c00 ]] ;then
   # Control intial conditions from current GFS cycle
   export ATM_FILES_INPUT="gfs.t${cyc}z.atmanl.nc"
