@@ -30,6 +30,64 @@ esac
 export ICERES=$OCNRES
 export waveGRD='gnh_10m aoc_9km gsh_15m'
 
+#Writing out
+export NUM_FILES=2
+
+# export LONB=$LONB
+# export LATB=$LATB
+export NSOUT=0
+
+#-----
+# I/O QUILTING, true--use Write Component; false--use GFDL FMS
+# if quilting=true, choose OUTPUT_GRID as cubed_sphere_grid in netcdf or gaussian_grid
+# if gaussian_grid, set OUTPUT_FILE for nemsio or netcdf
+# WRITE_DOPOST=true, use inline POST
+export QUILTING=".true."
+export OUTPUT_GRID=${FV3OUT_GRID:-"gaussian_grid"}
+export OUTPUT_FILE="netcdf"
+export WRITE_DOPOST=".true."
+export WRITE_NSFLIP=".true."
+PARM_POST=${PARM_POST:-$HOMEgfs/parm/post}
+export FLTFILEGFS=$PARM_POST/postxconfig-NT-GEFS.txt
+export FLTFILEGFSF00=$PARM_POST/postxconfig-NT-GEFS-F00.txt
+export POSTGRB2TBL=$PARM_POST/params_grib2_tbl_new
+
+# suffix options depending on file format
+#export SUFFIX=".nc"
+#export NEMSIO_IN=".false."
+#export NETCDF_IN=".true."
+#-----
+
+# CPU geopmetry
+export ntiles=${ntiles:-6}
+#PE geometry
+export hyperthread=${hyperthread:-".false."}
+if [[ $FORECAST_SEGMENT = lr ]]; then
+  export NTHREADS_FV3=${parallel_threads_lr:-1}
+else
+  if [[ $cplchm = ".true." ]]; then
+    export NTHREADS_FV3=${parallel_threads_chem:-1}
+  else
+    export NTHREADS_FV3=${parallel_threads:-1}
+  fi
+fi
+
+export EXPDIR=${HOMEgfs}/parm/config
+
+# add two tiered SST options
+export sst2tier=${sst2tier:-NO}
+
+export APRUN=${APRUN:-""}
+
+# OTHER FV# FCST related environment
+export warm_start=${warm_start:-".false."}
+export read_increment=${read_increment:-".false."}
+REMAP_GRID=none     # temporay setting, to void the latlon default
+export REMAP_GRID=${REMAP_GRID:-latlon}
+
+MEMBER=$(echo $RUNMEM|cut -c4-5)
+CDATE=$PDY$cyc
+
 ########## config.fcst ##########
 # Forecast specific
 
@@ -56,34 +114,6 @@ for component in WAVE OCN ICE AERO; do
   fi
 done
 
-#Writing out
-export NUM_FILES=2
-
-# export LONB=$LONB
-# export LATB=$LATB
-export NSOUT=0
-
-#-----
-# I/O QUILTING, true--use Write Component; false--use GFDL FMS
-# if quilting=true, choose OUTPUT_GRID as cubed_sphere_grid in netcdf or gaussian_grid
-# if gaussian_grid, set OUTPUT_FILE for nemsio or netcdf
-# WRITE_DOPOST=true, use inline POST
-export QUILTING=".true."
-export OUTPUT_GRID=${FV3OUT_GRID:-"gaussian_grid"}
-export OUTPUT_FILE="netcdf"
-export WRITE_DOPOST=".true."
-export WRITE_NSFLIP=".true."
-PARM_POST=${PARM_POST:-$HOMEgfs/parm/post}
-export FLTFILEGFS=$PARM_POST/postxconfig-NT-GEFS.txt
-export FLTFILEGFSF00=$PARM_POST/postxconfig-NT-GEFS-F00.txt
-export POSTGRB2TBL=$PARM_POST/params_grib2_tbl_new
-
-# suffix options depending on file format
-export SUFFIX=".nc"
-export NEMSIO_IN=".false."
-export NETCDF_IN=".true."
-#-----
-
 # Get task specific resources
 source $HOMEgefs/parm/gefs_fcst_resources.parm
 export domains_stack_size="16000000"
@@ -93,33 +123,12 @@ if [[ "$DONST" = "YES" ]]; then
   source $HOMEgefs/parm/gefs_nsst.parm
 fi
 
-
-# CPU geopmetry
-export ntiles=${ntiles:-6}
-#PE geometry
-export hyperthread=${hyperthread:-".false."}
-if [[ $FORECAST_SEGMENT = lr ]]; then
-  export NTHREADS_FV3=${parallel_threads_lr:-1}
-else
-  if [[ $cplchm = ".true." ]]; then
-    export NTHREADS_FV3=${parallel_threads_chem:-1}
-  else
-    export NTHREADS_FV3=${parallel_threads:-1}
-  fi
-fi
-
-# ---resources - fcst --/\/\
-
 export esmf_profile=".false."
 export esmf_logkind="ESMF_LOGKIND_MULTI_ON_ERROR" #Options: ESMF_LOGKIND_MULTI_ON_ERROR, ESMF_LOGKIND_MULTI, ESMF_LOGKIND_NONE
 
 
 #######################################################################
 # COUPLING COMPONENTS
-#export OCN_model="mom6"
-#export ICE_model="cice6"
-#export WAV_model="ww3"
-#export CHM_model="gocart"
 
 # cpl defaults
 export cpl=".false."
@@ -149,20 +158,9 @@ fi
 
 #######################################################################
 
-# add two tiered SST options
-export sst2tier=${sst2tier:-NO}
-
-export APRUN=${APRUN:-""}
-
-# OTHER FV# FCST related environment
-export warm_start=${warm_start:-".false."}
-export read_increment=${read_increment:-".false."}
-REMAP_GRID=none     # temporay setting, to void the latlon default
-export REMAP_GRID=${REMAP_GRID:-latlon}
-
-#######################################################################
-
-export FCSTEXEC=${FCSTEXEC:-ufs_model.x}
+export FORECASTSH="$HOMEgfs/scripts/exglobal_forecast.sh"
+export FCSTEXECDIR="$HOMEgfs/exec"
+export FCSTEXEC="ufs_model.x"
 
 #######################################################################
 # Model configuration
@@ -267,94 +265,6 @@ export cal_pre=".true."
 export do_sat_adj=".false."
 export random_clds=".true."
 
-#-----------------------For GEFS ----------\/\/-------------
-# set fixed k_split and n_split for dt=450s and 300s
-if [[ $DELTIM = 450 ]]; then
-  export k_split=2
-  export n_split=6
-elif [[ $DELTIM = 300 ]]; then
-  export k_split=1
-  export n_split=8
-else
-  export k_split=${k_split:-2}
-  export n_split=${n_split:-6}
-fi
-
-export assim_freq=$gefs_cych
-
-# Settings for coupling with Wavewatch III
-export cplwav=${cplwav:-.true.}
-export WAV_MOD_ID=${WAV_MOD_ID:-gefs}
-export coupling_interval_sec=${coupling_interval_sec:-3600}
-
-if [[ $cplchm = ".true." ]]; then
-  export DELTIM=300 # Needed to match setting used by GSD
-
-  if [[ $AEROSOL_INIT_TYPE == "warm" ]]; then
-    export warm_start=".true."
-    export read_increment=".true."
-  fi
-
-  export DIAG_TABLE=${DIAG_TABLE:-$HOMEgfs/parm/parm_fv3diag/chm_diag_table}
-
-  export lgfdlmprad=".true."
-  export effr_in=".true."
-  export USE_COUPLER_RES="YES"
-fi
-
-##gfs_physics
-#export FHZERO=${FHZER:-6}
-#export idiag3d=
-export FHCYC=${FHCYC:-24}
-#export USE_UFO=.true.
-#export PRE_RAD=.false.
-#export ncld=${NCLD:-5}
-#export do_sat_adj=${DO_SAT_ADJ:-".true."}
-#export zhao_mic=${ZHAO_MIC:-".false."}
-#export PDFCLD=${PDFCLD:-".false."}
-#export FHLWR=3600.      # LW radiation calling interval (hrs)
-#export FHSWR=3600.      # SW radiation calling interval (hrs)
-#export ialb=1          # 0: climatology sw albedo based on surface veg types;
-#                       # 1: MODIS based land surface albedo
-#export IEMS=1          # 0-blackbody ground emission; 1-climatology on one-deg map
-#export IAER=111        # 111--with stratospheric aerosol, tropospheric aerosol LW, troposphere aerosol SW.
-#export ICO2=2          # 0--fixed CO2 constant; 1--time varying global mean CO2; 2--changing CO2
-#export ISUBC_LW=2
-#export ISUBC_SW=2
-#export ISOL=2          # 0--fixed solar constant; 1--changing solar constant
-#export lwhtr=${lwhtr:-".true."}
-#export swhtr=${swhtr:-".true."}
-#
-#export CNVGWD=.true.
-#export shal_cnv=.true.
-#export cal_pre=.false.
-#export REDRAG=.true.
-#export DSPHEAT=.true.
-#export HYBEDMF=.true.
-#export lheatstrg=.false.
-#
-#export random_clds=.false.
-#export trans_trac=.true.
-#
-##export cnvcld=.false.
-#export NVCLD=.false.
-#export imfshalcnv=2
-#export imfdeepcnv=2
-#export cdmbgwd=1.0,1.2
-#export prslrd0=
-#export ivegsrc=
-#export isot=
-#export debug=${gfs_phys_debug:-".false."}
-#export nst_anl=${nst_anl:-".true."}
-#export nstf_name=${nstf_name:-"2,0,0,0,0"}
-#export psautco=${psautco:-"0.0008,0.0005"}
-#export prautco=${prautco:-"0.00015,0.00015"}
-#export lgfdlmprad=.true.
-#export effr_in=.true.
-
-#-----------------------For GEFS ----------/\/\-------------
-
-# imp_physics is set in gefs.parm because it is needed in other jobs
 if [[ "$imp_physics" -eq 99 ]]; then # ZhaoCarr
     export ncld=1
     export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/field_table_zhaocarr${tbf}${tbp}"
@@ -388,30 +298,30 @@ elif [[ "$imp_physics" -eq 8 ]]; then # Thompson
     export dddmp=0.1
     export d4_bg=0.12
 elif [[ "$imp_physics" -eq 11 ]]; then # GFDL
-  export ncld=5
-  if [[ $cplchm = ".true." ]]; then
-    export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/chm_field_table_gfdl"
-  else
-    export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/field_table_gfdl${tbf}"
-  fi
-  export nwat=6
-  export dnats=1
-  export cal_pre=".false."
-  export do_sat_adj=".true."
-  export random_clds=".false."
-  export lgfdlmprad=".true."
-  export effr_in=".true."
-  export reiflag=2
+    export ncld=5
+    if [[ $cplchm = ".true." ]]; then
+        export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/chm_field_table_gfdl"
+    else
+        export FIELD_TABLE="$HOMEgfs/parm/parm_fv3diag/field_table_gfdl${tbf}"
+    fi
+    export nwat=6
+    export dnats=1
+    export cal_pre=".false."
+    export do_sat_adj=".true."
+    export random_clds=".false."
+    export lgfdlmprad=".true."
+    export effr_in=".true."
+    export reiflag=2
 
-  export hord_mt_nh_nonmono=5
-  export hord_xx_nh_nonmono=5
-  export vtdm4_nh_nonmono=0.02
-  export nord=2
-  export d4_bg=0.12
-  export dddmp=0.1
+    export hord_mt_nh_nonmono=5
+    export hord_xx_nh_nonmono=5
+    export vtdm4_nh_nonmono=0.02
+    export nord=2
+    export d4_bg=0.12
+    export dddmp=0.1
 
 else
-  echo "Unknown microphysics option, ABORT!"
+    echo "Unknown microphysics option, ABORT!"
 
 fi
 
@@ -517,6 +427,92 @@ fi
 echo "END: config.fcst"
 
 
+#-----------------------For GEFS ----------\/\/-------------
+# set fixed k_split and n_split for dt=450s and 300s
+#if [[ $DELTIM = 450 ]]; then
+#  export k_split=2
+#  export n_split=6
+#elif [[ $DELTIM = 300 ]]; then
+#  export k_split=1
+#  export n_split=8
+#else
+#  export k_split=${k_split:-2}
+#  export n_split=${n_split:-6}
+#fi
+
+export assim_freq=$gefs_cych
+
+# Settings for coupling with Wavewatch III
+export cplwav=${cplwav:-.true.}
+export WAV_MOD_ID=${WAV_MOD_ID:-gefs}
+export coupling_interval_sec=${coupling_interval_sec:-3600}
+
+if [[ $cplchm = ".true." ]]; then
+  export DELTIM=300 # Needed to match setting used by GSD
+
+  if [[ $AEROSOL_INIT_TYPE == "warm" ]]; then
+    export warm_start=".true."
+    export read_increment=".true."
+  fi
+
+  export DIAG_TABLE=${DIAG_TABLE:-$HOMEgfs/parm/parm_fv3diag/chm_diag_table}
+
+  export lgfdlmprad=".true."
+  export effr_in=".true."
+  export USE_COUPLER_RES="YES"
+fi
+
+##gfs_physics
+#export FHZERO=${FHZER:-6}
+#export idiag3d=
+export FHCYC=${FHCYC:-24}
+#export USE_UFO=.true.
+#export PRE_RAD=.false.
+#export ncld=${NCLD:-5}
+#export do_sat_adj=${DO_SAT_ADJ:-".true."}
+#export zhao_mic=${ZHAO_MIC:-".false."}
+#export PDFCLD=${PDFCLD:-".false."}
+#export FHLWR=3600.      # LW radiation calling interval (hrs)
+#export FHSWR=3600.      # SW radiation calling interval (hrs)
+#export ialb=1          # 0: climatology sw albedo based on surface veg types;
+#                       # 1: MODIS based land surface albedo
+#export IEMS=1          # 0-blackbody ground emission; 1-climatology on one-deg map
+#export IAER=111        # 111--with stratospheric aerosol, tropospheric aerosol LW, troposphere aerosol SW.
+#export ICO2=2          # 0--fixed CO2 constant; 1--time varying global mean CO2; 2--changing CO2
+#export ISUBC_LW=2
+#export ISUBC_SW=2
+#export ISOL=2          # 0--fixed solar constant; 1--changing solar constant
+#export lwhtr=${lwhtr:-".true."}
+#export swhtr=${swhtr:-".true."}
+#
+#export CNVGWD=.true.
+#export shal_cnv=.true.
+#export cal_pre=.false.
+#export REDRAG=.true.
+#export DSPHEAT=.true.
+#export HYBEDMF=.true.
+#export lheatstrg=.false.
+#
+#export random_clds=.false.
+#export trans_trac=.true.
+#
+##export cnvcld=.false.
+#export NVCLD=.false.
+#export imfshalcnv=2
+#export imfdeepcnv=2
+#export cdmbgwd=1.0,1.2
+#export prslrd0=
+#export ivegsrc=
+#export isot=
+#export debug=${gfs_phys_debug:-".false."}
+#export nst_anl=${nst_anl:-".true."}
+#export nstf_name=${nstf_name:-"2,0,0,0,0"}
+#export psautco=${psautco:-"0.0008,0.0005"}
+#export prautco=${prautco:-"0.00015,0.00015"}
+#export lgfdlmprad=.true.
+#export effr_in=.true.
+
+#-----------------------For GEFS ----------/\/\-------------
 export DO_OCN_SPPT=${DO_OCN_SPPT:-"NO"}
 export DO_OCN_PERT_EPBL=${DO_OCN_PERT_EPBL:-"NO"}
 
@@ -525,11 +521,8 @@ export JCAP_STP=${JCAP_STP:-$JCAPFV}
 export LONB_STP=${LONB_STP:-$LONBFV}
 export LATB_STP=${LATB_STP:-$LATBFV}
 
-MEMBER=$(echo $RUNMEM|cut -c4-5)
-CDATE=$PDY$cyc
-
-# Turn off stochastic physics for control member
 if [[ $RUNMEM = "gec00" || $RUNMEM = "geaer" ]]; then
+  # Turn off stochastic physics for control member
   export DO_SPPT="NO"
   export DO_SHUM="NO"
   export DO_SKEB="NO"
@@ -537,6 +530,14 @@ if [[ $RUNMEM = "gec00" || $RUNMEM = "geaer" ]]; then
   export DO_CA="NO"
   export DO_OCN_SPPT="NO"
   export DO_OCN_PERT_EPBL="NO"
+else
+  export DO_SPPT=${DO_SPPT:-"YES"}
+  export DO_SKEB=${DO_SKEB:-"YES"}
+  export DO_SHUM=${DO_SHUM:-"NO"}
+  export DO_LAND_PERT=${DO_LAND_PERT:-"NO"}
+  export DO_CA=${DO_CA:-"YES"}
+  export DO_OCN_SPPT="YES"
+  export DO_OCN_PERT_EPBL="YES"
 fi # [[ $RUNMEM = "gec00" || $RUNMEM = "geaer" ]]
 
 ## Stochastically Perturbed Physics Tendency
