@@ -281,6 +281,15 @@ if [[ $CONVERT_SFC == ".true." ]]; then
   fi
 fi
 
+case "${CASE}" in
+  "C48") export OCNRES=500;;
+  "C96") export OCNRES=100;;
+  "C192") export OCNRES=050;;
+  "C384") export OCNRES=025;;
+  "C768") export OCNRES=025;;
+  *) export OCNRES=025;;
+esac
+
 export CRES=$(echo $CASE |cut -c2-5)
 export COMIN=$DATA
 export INPUT_TYPE="gaussian_netcdf"
@@ -288,6 +297,28 @@ export FIXfv3=$FIXgfs/orog/C$CRES
 export FIXsfc=$FIXfv3/fix_sfc
 export FIXam=${FIXam:-$FIXgfs/am}
 export VCOORD_FILE=${VCOORD_FILE:-$FIXam/global_hyblev.l${LEVS}.txt}
+
+
+#OROG_FILES_TARGET_GRID='C'${CRES}'_oro_data.tile1.nc","C'${CRES}'_oro_data.tile2.nc"'
+#OROG_FILES_TARGET_GRID=${OROG_FILES_TARGET_GRID}',"C'${CRES}'_oro_data.tile3.nc","C'${CRES}'_oro_data.tile4.nc"'
+#OROG_FILES_TARGET_GRID=${OROG_FILES_TARGET_GRID}',"C'${CRES}'_oro_data.tile5.nc","C'${CRES}'_oro_data.tile6.nc'
+
+#export OROG_FILES_TARGET_GRID
+
+# -- Use new Fix file
+if [[ 1 == 0 ]]; then
+  export FIXfv3=$FIXgfs/orog/${CASE}.mx${OCNRES}_frac #C$CRES
+  n=1
+  OROG_FILES_TARGET_GRID=oro_${CASE}.mx${OCNRES}.tile${n}'.nc"'
+  for n in {2..5}
+  do
+    OROG_FILES_TARGET_GRID=${OROG_FILES_TARGET_GRID}',"oro_'${CASE}.mx${OCNRES}.tile${n}'.nc"'
+  done
+  n=6
+  OROG_FILES_TARGET_GRID=${OROG_FILES_TARGET_GRID}',"oro_'${CASE}.mx${OCNRES}.tile${n}.nc
+  export OROG_FILES_TARGET_GRID
+
+fi
 
 #############################################################
 # Execute the script
