@@ -23,6 +23,30 @@ fi
 mkdir -p $OUTDIR
 cd $DATA
 
+# Copy from set_fixed_files.sh
+#---------------------------------------------------------------------------
+# Set directory names and file names for orog data
+# The old and new (support fractional grid) orog data have different file names
+#---------------------------------------------------------------------------
+export FRAC_ORO="yes"
+if [ "${FRAC_ORO:-"no"}" = "yes" ]; then
+  if  [ ${CASE} == 'C48' ] ; then
+    OCNRES='500'
+  elif [ ${CASE} == 'C96' ] ; then
+    OCNRES='100'
+  elif [ ${CASE} == 'C192' ] ; then
+    OCNRES='050'
+  elif [ ${CASE} == 'C384' ] || [ ${CASE} == 'C768' ] || [ ${CASE} == 'C1152' ]; then
+    OCNRES='025'
+  fi
+  ORO_DIR="${CASE}.mx${OCNRES}_frac"
+  ORO_NAME="oro_${CASE}.mx${OCNRES}"
+else
+  ORO_DIR="${CASE}"
+  ORO_NAME="${CASE}_oro_data"
+fi
+
+
 USE_RESTART="NO"
 if [[ $USE_RESTART == YES ]]; then
 
@@ -37,8 +61,25 @@ if [[ $USE_RESTART == YES ]]; then
 
   export CRES=$(echo $CASE |cut -c2-5)
   CRES_H=$((CRES+CRES))
-  export FIXfv3=$FIXgfs/orog/C$CRES
-  export FIXfv3_H=$FIXgfs/orog/C$CRES_H
+  CASE_H=C${CRES_H}
+  if [ "${FRAC_ORO:-"no"}" = "yes" ]; then
+    if  [ ${CASE_H} == 'C48' ] ; then
+      OCNRES_H='500'
+    elif [ ${CASE_H} == 'C96' ] ; then
+      OCNRES_H='100'
+    elif [ ${CASE_H} == 'C192' ] ; then
+      OCNRES_H='050'
+    elif [ ${CASE_H} == 'C384' ] || [ ${CASE_H} == 'C768' ] || [ ${CASE_H} == 'C1152' ]; then
+      OCNRES_H='025'
+    fi
+    ORO_DIR_H="${CASE_H}.mx${OCNRES_H}_frac"
+    ORO_NAME_H="oro_${CASE_H}.mx${OCNRES_H}"
+  else
+    ORO_DIR_H="${CASE_H}"
+    ORO_NAME_H="${CASE_H}_oro_data"
+  fi
+  export FIXfv3=$FIXgfs/orog/${ORO_DIR}
+  export FIXfv3_H=$FIXgfs/orog/${ORO_DIR_H}
   export FIXsfc=$FIXfv3/fix_sfc
   export FIXam=${FIXam:-$FIXgfs/am}
   export VCOORD_FILE=${VCOORD_FILE:-$FIXam/global_hyblev.l${LEVS}.txt}
@@ -270,55 +311,37 @@ fi
 
 if [[ $CONVERT_SFC == ".true." ]]; then
   export SFC_FILES_INPUT="gfs.t${cyc}z.sfcanl.nc"
-  SFCFILE="$COMINgfs/atmos/$SFC_FILES_INPUT"
+  SFCFILE="${COMINgfs}/atmos/${SFC_FILES_INPUT}"
   if [[ -f $SFCFILE ]]; then
-    $NCP $SFCFILE $DATA
+    $NCP ${SFCFILE} ${DATA}
   else
-    msg="FATAL ERROR in $(basename $BASH_SOURCE): GFS surfce analysis $SFCFILE not found!"
-    echo $msg
+    msg="FATAL ERROR in $(basename ${BASH_SOURCE}): GFS surfce analysis ${SFCFILE} not found!"
+    echo ${msg}
     export err=100
     err_chk || exit $err
   fi
 fi
 
-case "${CASE}" in
-  "C48") export OCNRES=500;;
-  "C96") export OCNRES=100;;
-  "C192") export OCNRES=050;;
-  "C384") export OCNRES=025;;
-  "C768") export OCNRES=025;;
-  *) export OCNRES=025;;
-esac
-
-export CRES=$(echo $CASE |cut -c2-5)
+export CRES=$(echo ${CASE} |cut -c2-5)
 export COMIN=$DATA
 export INPUT_TYPE="gaussian_netcdf"
-export FIXfv3=$FIXgfs/orog/C$CRES
+export FIXfv3=$FIXgfs/orog/${ORO_DIR}
 export FIXsfc=$FIXfv3/fix_sfc
 export FIXam=${FIXam:-$FIXgfs/am}
 export VCOORD_FILE=${VCOORD_FILE:-$FIXam/global_hyblev.l${LEVS}.txt}
 
+export TRACERS_INPUT="spfh","clwmr","o3mr","icmr","rwmr","snmr","grle"
+export TRACERS_TARGET="sphum","liq_wat","o3mr","ice_wat","rainwat","snowwat","graupel"
 
-#OROG_FILES_TARGET_GRID='C'${CRES}'_oro_data.tile1.nc","C'${CRES}'_oro_data.tile2.nc"'
-#OROG_FILES_TARGET_GRID=${OROG_FILES_TARGET_GRID}',"C'${CRES}'_oro_data.tile3.nc","C'${CRES}'_oro_data.tile4.nc"'
-#OROG_FILES_TARGET_GRID=${OROG_FILES_TARGET_GRID}',"C'${CRES}'_oro_data.tile5.nc","C'${CRES}'_oro_data.tile6.nc'
-
-#export OROG_FILES_TARGET_GRID
-
-# -- Use new Fix file
-if [[ 1 == 0 ]]; then
-  export FIXfv3=$FIXgfs/orog/${CASE}.mx${OCNRES}_frac #C$CRES
-  n=1
-  OROG_FILES_TARGET_GRID=oro_${CASE}.mx${OCNRES}.tile${n}'.nc"'
-  for n in {2..5}
-  do
-    OROG_FILES_TARGET_GRID=${OROG_FILES_TARGET_GRID}',"oro_'${CASE}.mx${OCNRES}.tile${n}'.nc"'
-  done
-  n=6
-  OROG_FILES_TARGET_GRID=${OROG_FILES_TARGET_GRID}',"oro_'${CASE}.mx${OCNRES}.tile${n}.nc
-  export OROG_FILES_TARGET_GRID
-
-fi
+OROG_FILES_INPUT_GRID=''
+for tile in {1..6}
+do
+  OROG_FILES_INPUT_GRID=${OROG_FILES_INPUT_GRID}"${ORO_NAME}.tile${tile}.nc"
+  if [[ $tile != 6 ]]; then
+    OROG_FILES_INPUT_GRID=${OROG_FILES_INPUT_GRID}'","'
+  fi
+done
+export OROG_FILES_TARGET_GRID
 
 #############################################################
 # Execute the script
@@ -358,7 +381,6 @@ if [[ $SENDCOM == "YES" ]]; then
       fi
       mkdir -p $COMDIR2
       for tile in tile1 tile2 tile3 tile4 tile5 tile6; do
-        #$NCP $GESOUT/init/$mem/sfc_data.${tile}.nc $COMDIR2
         $NCP ${DATA}/out.sfc.${tile}.nc $COMDIR2/sfc_data.${tile}.nc
         if [[ $SENDDBN = YES ]];then
           $DBNROOT/bin/dbn_alert MODEL $DBNTYP $job $COMDIR2/sfc_data.${tile}.nc
