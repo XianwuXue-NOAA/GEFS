@@ -184,9 +184,11 @@ if [[ $USE_RESTART == YES ]]; then
   if [[ $mem = c00 ]]; then
     CRES_INPUT=$CRES_H
     FIXfv3_INPUT=$FIXfv3_H
+    ORO_NAME_INPUT=${ORO_NAME_H}
   else
     CRES_INPUT=$CRES
     FIXfv3_INPUT=$FIXfv3
+    ORO_NAME_INPUT=${ORO_NAME}
   fi
 
   #if [[ $mem = c00 ]]; then
@@ -200,17 +202,20 @@ if [[ $USE_RESTART == YES ]]; then
     ATM_CORE_FILES_INPUT=""
     ATM_TRACER_FILES_INPUT=""
     SFC_FILES_INPUT=""
+    OROG_FILES_TARGET_GRID="" #${OROG_FILES_TARGET_GRID}"${ORO_NAME}.tile${tile}.nc"
     for tile in {1..6}
     do
-      OROG_FILES_INPUT_GRID=${OROG_FILES_INPUT_GRID}"C${CRES_INPUT}_oro_data.tile${tile}.nc"
+      OROG_FILES_INPUT_GRID=${OROG_FILES_INPUT_GRID}"${ORO_NAME_INPUT}.tile${tile}.nc" #"C${CRES_INPUT}_oro_data.tile${tile}.nc"
       ATM_CORE_FILES_INPUT=${ATM_CORE_FILES_INPUT}"${sPDY}.${scyc}0000.fv_core.res.tile${tile}.nc"
       ATM_TRACER_FILES_INPUT=${ATM_TRACER_FILES_INPUT}"${sPDY}.${scyc}0000.fv_tracer.res.tile${tile}.nc"
       SFC_FILES_INPUT=${SFC_FILES_INPUT}"${sPDY}.${scyc}0000.sfcanl_data.tile${tile}.nc"
+      OROG_FILES_TARGET_GRID=${OROG_FILES_TARGET_GRID}"${ORO_NAME}.tile${tile}.nc"
       if [[ $tile != 6 ]]; then
         OROG_FILES_INPUT_GRID=${OROG_FILES_INPUT_GRID}'","'
         ATM_CORE_FILES_INPUT=${ATM_CORE_FILES_INPUT}'","'
         ATM_TRACER_FILES_INPUT=${ATM_TRACER_FILES_INPUT}'","'
         SFC_FILES_INPUT=${SFC_FILES_INPUT}'","'
+        OROG_FILES_TARGET_GRID=${OROG_FILES_TARGET_GRID}'","'
       fi
     done
 
@@ -219,9 +224,12 @@ if [[ $USE_RESTART == YES ]]; then
     export ATM_CORE_FILES_INPUT=${ATM_CORE_FILES_INPUT}"${sPDY}.${scyc}0000.fv_core.res.nc"
     export ATM_TRACER_FILES_INPUT
     export SFC_FILES_INPUT
+    export OROG_FILES_TARGET_GRID
 
     export TRACERS_TARGET='"sphum","liq_wat","o3mr","ice_wat","rainwat","snowwat","graupel"'
     export TRACERS_INPUT='"sphum","liq_wat","o3mr","ice_wat","rainwat","snowwat","graupel"'
+    #export TRACERS_INPUT="spfh","clwmr","o3mr","icmr","rwmr","snmr","grle"
+    #export TRACERS_TARGET="sphum","liq_wat","o3mr","ice_wat","rainwat","snowwat","graupel"
 
     export COMIN=$INIDIR/RESTART
 
@@ -332,13 +340,15 @@ export VCOORD_FILE=${VCOORD_FILE:-$FIXam/global_hyblev.l${LEVS}.txt}
 
 export TRACERS_INPUT="spfh","clwmr","o3mr","icmr","rwmr","snmr","grle"
 export TRACERS_TARGET="sphum","liq_wat","o3mr","ice_wat","rainwat","snowwat","graupel"
+#export TRACERS_TARGET='"sphum","liq_wat","o3mr","ice_wat","rainwat","snowwat","graupel"'
+#export TRACERS_INPUT='"sphum","liq_wat","o3mr","ice_wat","rainwat","snowwat","graupel"'
 
-OROG_FILES_INPUT_GRID=''
+OROG_FILES_TARGET_GRID=''
 for tile in {1..6}
 do
-  OROG_FILES_INPUT_GRID=${OROG_FILES_INPUT_GRID}"${ORO_NAME}.tile${tile}.nc"
+  OROG_FILES_TARGET_GRID=${OROG_FILES_TARGET_GRID}"${ORO_NAME}.tile${tile}.nc"
   if [[ $tile != 6 ]]; then
-    OROG_FILES_INPUT_GRID=${OROG_FILES_INPUT_GRID}'","'
+    OROG_FILES_TARGET_GRID=${OROG_FILES_TARGET_GRID}'","'
   fi
 done
 export OROG_FILES_TARGET_GRID
