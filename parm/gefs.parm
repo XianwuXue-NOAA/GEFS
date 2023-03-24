@@ -129,6 +129,15 @@ export IDVC=${IDVC:-2}
 #export IDVM=32
 
 ####################################
+# Directories relative to installation areas
+####################################
+export HOMEgefs=${HOMEgefs:-${PACKAGEROOT}/gefs.${gefs_ver}}
+export EXECgefs=${EXECgefs:-${HOMEgefs}/exec}
+export USHgefs=${USHgefs:-${HOMEgefs}/ush}
+#export FIXgefs=${FIXgefs:-${HOMEgefs}/fix/fix_gefs}
+export PARMgefs=${PARMgefs:-${HOMEgefs}/parm}
+
+####################################
 # Specify NET and RUN Name and model
 ####################################
 export NET=${NET:-gefs}
