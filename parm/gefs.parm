@@ -113,6 +113,7 @@ export LONBLR=${LONBLR:-1536}
 export MTNRSLLR=${MTNRSLLR:-766.1536.768}
 export NTRACLR=${NTRACLR:-3}
 
+export FORECAST_SEGMENT=${FORECAST_SEGMENT:-"hr"}
 if [[ ${FORECAST_SEGMENT} == "hr" ]]; then
   export LEVS=$((LEVSHR + 1))
 else
