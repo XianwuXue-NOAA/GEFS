@@ -113,13 +113,44 @@ export LONBLR=${LONBLR:-1536}
 export MTNRSLLR=${MTNRSLLR:-766.1536.768}
 export NTRACLR=${NTRACLR:-3}
 
+if [[ ${FORECAST_SEGMENT} == "hr" ]]; then
+  export LEVS=$((LEVSHR + 1))
+else
+  export LEVS=$((LEVSLR + 1))
+fi
+
+CASE=${CASEHR}
+if [[ ${FORECAST_SEGMENT} == "lr" ]]; then
+  CASE=$CASELR
+fi
+
 #for new vertical coordinate
 export IDVC=${IDVC:-2}
 #export IDVM=32
 
+####################################
+# Specify NET and RUN Name and model
+####################################
+export NET=${NET:-gefs}
+export envir=${envir:-prod}
+export RUN=${RUN:-gefs}
+
+######################################
+# SENDCOM  - Copy Files From TMPDIR to $COMOUT
+# SENDDBN  - Issue DBNet Client Calls
+# SENDECF  - Flag Events on ECF
+# VERBOSE  - Specify Verbose Output
+######################################
+export SENDECF=${SENDECF:-"YES"}
+export SENDCOM=${SENDCOM:-"YES"}
+export SENDDBN_NTC=${SENDDBN_NTC:-"NO"}
+export SENDDBN=${SENDDBN:-"YES"}
+export DBNROOT=${DBNROOT:-${UTILROOT}/fakedbn}
+export VERBOSE=${VERBOSE:-YES}
+
 #------
 # APP settings
-export APP=${APP:-"ATM"}
+export APP=${APP:-"S2SW"} # ATM
 
 # Defaults:
 export DO_ATM="YES"
@@ -128,11 +159,23 @@ export DO_WAVE="NO"
 export DO_OCN="NO"
 export DO_ICE="NO"
 export DO_AERO="NO"
-export CCPP_SUITE=${CCPP_SUITE:-"FV3_GFS_v17_p8"} #FV3_GFS_v16"} #FV3_GFS_v17_coupled_p8"}
+export CCPP_SUITE=${CCPP_SUITE:-"FV3_GFS_v17_p8"} #FV3_GFS_v16"}
 export WAVE_CDUMP=""                           # When to include wave suite: gdas, gfs, or both
 export DOBNDPNT_WAVE="NO"
 export cplwav2atm=".false."
 export FRAC_GRID=".true."
+
+# These are the currently available grid-combinations
+case "${CASE}" in
+    "C48") export OCNRES=500;;
+    "C96") export OCNRES=100;;
+    "C192") export OCNRES=050;;
+    "C384") export OCNRES=025;;
+    "C768") export OCNRES=025;;
+    *) export OCNRES=025;;
+esac
+export ICERES=${OCNRES}
+export waveGRD='gnh_10m aoc_9km gsh_15m'
 
 case "${APP}" in
   ATM)
@@ -160,19 +203,19 @@ case "${APP}" in
     export CCPP_SUITE="FV3_GFS_v17_coupled_p8"
     export confignamevarfornems="cpld"
 
-    if [[ "$APP" =~ A$ ]]; then
-      export DO_AERO="YES"
-      export confignamevarfornems="${confignamevarfornems}_aero"
+    if [[ "${APP}" =~ A$ ]]; then
+        export DO_AERO="YES"
+        export confignamevarfornems="${confignamevarfornems}_aero"
     fi
 
-    if [[ "$APP" =~ ^S2SW ]]; then
-      export DO_WAVE="YES"
-      export WAVE_CDUMP="both"
-      export cplwav2atm=".true."
-      export confignamevarfornems="${confignamevarfornems}_outerwave"
+    if [[ "${APP}" =~ ^S2SW ]]; then
+        export DO_WAVE="YES"
+        export WAVE_CDUMP="both"
+        export cplwav2atm=".true."
+        export confignamevarfornems="${confignamevarfornems}_outerwave"
     fi
 
-    source $EXPDIR/config.defaults.s2sw
+    source ${EXPDIR}/config.defaults.s2sw
 
     ;;
   *)
@@ -180,6 +223,9 @@ case "${APP}" in
     exit 1
     ;;
 esac
+
+# Surface cycle update frequency
+export FHCYC=24
 
 # IAU related parameters
 export DOIAU=${DOIAU:-"NO"} # Enable 4DIAU for control with 3 increments

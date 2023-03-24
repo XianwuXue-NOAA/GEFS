@@ -8,28 +8,6 @@ export HOMEgfs=${HOMEgfs:-$HOMEgefs}
 export RERUN=${RERUN:-"NO"}
 export CDATE_RST=${CDATE_RST:-""}
 
-if [[ ${FORECAST_SEGMENT} == "hr" ]]; then
-  export LEVS=$((LEVSHR + 1))
-else
-  export LEVS=$((LEVSLR + 1))
-fi
-
-CASE=$CASEHR
-if [[ $FORECAST_SEGMENT == "lr" ]]; then
-  CASE=$CASELR
-fi
-
-case "$CASE" in
-  "C48") export OCNRES=500;;
-  "C96") export OCNRES=100;;
-  "C192") export OCNRES=050;;
-  "C384") export OCNRES=025;;
-  "C768") export OCNRES=025;;
-  *) export OCNRES=025;;
-esac
-export ICERES=$OCNRES
-export waveGRD='gnh_10m aoc_9km gsh_15m'
-
 #Writing out
 export NUM_FILES=2
 
@@ -87,6 +65,10 @@ export REMAP_GRID=${REMAP_GRID:-latlon}
 
 MEMBER=$(echo $RUNMEM|cut -c4-5)
 CDATE=$PDY$cyc
+
+#export EXPDIR=${HOMEgefs}/parm/config
+#
+#source ${EXPDIR}/config.fcst
 
 ########## config.fcst ##########
 # Forecast specific
@@ -441,6 +423,9 @@ echo "END: config.fcst"
 #fi
 
 export assim_freq=$gefs_cych
+
+export TYPE=${TYPE:-"nh"}    # choices:  nh, hydro
+export MONO=${MONO:-"non-mono"}
 
 # Settings for coupling with Wavewatch III
 export cplwav=${cplwav:-.true.}
