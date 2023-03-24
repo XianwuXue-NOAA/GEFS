@@ -55,7 +55,8 @@ done
 #
 # config.coupled_ic --\/\/
 if [[ "${machine}" == "WCOSS2" ]]; then
-  export BASE_CPLIC="/lfs/h2/emc/couple/noscrub/Jiande.Wang/IC"
+  #export BASE_CPLIC="/lfs/h2/emc/couple/noscrub/Jiande.Wang/IC"
+  export BASE_CPLIC="/lfs/h2/emc/ens/noscrub/xianwu.xue/GEFS_v13/z_ICS_CPL"
 elif [[ "${machine}" == "HERA" ]]; then
   export BASE_CPLIC="/scratch1/NCEPDEV/climate/role.ufscpara/IC"
 elif [[ "${machine}" == "ORION" ]]; then
