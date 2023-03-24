@@ -49,7 +49,6 @@ esac
 #export FHMAX_GFS=$fhmax
 
 memberlist="c00"
-
 imem=1
 while [[ imem -le $npert ]]; do
   memberlist="$memberlist p$(printf %02i $imem)"
@@ -136,6 +135,13 @@ export EXECgefs=${EXECgefs:-${HOMEgefs}/exec}
 export USHgefs=${USHgefs:-${HOMEgefs}/ush}
 #export FIXgefs=${FIXgefs:-${HOMEgefs}/fix/fix_gefs}
 export PARMgefs=${PARMgefs:-${HOMEgefs}/parm}
+
+####################################
+# CONVENIENT utility scripts and other environment parameters
+export NCP="/bin/cp -p"
+export NMV="/bin/mv"
+export NLN="/bin/ln -sf"
+export KEEPDATA=${KEEPDATA:-"NO"}
 
 ####################################
 # Specify NET and RUN Name and model

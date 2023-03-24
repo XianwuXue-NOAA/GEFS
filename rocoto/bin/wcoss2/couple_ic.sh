@@ -43,7 +43,7 @@ export mem=$(echo ${RUNMEM}|cut -c3-5)
 export CDATE=${CDATE:-${PDY}${cyc}}
 
 configs="gefs"
-config_path=${PARMgefs}
+config_path=${PARMgefs:-${HOMEgefs}/parm}
 for config in $configs; do
   . ${config_path}/${config}.parm
   export err=$?
@@ -110,7 +110,7 @@ export ROTDIR=${ROTDIR:-$(compath.py ${envir}/com/$NET/${ver})}
 
 ###############################################################
 # Locally scoped variables and functions
-GDATE=$(date -d "${PDY} ${cyc} - ${assim_freq} hours" +%Y%m%d%H)
+GDATE=$(date -d "${PDY} ${cyc} - ${assim_freq:-${gefs_cych:-6}} hours" +%Y%m%d%H)
 gPDY="${GDATE:0:8}"
 gcyc="${GDATE:8:2}"
 
@@ -142,7 +142,7 @@ for ftype in gfs_data sfc_data; do
 done
 
 # Stage ocean initial conditions to ROTDIR (warm start)
-OCNdir="${ROTDIR}/${RUN}.${gPDY}/${gcyc}/ocean/RESTART"
+OCNdir="${ROTDIR}/${RUN}.${gPDY}/${gcyc}/${mem}/ocean/RESTART"
 [[ ! -d "${OCNdir}" ]] && mkdir -p "${OCNdir}"
 source="${BASE_CPLIC}/${CPL_OCNIC}/${PDY}${cyc}/ocn/${OCNRES}/MOM.res.nc"
 target="${OCNdir}/${PDY}.${cyc}0000.MOM.res.nc"
