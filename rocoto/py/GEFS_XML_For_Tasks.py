@@ -1480,6 +1480,8 @@ def get_metatask_names(taskname=""):
     metatask_names.append('postsnd')
     # fcst_post_manageq
     metatask_names.append('fcst_post_manager')
+    # coupled model
+    metatask_names.append('couple_ic')
 
     return metatask_names
 
