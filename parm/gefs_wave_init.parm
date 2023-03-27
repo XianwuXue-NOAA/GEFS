@@ -11,3 +11,5 @@
 
 # Step label
 export sigMODE=${sigMODE:-init}
+
+export CDUMP="gefs"

@@ -59,7 +59,7 @@ if [[ -d global-workflow.fd ]] ; then
 
   cd ${pwd}/../fix
 
-  for gw_dir in am aer lut orog chem ugwd; do
+  for gw_dir in am aer lut orog chem ugwd wave; do
     if [[ -d $gw_dir ]]; then
       rm -rf $gw_dir
     fi
@@ -164,17 +164,18 @@ if [[ -d global-workflow.fd ]] ; then
 fi
 
 # For wave
-if [[ 1 == 0 ]]; then
 echo $pwd
 cd $pwd
 if [[ -d global-workflow.fd ]]; then
-  lScripts="exwave_init.sh exwave_nawips.sh exwave_post_sbs.sh exwave_prep.sh exwave_stat.sh"
+  lScripts="exgfs_wave_init.sh exgfs_wave_nawips.sh exgfs_wave_post_gridded_sbs.sh exgfs_wave_prep.sh exgfs_wave_prdgen_bulls.sh exgfs_wave_prdgen_gridded.sh" #exwave_stat.sh"
   for sFile in $lScripts; do
     $LINK ../sorc/global-workflow.fd/scripts/$sFile ../scripts/
   done
 
-  lUsh="wave_ens_bull.sh wave_ens_stat.sh wave_grib2_sbs.sh wave_grid_interp_sbs.sh wave_grid_moddef.sh wave_outp_spec.sh wave_prnc_cur.sh wave_prnc_ice.sh wave_tar.sh"
+  lUsh=`ls ../sorc/global-workflow.fd/ush/wave_*` #"wave_ens_bull.sh wave_ens_stat.sh wave_grib2_sbs.sh wave_grid_interp_sbs.sh wave_grid_moddef.sh wave_outp_spec.sh wave_prnc_cur.sh wave_prnc_ice.sh wave_tar.sh"
   for sFile in $lUsh; do
+    sFile=$(basename ${sFile})
+    echo $sFile
     $LINK ../sorc/global-workflow.fd/ush/$sFile ../ush/
   done
 
@@ -186,7 +187,6 @@ if [[ -d global-workflow.fd ]]; then
   else
     $LINK ${pwd}/global-workflow.fd/env ../
   fi
-fi
 fi
 
 # for CHEM

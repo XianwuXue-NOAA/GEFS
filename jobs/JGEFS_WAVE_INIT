@@ -62,18 +62,7 @@ export HOMEgefs=${HOMEgefs:-${PACKAGEROOT}/gefs.${gefs_ver}}
 export EXECgefs=${EXECgefs:-$HOMEgefs/exec}
 export PARMgefs=${PARMgefs:-$HOMEgefs/parm}
 export FIXwave=${FIXwave:-$HOMEgefs/fix/fix_wave}
-
-##############################################
-# Define COM directories
-##############################################
-# Have to include $COMPONENT in COM paths for downstream scripts
-ver=${ver:-$(echo ${gefs_ver}|cut -c1-5)}
-export COMIN=${COMIN:-$(compath.py $envir/com/$NET/${ver})/${RUN}.${PDY}/$cyc/wave}
-export COMOUT=${COMOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDY}/$cyc/wave}
-if [[ $SENDCOM = YES ]]; then
-  mkdir -p $COMOUT/rundata
-fi
-
+export CDUMP="gefs"
 #############################
 # Source relevant config files
 #############################
@@ -88,6 +77,24 @@ for config in $configs; do
     fi
 done
 
+##############################################
+# Define COM directories
+##############################################
+# Have to include $COMPONENT in COM paths for downstream scripts
+ver=${ver:-$(echo ${gefs_ver}|cut -c1-5)}
+export COMIN=${COMIN:-$(compath.py $envir/com/$NET/${ver})/${RUN}.${PDY}/$cyc}
+export COMOUT=${COMOUT:-$(compath.py -o $NET/${ver})/${RUN}.${PDY}/$cyc}
+
+if [[ ${NewCOM:-"YES"} == "YES" ]]; then
+  #export RUNMEM="gec00"
+  export mem=$(echo ${RUNMEM}|cut -c3-5)
+  export COMIN=${COMIN}/${mem}/wave
+  export COMOUT=${COMOUT}/${mem}/wave
+else
+  export COMIN=${COMIN}/wave
+  export COMOUT=${COMOUT}/wave
+fi
+
 export errchk=${errchk:-err_chk}
 if [[ $SENDCOM == "YES" ]]; then
     export wavelog=${COMOUT}/wave.log
@@ -100,7 +107,7 @@ env | sort
 
 #############################################################
 # Execute the script
-$HOMEwave/scripts/exwave_init.sh
+$HOMEwave/scripts/exgfs_wave_init.sh
 export err=$?
 if [[ $err == 0 ]]; then
     echo "$job completed normally!"
