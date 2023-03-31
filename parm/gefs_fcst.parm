@@ -92,7 +92,7 @@ source $HOMEgefs/parm/gefs_ufs.parm ${string}
 for component in WAVE OCN ICE AERO; do
   control="DO_${component}"
   if [[ $(eval echo \$$control) == "YES" ]]; then
-    . $EXPDIR/config.$(echo "$component" | awk '{ print tolower($1) }')
+    . $PARMgefs/gefs_$(echo "$component" | awk '{ print tolower($1) }').parm
   fi
 done
 
