@@ -101,14 +101,14 @@ MEMDIR="${memchar}" YMD=${PDY} HH=${cyc} generate_com -rx COM_ATMOS_HISTORY COM_
 export PRDGEN_STREAMS="res_2p50 res_0p50 res_0p25_s1 res_0p25_s2"
 
 if [[ ${RUNMEM} == "memgfs" ]]; then
-  grids=['2p50' '0p25' '0p25s' '0p50a' '0p50b']
+  grids="2p50 0p25 0p25s 0p50a 0p50b"
 elif [[ ${RUNMEM} == "memaer" ]]; then
-  grids=['0p25' '0p25s' '0p50a' '0p50b']
+  grids="0p25 0p25s 0p50a 0p50b"
 else
   if [ ${FORECAST_SEGMENT} = lr ]; then
-    grids=['2p50' '0p50a' '0p50b']
+    grids="2p50 0p50a 0p50b"
   else
-    grids=['2p50' '0p25' '0p25s' '0p50a' '0p50b']
+    grids="2p50 0p25 0p25s 0p50a 0p50b"
   fi
 fi
 
