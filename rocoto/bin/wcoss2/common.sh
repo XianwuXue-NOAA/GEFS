@@ -36,7 +36,7 @@ if [[ $RocotoGen == 0 ]]; then
     #export COMPATH=$HOMEdata/canned/com/gfs:$HOMEdata/canned/com/cfs:$HOMEdata/canned/com/nawips:$HOMEdata/canned/com/ecmwf:$HOMEdata/canned/com/nam:${WORKDIR}/$envir/com/${NET}
     #export DCOMROOT=${HOMEdata}/canned/dcom
     # For prod data
-    export COMPATH=${WORKDIR}/$envir/com/${NET}
+    export COMPATH=${WORKDIR}/$envir/com/${NET}:/lfs/h2/emc/ens/noscrub/xianwu.xue/ForXinrenWu/HOMEDATA/prod/com/gfs
 
 elif [[ $RocotoGen == 1 ]]; then
     export HOMEtrak=/gpfs/dell2/emc/verification/noscrub/emc.enspara/common/git/ens_tracker/ens_tracker.v2.1.2
